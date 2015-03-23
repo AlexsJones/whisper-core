@@ -36,7 +36,9 @@ session_state session_message_read_and_decrypt(session *s,
 }
 session_state session_disconnect(session *s) {
   if (s->is_connected) {
-    close(s->secure_comms_fd);
+    if(s->secure_comms_fd) {
+      close(s->secure_comms_fd);
+    }
   }
   s->is_connected = 0;
   return SESSION_STATE_OKAY;

@@ -25,7 +25,7 @@ function test_against_file()
 {
   file=$1
   echo "Compiling $file"
-  `$COMPILER $file src/util/*.c src/data/*.c src/net/*.c src/session/*.c src/integrity/*.c src/crypto/*.c -Isrc/crypto -Isrc/data -Isrc/err -Isrc/integrity -Isrc/net -Isrc/session -Isrc/util -o ${file:0:${#file}-2} -pthread -w -rdynamic -lcrypto -lssl -ljnxc -lprotobuf-c -g`
+  `$COMPILER $file src/util/*.c src/data/*.c src/net/*.c src/session/*.c src/integrity/*.c src/crypto/*.c -Isrc/crypto -Isrc/data -Isrc/err -Isrc/integrity -Isrc/net -Isrc/session -Isrc/util -o ${file:0:${#file}-2} -pthread -w -rdynamic -lcrypto -lssl -ljnxc -lprotobuf-c -g -DDEBUG=ON`
   ./$current
   out=$?
   if [ ! $out -eq 0 ]; then

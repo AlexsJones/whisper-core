@@ -37,6 +37,12 @@ void test_create_destroy() {
   session_service_destroy(&service);
   JNXCHECK(service == NULL);
 }
+static int linking_did_use_functor=0;
+int linking_test_procedure(session *s, void *optargs) {
+  JNX_LOG(NULL,"Session hit linking procedure functor");
+  linking_did_use_functor=1;
+  return 0;
+}
 void test_linking() {
   JNX_LOG(NULL,"test_linking");
   session_service *service = session_service_create();
@@ -51,9 +57,12 @@ void test_linking() {
  
   peer *l = peer_create(h,"N/A","Bob", 10);
   peer *n = peer_create(g,"N/A","Bob", 10);
-  
-  e = session_service_link_sessions(service,&os->session_guid,l,n);
+  e = session_service_link_sessions(service,
+      linking_test_procedure,
+      NULL,
+      &os->session_guid,l,n);
   JNXCHECK(e == SESSION_STATE_OKAY);
+  JNXCHECK(linking_did_use_functor);
   JNXCHECK(session_service_session_is_linked(service,&os->session_guid) == 1); 
   e = session_service_unlink_sessions(service,&os->session_guid);
   JNXCHECK(e == SESSION_STATE_OKAY);
