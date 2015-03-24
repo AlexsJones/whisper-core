@@ -233,9 +233,8 @@ session_state session_service_unlink_sessions(session_service *s,
   JNXCHECK(is_guid_blank(&osession->remote_peer_guid));
  
   int r = fn(osession,optargs);
-
   session_disconnect(osession);
-
+  JNX_LOG(NULL,"Disconnected session");
   return r ? SESSION_STATE_FAIL : SESSION_STATE_OKAY;
 }
 jnx_int session_service_session_is_linked(session_service *s,\
