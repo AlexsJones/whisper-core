@@ -7,6 +7,15 @@
   Using dynamically generated dual encrypted one time sessions; we're giving you the tools to speak your mind without   worrying about who is listening in.
 
 ---
+##For Users
+
+You will probably never use this library directly.
+Instead you might use the whisper-gui or whisper-cli verions; or potentially a GUI binding for another language.
+Ultimately this repo is the core of the application and is meant for developers to hook into.
+For an example of a user level implementation see: https://github.com/AlexsJones/whisper-cli
+
+
+---
 ##For Developers
 
 [![Build Status](https://travis-ci.org/AlexsJones/whisper-core.svg?branch=master)](https://travis-ci.org/AlexsJones/whisper-core)
