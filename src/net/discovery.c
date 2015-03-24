@@ -74,6 +74,18 @@ static void send_peer_packet(discovery_service *svc) {
   debug_packet(svc, "PEER");
 #endif
 }
+static void send_stop_packet(discovery_service *svc) {
+  void *buffer;
+  size_t len = peerton(peerstore_get_local_peer(svc->peers), &buffer);
+  jnx_uint8 *message = malloc(4 + len);
+  memcpy(message, "STOP", 4);
+  memcpy(message + 4, buffer, len);
+
+  jnx_socket_udp_send(svc->sock_send, svc->broadcast_group_address, port_to_string(svc), message, len + 4);
+#ifdef DEBUG
+  debug_packet(svc, "STOP");
+#endif
+}
 static void handle_peer(discovery_service *svc, jnx_uint8 *payload, jnx_size bytesread) {
   peer *p = ntopeer(payload, bytesread);
   peerstore_store_peer(svc->peers, p);	
@@ -346,6 +358,9 @@ int discovery_service_stop(discovery_service *svc) {
   if (svc->update_thread != NULL) {
     cancel_thread(&svc->update_thread);
   }
+  send_stop_packet(svc);
+  pthread_join(svc->listening_thread->system_thread, NULL);
+
   jnx_socket_destroy(&(svc->sock_send));
   jnx_socket_udp_listener_destroy(&svc->udp_listener);
   return 0;
@@ -368,5 +383,5 @@ time_t get_last_update_time(discovery_service *svc) {
   return last_update;
 }
 void discovery_notify_peers_of_shutdown(discovery_service *svc) {
-  JNX_LOG(NULL,"Not implemented!");
+  send_stop_packet(svc);
 }
