@@ -36,6 +36,7 @@ static int connect_for_socket_fd(jnx_socket *s, peer *remote_peer,session *ses) 
     }
     s->isconnected = 1;
   }
+  write(s->socket,"CONNECT",8);
   freeaddrinfo(res);
   return s->socket;
 }
