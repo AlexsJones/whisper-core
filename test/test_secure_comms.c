@@ -27,7 +27,7 @@ void *worker(void *args) {
   sleep(2);
   char *port = (char*)args;
   jnx_socket *t = jnx_socket_tcp_create(AF_INET);
-  jnx_socket_tcp_send(t,"127.0.0.1",port,"ping",5);
+  jnx_socket_tcp_send(t,"127.0.0.1",port,"CONNECT",8);
 }
 void fire_threaded_tcp_packet(char *port) {
   jnx_thread_create_disposable(worker,port);
