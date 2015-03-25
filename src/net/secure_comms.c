@@ -119,7 +119,6 @@ void secure_comms_start(secure_comms_endpoint e, discovery_service *ds,
    * bi directional socket with non-blocking write properties */
   
   switch(e) {
-
     case SC_INITIATOR:
       printf("About to initiate connection to remote secure_comms_port.\n");
       sleep(3);
@@ -129,15 +128,11 @@ void secure_comms_start(secure_comms_endpoint e, discovery_service *ds,
 
     case SC_RECEIVER:
       printf("Setting up recevier.\n");
-
       s->secure_tcp_listener = jnx_socket_tcp_listener_create(s->secure_comms_port,addr_family,1);
-
       while(s->secure_comms_fd == 0) {
         jnx_socket_tcp_listener_tick(s->secure_tcp_listener,secure_tcp_listener_tick_callback,s);
       }
-
       jnx_socket_tcp_listener_destroy(&(*s).secure_tcp_listener);
-
       printf("Secure socket fd: %d\n",s->secure_comms_fd);
       break;
   }
