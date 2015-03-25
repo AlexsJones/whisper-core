@@ -126,7 +126,7 @@ void secure_comms_start(secure_comms_endpoint e, discovery_service *ds,
       break;
 
     case SC_RECEIVER:
-      printf("Setting up recevier.\n");
+      printf("Setting up recevier\n");
       sockfd = listen_for_socket_fd(secure_sock,remote_peer,s);
       JNXCHECK(sockfd != -1);
       s->secure_comms_fd = sockfd;
