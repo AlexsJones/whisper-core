@@ -64,7 +64,8 @@ session_service *session_service_create() {
 void session_service_destroy(session_service **service) {
   if((*service)->session_list->counter){
     jnx_list *sessions_list;
-    JNXCHECK(session_service_fetch_all_sessions(*service,&sessions_list) == SESSION_STATE_OKAY);
+    JNXCHECK(session_service_fetch_all_sessions(*service,&sessions_list) ==
+        SESSION_STATE_OKAY);
     jnx_node *h = sessions_list->head,
              *r = sessions_list->head;
     while(h) {
@@ -80,7 +81,8 @@ void session_service_destroy(session_service **service) {
   free(*service);
   *service = NULL;
 }
-session_state session_service_create_session(session_service *service, session **osession) {
+session_state session_service_create_session(session_service *service, 
+    session **osession) {
   session *s = calloc(1, sizeof(session));
   s->keypair = asymmetrical_generate_key(2048);  
   s->is_connected = 0;
@@ -106,7 +108,8 @@ session_state session_service_create_shared_session(session_service *service,\
   jnx_guid g;
   jnx_guid_from_string(input_guid_string,&g);
   session_state e;
-  if((e = session_service_fetch_session(service,&g,osession)) == SESSION_STATE_OKAY) {
+  if((e = session_service_fetch_session(service,&g,osession)) == 
+      SESSION_STATE_OKAY) {
     printf("Returning existing session.\n");
     return e;
   }
@@ -114,7 +117,8 @@ session_state session_service_create_shared_session(session_service *service,\
   (*osession)->session_guid = g;
   return e;
 }
-session_state session_service_fetch_all_sessions(session_service *service, jnx_list **olist) {
+session_state session_service_fetch_all_sessions(session_service *service, 
+    jnx_list **olist) {
   *olist = NULL;
   if(service->session_list->counter == 0) {
     JNX_LOG(NULL,"Session list is empty");
@@ -131,7 +135,8 @@ session_state session_service_fetch_all_sessions(session_service *service, jnx_l
   service->session_list->head = r;
   return SESSION_STATE_OKAY;
 }
-session_state session_service_fetch_session(session_service *service, jnx_guid *g, session **osession) {
+session_state session_service_fetch_session(session_service *service, 
+    jnx_guid *g, session **osession) {
   if(!service) {
     JNX_LOG(NULL,"Session service is null");
     return SESSION_STATE_NOT_FOUND;
@@ -160,7 +165,7 @@ session_state session_service_fetch_session(session_service *service, jnx_guid *
 }
 static void destroy_session(session *s) {
   if(s->is_connected) {
-  printf("Warning: destroying a connected session\n");
+    printf("Warning: destroying a connected session\n");
   }
   if(s->keypair) {
     asymmetrical_destroy_key(s->keypair); 
@@ -216,7 +221,7 @@ session_state session_service_link_sessions(session_service *s,\
 session_state session_service_unlink_sessions(session_service *s,\
     jnx_guid *session_guid) {
   session *osession;
-  
+
   session_state e = session_service_fetch_session(s,session_guid,&osession);
   if(e != SESSION_STATE_OKAY) {
     return e;
