@@ -22,6 +22,16 @@
 static char *baddr = NULL;
 static int linking_did_use_functor=0;
 static int unlinking_did_use_functor=0;
+
+void *worker(void *args) {
+  sleep(2);
+  char *port = (char*)args;
+  jnx_socket *t = jnx_socket_tcp_create(AF_INET);
+  jnx_socket_tcp_send(t,"127.0.0.1",port,"ping",5);
+}
+void fire_threaded_tcp_packet(char *port) {
+  jnx_thread_create_disposable(worker,port);
+}
 int linking_test_procedure(session *s, void *optargs) {
   JNX_LOG(NULL,"Session hit linking procedure functor");
   linking_did_use_functor=1;
@@ -65,6 +75,7 @@ void test_secure_comms_receiver() {
   
   discovery_service *ds = discovery_service_create(1234, AF_INET, baddr, store);
 
+  fire_threaded_tcp_packet(os->secure_comms_port);
   secure_comms_start(SC_RECEIVER,ds,os,AF_INET);
 
   e = session_service_unlink_sessions(service,
