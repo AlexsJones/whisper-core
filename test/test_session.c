@@ -72,10 +72,6 @@ void test_linking() {
   JNXCHECK(e == SESSION_STATE_OKAY);
   JNXCHECK(linking_did_use_functor);
   JNXCHECK(session_service_session_is_linked(service,&os->session_guid) == 1); 
-
-  JNXCHECK(jnx_guid_compare(&(*os).local_peer_guid,&h) == JNX_GUID_STATE_SUCCESS);
-  JNXCHECK(jnx_guid_compare(&(*os).remote_peer_guid,&g) == JNX_GUID_STATE_SUCCESS);
-
   e = session_service_unlink_sessions(service,
       unlinking_test_procedure,
       "PASSED",
