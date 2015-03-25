@@ -28,6 +28,10 @@ typedef struct session_service {
   jnx_list *session_list;
 }session_service;
 
+typedef int (*session_linking_service_func)(session *s,void *optargs);
+
+typedef int (*session_unlinking_service_func)(session *s,void *optargs);
+
 session_service *session_service_create();
 
 void session_service_destroy(session_service **service);
@@ -47,10 +51,12 @@ session_state session_service_fetch_all_sessions(session_service *service,\
 session_state session_service_destroy_session(session_service *service,jnx_guid \
     *session_guid);
 
-session_state session_service_link_sessions(session_service *s,jnx_guid \
-    *session_guid, peer *local_peer, peer *remote_peer);
+session_state session_service_link_sessions(session_service *s, 
+    session_linking_service_func fn,void *optargs,\
+    jnx_guid *session_guid, peer *local_peer, peer *remote_peer);
 
-session_state session_service_unlink_sessions(session_service *s,jnx_guid \
+session_state session_service_unlink_sessions(session_service *s,
+    session_unlinking_service_func fn, void *optargs, jnx_guid \
     *session_guid);
 
 jnx_int session_service_session_is_linked(session_service *,jnx_guid \
