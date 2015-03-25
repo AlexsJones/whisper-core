@@ -47,8 +47,8 @@ void *secure_comms_bootstrap_listener(void *args) {
     bzero(buffer,2048);
     int bytes_read = recv(s->secure_comms_fd,
         buffer,2048, 0);
-    if (bytes_read > 0) { 
-      jnx_char *decrypted_message = 
+    if (bytes_read > 0) {
+      jnx_char *decrypted_message =
         symmetrical_decrypt(s->shared_secret,buffer,strlen(buffer));
       if (s->is_connected) {
         s->session_callback(s->gui_context, &s->session_guid, decrypted_message);
@@ -61,7 +61,10 @@ void *secure_comms_bootstrap_listener(void *args) {
       // the other side has closed the chat
       if (s->is_connected) {
         session_disconnect(s);
-        s->session_callback(s->gui_context, &s->session_guid, "The chat has terminated. Type :q to end the session.");
+        if (s->session_callback != NULL) {
+          s->session_callback(s->gui_context, &s->session_guid,
+            "The chat has terminated. Type :q to end the session.");
+        }
       }
       break;
     }
@@ -80,13 +83,12 @@ void secure_comms_start(secure_comms_endpoint e, discovery_service *ds,
   printf("Starting secure comms on %s.\n",s->secure_comms_port);
 
   peer *local_peer = peerstore_get_local_peer(ds->peers);
-  JNXCHECK(local_peer); 
+  JNXCHECK(local_peer);
   peer *remote_peer = peerstore_lookup(ds->peers,&(*s).remote_peer_guid);
   JNXCHECK(remote_peer);
   printf("Starting a tunnel to %s\n",remote_peer->host_address);
 
   jnx_socket *secure_sock = jnx_socket_tcp_create(addr_family);
-
   switch(e) {
     case SC_INITIATOR:
       printf("About to initiate connection to remote secure_comms_port.\n");
@@ -102,15 +104,15 @@ void secure_comms_start(secure_comms_endpoint e, discovery_service *ds,
         jnx_socket_tcp_listener_tick(s->secure_tcp_listener,secure_tcp_listener_tick_callback,s);
       }
       jnx_socket_tcp_listener_destroy(&(*s).secure_tcp_listener);
-      printf("Secure Receiver socket fd: %d\n",s->secure_comms_fd);
+      printf("Secure socket fd: %d\n",s->secure_comms_fd);
       break;
   }
   JNXCHECK(s->secure_comms_fd != 0);
-  // At this point both the initiator and receiver are equal and have fd's relevent to them 
+  // At this point both the initiator and receiver are equal and have fd's relevent to them
   //  that are connected *
 
   jnx_thread_create_disposable(secure_comms_bootstrap_listener,s);
-} 
+}
 void secure_comms_receiver_start(discovery_service *ds,
     session *s,jnx_unsigned_int addr_family) {
   secure_comms_start(SC_RECEIVER,ds,s,addr_family);
