@@ -17,26 +17,9 @@
  */
 #include <stdlib.h>
 #include "session_service.h"
-void test_create_destroy() {
-  JNX_LOG(NULL,"test_create_destroy");
-  session_service *service = session_service_create();
-  session *os;
-  //Create a session
-  session_state e = session_service_create_session(service,&os);
-  JNXCHECK(e == SESSION_STATE_OKAY);
-  JNXCHECK(service->session_list->counter == 1);
-  //Pulling out that session guid lets get a handle on our session
-  session *retrieved = NULL;
-  //Lets test we can retrieve our session by giving our service the guid
-  e = session_service_fetch_session(service,&os->session_guid,&retrieved);
-  JNXCHECK(e == SESSION_STATE_OKAY);
-  JNXCHECK(jnx_guid_compare(&os->session_guid,&retrieved->session_guid) == JNX_GUID_STATE_SUCCESS);
-  e = session_service_destroy_session(service,&os->session_guid);
-  JNXCHECK(e == SESSION_STATE_OKAY);
-  JNXCHECK(service->session_list->counter == 0);
-  session_service_destroy(&service);
-  JNXCHECK(service == NULL);
-}
+#include "secure_comms.h"
+#include "discovery.h"
+static char *baddr = NULL;
 static int linking_did_use_functor=0;
 static int unlinking_did_use_functor=0;
 int linking_test_procedure(session *s, void *optargs) {
@@ -51,7 +34,7 @@ int unlinking_test_procedure(session *s, void *optargs) {
   unlinking_did_use_functor=1;
   return 0;
 }
-void test_linking() {
+void test_secure_comms_receiver() {
   JNX_LOG(NULL,"test_linking");
   session_service *service = session_service_create();
   session *os;
@@ -63,8 +46,8 @@ void test_linking() {
   jnx_guid_create(&h);
   jnx_guid_create(&g);
  
-  peer *l = peer_create(h,"N/A","Bob", 10);
-  peer *n = peer_create(g,"N/A","Bob", 10);
+  peer *l = peer_create(h,"127.0.0.1","Alex", 10);
+  peer *n = peer_create(g,"127.0.0.1","Bob", 10);
   e = session_service_link_sessions(service,
       linking_test_procedure,
       NULL,
@@ -73,8 +56,16 @@ void test_linking() {
   JNXCHECK(linking_did_use_functor);
   JNXCHECK(session_service_session_is_linked(service,&os->session_guid) == 1); 
 
-  JNXCHECK(jnx_guid_compare(&(*os).local_peer_guid,&h) == JNX_GUID_STATE_SUCCESS);
-  JNXCHECK(jnx_guid_compare(&(*os).remote_peer_guid,&g) == JNX_GUID_STATE_SUCCESS);
+  //Fake data required for the session
+  os->is_connected = 1;
+  os->secure_comms_port = "9015";
+
+  peerstore *store = peerstore_init(l, 0);
+  peerstore_store_peer(store,n);
+  
+  discovery_service *ds = discovery_service_create(1234, AF_INET, baddr, store);
+
+  secure_comms_start(SC_RECEIVER,ds,os,AF_INET);
 
   e = session_service_unlink_sessions(service,
       unlinking_test_procedure,
@@ -88,7 +79,6 @@ void test_linking() {
   JNXCHECK(service == NULL);
 }
 int main(int argc, char **argv) {
-  test_create_destroy();
-  test_linking();
+  test_secure_comms_receiver();
   return 0;
 }
