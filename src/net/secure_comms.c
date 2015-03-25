@@ -123,7 +123,7 @@ void secure_comms_start(secure_comms_endpoint e, discovery_service *ds,
       printf("About to initiate connection to remote secure_comms_port.\n");
       sleep(3);
       s->secure_comms_fd = connect_for_socket_fd(secure_sock,remote_peer,s);
-      printf("Secure socket fd: %d\n",s->secure_comms_fd);
+      printf("Secure Initiator socket fd: %d\n",s->secure_comms_fd);
       break;
 
     case SC_RECEIVER:
@@ -133,7 +133,7 @@ void secure_comms_start(secure_comms_endpoint e, discovery_service *ds,
         jnx_socket_tcp_listener_tick(s->secure_tcp_listener,secure_tcp_listener_tick_callback,s);
       }
       jnx_socket_tcp_listener_destroy(&(*s).secure_tcp_listener);
-      printf("Secure socket fd: %d\n",s->secure_comms_fd);
+      printf("Secure Receiver socket fd: %d\n",s->secure_comms_fd);
       break;
   }
   JNXCHECK(s->secure_comms_fd != 0);
