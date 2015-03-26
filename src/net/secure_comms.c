@@ -17,7 +17,7 @@
 #include <jnxc_headers/jnxthread.h>
 #include <jnxc_headers/jnx_tcp_socket.h>
 
-static int connect_for_socket_fd(jnx_socket *s, peer *remote_peer,session *ses) {
+int connect_for_socket_fd(jnx_socket *s, peer *remote_peer,session *ses) {
   struct addrinfo hints, *res;
   memset(&hints,0,sizeof(hints));
   hints.ai_family = s->addrfamily;

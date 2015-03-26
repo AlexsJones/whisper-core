@@ -22,12 +22,18 @@
 static char *baddr = NULL;
 static int linking_did_use_functor=0;
 static int unlinking_did_use_functor=0;
+static int connector_sockfd=0;
+typedef struct dtostr {
+  peer *p;
+  session *sess;
+  char *port;
+}dtostr;
 
 void *worker(void *args) {
   sleep(2);
-  char *port = (char*)args;
+  dtostr *d = (dtostr*)args;
   jnx_socket *t = jnx_socket_tcp_create(AF_INET);
-  jnx_socket_tcp_send(t,"127.0.0.1",port,"CONNECT",8);
+  connector_sockfd = connect_for_socket_fd(t,d->p,d->sess);
 }
 void fire_threaded_tcp_packet(char *port) {
   jnx_thread_create_disposable(worker,port);
@@ -75,9 +81,15 @@ void test_secure_comms_receiver() {
   
   discovery_service *ds = discovery_service_create(1234, AF_INET, baddr, store);
 
-  fire_threaded_tcp_packet(os->secure_comms_port);
+  dtostr *d = malloc(sizeof(dtostr));
+  d->sess = os;
+  d->p = n;
+  d->port = os->secure_comms_port;
+  
+  fire_threaded_tcp_packet(d);
   secure_comms_start(SC_RECEIVER,ds,os,AF_INET);
 
+  JNXCHECK(connector_sockfd != 0);
   e = session_service_unlink_sessions(service,
       unlinking_test_procedure,
       "PASSED",
