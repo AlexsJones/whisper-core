@@ -40,42 +40,40 @@ int connect_for_socket_fd(jnx_socket *s, peer *remote_peer,session *ses) {
   freeaddrinfo(res);
   return s->socket;
 }
-void *secure_comms_bootstrap_listener(void *args) {
-  session *s = (session *)args;
+void secure_tcp_listener_tick_callback(const jnx_uint8 *payload, \
+    jnx_size bytes_read, int connected_socket, void *args) {
+  session *s = (session*)args; 
   jnx_char buffer[2048];
-  while(s->is_connected) {
-    bzero(buffer,2048);
-    int bytes_read = recv(s->secure_comms_fd,
-        buffer,2048, 0);
-    if (bytes_read > 0) {
-      jnx_char *decrypted_message =
-        symmetrical_decrypt(s->shared_secret,buffer,strlen(buffer));
-      if (s->is_connected) {
-        s->session_callback(s->gui_context, &s->session_guid, decrypted_message);
-      }
-      else {
-        break;
-      }
+  bzero(buffer,2048);
+  memcpy(buffer,payload,bytes_read);
+  if(bytes_read > 0) {
+    jnx_char *decrypted_message =
+      symmetrical_decrypt(s->shared_secret,buffer,bytes_read);
+    if (s->is_connected) {
+      s->session_callback(s->gui_context, &s->session_guid, decrypted_message);
     }
-    else {
-      // the other side has closed the chat
-      if (s->is_connected) {
-        session_disconnect(s);
-        if (s->session_callback != NULL) {
-          s->session_callback(s->gui_context, &s->session_guid,
+  }else {
+    if (s->is_connected) {
+      session_disconnect(s);
+      if (s->session_callback != NULL) {
+        s->session_callback(s->gui_context, &s->session_guid,
             "The chat has terminated. Type :q to end the session.");
-        }
       }
-      break;
     }
   }
-  return NULL;
 }
-void secure_tcp_listener_tick_callback(const jnx_uint8 *payload, \
-      jnx_size bytes_read, int connected_socket, void *args) {
-    printf("secure_tcp_listener_tick_callback hit with connected socket: %d\n",connected_socket);
-    session *s = (session*)args;
-    s->secure_comms_fd = connected_socket;
+void *secure_comms_bootstrap_listener(void *args) {
+  session *s = (session*)args;
+  while(s->is_connected){
+    jnx_socket_tcp_listener_tick(s->secure_tcp_listener,secure_tcp_listener_tick_callback,s);
+  }
+}
+void secure_tcp_listener_await_socket_tick_callback(const jnx_uint8 *payload, \
+    jnx_size bytes_read, int connected_socket, void *args) {
+  printf("secure_tcp_listener_await_socket_tick_callback hit with connected socket: %d\n",
+      connected_socket);
+  session *s = (session*)args;
+  s->secure_comms_fd = connected_socket;
 }
 void secure_comms_start(secure_comms_endpoint e, discovery_service *ds,
     session *s,jnx_unsigned_int addr_family) {
@@ -101,17 +99,17 @@ void secure_comms_start(secure_comms_endpoint e, discovery_service *ds,
       printf("Setting up recevier.\n");
       s->secure_tcp_listener = jnx_socket_tcp_listener_create(s->secure_comms_port,addr_family,1);
       while(s->secure_comms_fd == 0) {
-        jnx_socket_tcp_listener_tick(s->secure_tcp_listener,secure_tcp_listener_tick_callback,s);
+        jnx_socket_tcp_listener_tick(s->secure_tcp_listener,secure_tcp_listener_await_socket_tick_callback,s);
       }
-      jnx_socket_tcp_listener_destroy(&(*s).secure_tcp_listener);
       printf("Secure socket fd: %d\n",s->secure_comms_fd);
       break;
   }
   JNXCHECK(s->secure_comms_fd != 0);
-  // At this point both the initiator and receiver are equal and have fd's relevent to them
-  //  that are connected *
 
   jnx_thread_create_disposable(secure_comms_bootstrap_listener,s);
+}
+void secure_comms_end(session *s) {
+
 }
 void secure_comms_receiver_start(discovery_service *ds,
     session *s,jnx_unsigned_int addr_family) {
