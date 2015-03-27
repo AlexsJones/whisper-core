@@ -109,7 +109,11 @@ void secure_comms_start(secure_comms_endpoint e, discovery_service *ds,
   jnx_thread_create_disposable(secure_comms_bootstrap_listener,s);
 }
 void secure_comms_end(session *s) {
-
+  while(s->is_connected) {
+    printf("Waiting to terminate secure comms tcp listener..\n");
+    sleep(1);
+  }
+  jnx_socket_tcp_listener_destroy(&(*s).secure_tcp_listener);
 }
 void secure_comms_receiver_start(discovery_service *ds,
     session *s,jnx_unsigned_int addr_family) {
