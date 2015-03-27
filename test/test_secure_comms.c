@@ -94,6 +94,7 @@ void test_secure_comms_receiver() {
       unlinking_test_procedure,
       "PASSED",
       &os->session_guid);
+  JNXCHECK(os->is_connected == 0);
   JNXCHECK(unlinking_did_use_functor);
   JNXCHECK(e == SESSION_STATE_OKAY);
   int r = session_service_session_is_linked(service,&os->session_guid);
