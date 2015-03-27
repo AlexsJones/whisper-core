@@ -70,9 +70,9 @@ int connect_for_socket_fd(jnx_socket *s, peer *remote_peer,session *ses) {
   return s->socket;
 }
 void secure_comms_end(session *s) {
-
+  jnx_socket_destroy(&(*s).secure_socket);
 }
-jnx_int secure_comms_start(secure_comms_endpoint e, discovery_service *ds,
+jnx_socket* secure_comms_start(secure_comms_endpoint e, discovery_service *ds,
     session *s,jnx_unsigned_int addr_family) {
   JNXCHECK(s->is_connected);
   printf("Starting secure comms on %s.\n",s->secure_comms_port);
@@ -83,6 +83,10 @@ jnx_int secure_comms_start(secure_comms_endpoint e, discovery_service *ds,
   JNXCHECK(remote_peer);
   printf("Starting a tunnel to %s\n",remote_peer->host_address);
 
+  if(s->secure_socket != NULL) {
+    JNX_LOG(NULL,"Found an existing secure comms socket, closing now");
+    secure_comms_end(s);
+  }
   jnx_socket *secure_sock = jnx_socket_tcp_create(addr_family);
 
   jnx_int sockfd = -1;
@@ -92,28 +96,25 @@ jnx_int secure_comms_start(secure_comms_endpoint e, discovery_service *ds,
       printf("About to initiate connection to remote secure_comms_port.\n");
       sleep(3);
       sockfd = connect_for_socket_fd(secure_sock,remote_peer,s);
-      s->secure_comms_fd = sockfd;
-      printf("Secure socket fd: %d\n",s->secure_comms_fd);
+      printf("Secure socket fd: %d\n",s->secure_socket->socket);
       break;
 
     case SC_RECEIVER:
       printf("Setting up recevier.\n");
       sockfd = listen_for_socket_fd(secure_sock,remote_peer,s);
       JNXCHECK(sockfd != -1);
-      s->secure_comms_fd = sockfd;
-      printf("Secure socket fd: %d\n",s->secure_comms_fd);
+      printf("Secure socket fd: %d\n",s->secure_socket->socket);
       break;
   }
   JNXCHECK(sockfd != -1);
-
-  s->secure_sock = secure_sock;
-  return s->secure_comms_fd;
+  s->secure_socket = secure_sock;
+  return s->secure_socket;
 }
-jnx_int secure_comms_receiver_start(discovery_service *ds,
+jnx_socket* secure_comms_receiver_start(discovery_service *ds,
     session *s,jnx_unsigned_int addr_family) {
   return secure_comms_start(SC_RECEIVER,ds,s,addr_family);
 }
-jnx_int secure_comms_initiator_start(discovery_service *ds,
+jnx_socket* secure_comms_initiator_start(discovery_service *ds,
     session *s,jnx_unsigned_int addr_family) {
   return secure_comms_start(SC_INITIATOR,ds,s,addr_family);
 }

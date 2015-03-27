@@ -19,7 +19,7 @@ session_state session_message_write(session *s,jnx_char *message) {
   jnx_size len = strlen(message);
   jnx_char *encrypted = symmetrical_encrypt((jnx_uint8*)s->shared_secret,(jnx_uint8*)message,
       len);
-  if (0 > send(s->secure_comms_fd,encrypted,strlen(encrypted),0)) {
+  if (0 > send(s->secure_socket->socket,encrypted,strlen(encrypted),0)) {
     session_disconnect(s);
     perror("session: write");
     return SESSION_STATE_FAIL;
@@ -36,8 +36,8 @@ session_state session_message_read_and_decrypt(session *s,
 }
 session_state session_disconnect(session *s) {
   if (s->is_connected) {
-    if(s->secure_comms_fd) {
-      close(s->secure_comms_fd);
+    if(s->secure_socket) {
+      secure_comms_end(s);
     }
   }
   s->is_connected = 0;

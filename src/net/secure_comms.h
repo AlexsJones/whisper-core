@@ -19,13 +19,13 @@ typedef enum {
 /*
  *@fn jnx_int secure_comms_receiver_start(discovery_service *ds,
      session *s,jnx_unsigned_int addr_family)
- *@brief This function binds a secure_comms_file descriptor for usage
+ @brief This function binds a secure_comms_file descriptor for usage
  @param ds is the discovery service reference
  @param s is the current session to attach secure_comms_fd too
  @param addr_family is the family (AFINET or AFINET6)
- @return bound socket file descriptor (also available on s->secure_comms_fd)
+ @return bound socket ref
 */
-jnx_int secure_comms_receiver_start(discovery_service *ds,
+jnx_socket* secure_comms_receiver_start(discovery_service *ds,
     session *s,jnx_unsigned_int addr_family);
 /*
   *@fn jnx_int secure_comms_receiver_start(discovery_service *ds,
@@ -34,9 +34,9 @@ jnx_int secure_comms_receiver_start(discovery_service *ds,
   @param ds is the discovery service reference
   @param s is the current session to attach secure_comms_fd too
   @param addr_family is the family (AFINET or AFINET6)
-  @return bound socket file descriptor (also available on s->secure_comms_fd)
+  @return bound socket ref
 */
-jnx_int secure_comms_initiator_start(discovery_service *ds,
+jnx_socket* secure_comms_initiator_start(discovery_service *ds,
     session *s,jnx_unsigned_int addr_family);
 
 void secure_comms_end(session *s);
