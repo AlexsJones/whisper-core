@@ -41,7 +41,7 @@ function test_against_file()
     echo "Compile failed!"
     exit 1
   fi
-  if [ "$COMPTYPE" == "clang" ]; then
+  if hash lldb 2>/dev/null; then
     echo "Running commnad => $TESTCOMPILER -f $current -o run -o exit"
     $TESTCOMPILER -f $current -o run -o exit
   else
