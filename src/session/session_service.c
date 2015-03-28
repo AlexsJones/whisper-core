@@ -256,5 +256,5 @@ jnx_int session_service_session_is_linked(session_service *s,\
   if(a && b) {
     return 0;
   }
-  return 1;
+  return osession->is_connected ? 0 : 1;
 }
