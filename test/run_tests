@@ -11,10 +11,10 @@ else
 fi
 if hash lldb 2>/dev/null; then
   TESTCOMPILER=lldb
-  echo "Using lldb for test compiler"
+  echo "Using lldb for test debugger"
 else
-  TESTCOMPILER=/usr/bin/gdb
-  echo "Using gdb for test compiler"
+  TESTCOMPILER=gdb
+  echo "Using gdb for test debugger"
 fi
 function echo_red()
 {
@@ -35,9 +35,16 @@ function test_against_file()
   file=$1
   echo "Compiling $file"
   `$COMPILER $file ../src/util/*.c ../src/data/*.c ../src/net/*.c ../src/session/*.c ../src/integrity/*.c ../src/crypto/*.c -I../src/crypto -I../src/data -I../src/err -I../src/integrity -I../src/net -I../src/session -I../src/util -o ${file:0:${#file}-2} -pthread -w -rdynamic -lcrypto -lssl -ljnxc -lprotobuf-c -g`
+  out=$?
+  if [ ! $out -eq 0 ]; then
+    echo "Compile failed!"
+    exit 1
+  fi
   if [ "$COMPTYPE" == "clang" ]; then
+    echo "Running commnad => $TESTCOMPILER -f $current -o run -o exit"
     $TESTCOMPILER -f $current -o run -o exit
   else
+    echo "Running command => $TESTCOMPILER --args $current"
     $TESTCOMPILER --args $current
   fi
   out=$?
