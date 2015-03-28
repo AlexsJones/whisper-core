@@ -54,6 +54,8 @@ void default_session_callback(void *gui_context, jnx_guid *session_guid,
 
 session_state session_message_write(session *s,jnx_char *message);
 
+jnx_int session_message_read(session *s, jnx_char **omessage);
+
 session_state session_message_read_and_decrypt(session *s, jnx_char *message,
     jnx_char **omessage);
 

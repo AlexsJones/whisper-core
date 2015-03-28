@@ -14,10 +14,10 @@ void default_session_callback(void *gui_context, jnx_guid *session_guid,
   free(decrypted_message);
 }
 session_state session_message_write(session *s,jnx_char *message) {
-
   /* take the raw message and des encrypt it */
   jnx_size len = strlen(message);
-  jnx_char *encrypted = symmetrical_encrypt((jnx_uint8*)s->shared_secret,(jnx_uint8*)message,
+  jnx_char *encrypted = symmetrical_encrypt((jnx_uint8*)s->shared_secret,
+      (jnx_uint8*)message,
       len);
   if (0 > send(s->secure_socket->socket,encrypted,strlen(encrypted),0)) {
     session_disconnect(s);
@@ -26,11 +26,31 @@ session_state session_message_write(session *s,jnx_char *message) {
   }
   return SESSION_STATE_OKAY;
 }
+jnx_int session_message_read(session *s, jnx_char **omessage) {
+  *omessage = NULL;
+  if(!s->is_connected) {
+    JNX_LOG(0,"Session not connected, cannot read");
+    return 0;
+  }
+  if(!s->secure_socket) {
+    JNX_LOG(0,"Session cannot read from a null socket");
+    return 0;
+  }
+  jnx_char buffer[2048];
+  bzero(buffer,2048);
+  jnx_int bytes_read = recv(s->secure_socket->socket,buffer,2048,0);
+  if(bytes_read > 0) {
+    jnx_char *decrypted_message = symmetrical_decrypt(s->shared_secret,
+        buffer,bytes_read);
+    *omessage = decrypted_message;
+  }
+  return 0;
+}
 session_state session_message_read_and_decrypt(session *s, 
     jnx_char *message,jnx_char **omessage) {
   jnx_size len = strlen(message);
   jnx_char *decrypted = symmetrical_decrypt((jnx_uint8*)s->shared_secret,
-                                            (jnx_uint8*)message,len);
+      (jnx_uint8*)message,len);
   *omessage = decrypted;
   return SESSION_STATE_OKAY;
 }

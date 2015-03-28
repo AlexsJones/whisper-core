@@ -103,10 +103,11 @@ function run_single_test()
   done
 }
 
+pushd test
 if [ -z "$1"  ]; then 
   run_full_suite
 else
   run_single_test $1
 fi
-
+popd
 exit 0

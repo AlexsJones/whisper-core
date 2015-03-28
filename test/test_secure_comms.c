@@ -89,8 +89,8 @@ void test_secure_comms_receiver() {
   fire_threaded_tcp_packet(d);
   secure_comms_start(SC_RECEIVER,ds,os,AF_INET);
 
-
   JNXCHECK(connector_sockfd != 0);
+  
   e = session_service_unlink_sessions(service,
       unlinking_test_procedure,
       "PASSED",
