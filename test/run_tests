@@ -3,14 +3,18 @@ OS=`uname`
 if hash clang 2>/dev/null; then
   COMPILER=clang
   COMPTYPE="clang"
+  echo "Using clang for test compiler"
 else
   COMPILER=gcc
   COMPTYPE="gcc"
+  echo "Using gcc for test compiler"
 fi
 if hash lldb 2>/dev/null; then
   TESTCOMPILER=lldb
+  echo "Using lldb for test compiler"
 else
-  TESTCOMPILER=gdb
+  TESTCOMPILER=/usr/bin/gdb
+  echo "Using gdb for test compiler"
 fi
 function echo_red()
 {
@@ -67,7 +71,7 @@ function run_full_suite()
 
 function run_single_test()
 {
-  filelist=`ls test/*.c`
+  filelist=`ls *.c`
   for file in $filelist; do
     if [ "$file" == "$1"  ]; then
       echo "found match"
