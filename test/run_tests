@@ -1,12 +1,15 @@
 #!/bin/bash
 OS=`uname`
-if [ "$OS" == "Darwin" ]; then
-  echo "Building with Clang"
+if hash clang 2>/dev/null; then
   COMPILER=clang
+  COMPTYPE="clang"
+else
+  COMPILER=gcc
+  COMPTYPE="gcc"
+fi
+if hash lldb 2>/dev/null; then
   TESTCOMPILER=lldb
 else
-  echo "Building with GCC"
-  COMPILER=gcc
   TESTCOMPILER=gdb
 fi
 function echo_red()
@@ -28,7 +31,11 @@ function test_against_file()
   file=$1
   echo "Compiling $file"
   `$COMPILER $file ../src/util/*.c ../src/data/*.c ../src/net/*.c ../src/session/*.c ../src/integrity/*.c ../src/crypto/*.c -I../src/crypto -I../src/data -I../src/err -I../src/integrity -I../src/net -I../src/session -I../src/util -o ${file:0:${#file}-2} -pthread -w -rdynamic -lcrypto -lssl -ljnxc -lprotobuf-c -g`
-  $TESTCOMPILER --args $current
+  if [ "$COMPTYPE" == "clang" ]; then
+    $TESTCOMPILER -f $current -o run -o exit
+  else
+    $TESTCOMPILER --args $current
+  fi
   out=$?
   if [ ! $out -eq 0 ]; then
     echo_red "Test failed"
