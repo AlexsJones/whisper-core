@@ -3,19 +3,27 @@ OS=`uname`
 echo "System: $OS"
 if hash clang 2>/dev/null; then
   COMPILER=clang
-  COMPTYPE="clang"
   echo "Using clang for test compiler"
 else
-  COMPILER=gcc
-  COMPTYPE="gcc"
-  echo "Using gcc for test compiler"
+  if hash gcc 2>/dev/null; then
+    COMPILER=gcc
+    echo "Using gcc for test compiler"
+  else
+    echo "gcc not found - Cannot compile"
+    exit 1
+  fi
 fi
 if hash lldb 2>/dev/null; then
   TESTCOMPILER=lldb
   echo "Using lldb for test debugger"
 else
-  TESTCOMPILER=gdb
-  echo "Using gdb for test debugger"
+  if hash gdb 2>/dev/null; then
+    TESTCOMPILER=gdb
+    echo "Using gdb for test debugger"
+  else
+    echo "gdb not found - Cannot run tests without any debugger"
+    exit 1
+  fi
 fi
 function echo_red()
 {
@@ -42,7 +50,7 @@ function test_against_file()
     exit 1
   fi
   if hash lldb 2>/dev/null; then
-    echo "Running commnad => $TESTCOMPILER -f $current -o run -o exit"
+    echo "Running command => $TESTCOMPILER -f $current -o run -o exit"
     $TESTCOMPILER -f $current -o run -o exit
   else
     echo "Running command => $TESTCOMPILER --args $current"
