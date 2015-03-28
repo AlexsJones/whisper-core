@@ -87,27 +87,25 @@ jnx_socket* secure_comms_start(secure_comms_endpoint e, discovery_service *ds,
     JNX_LOG(NULL,"Found an existing secure comms socket, closing now");
     secure_comms_end(s);
   }
-  jnx_socket *secure_sock = jnx_socket_tcp_create(addr_family);
-
+  s->secure_socket = jnx_socket_tcp_create(addr_family);
   jnx_int sockfd = -1;
   switch(e) {
 
     case SC_INITIATOR:
       printf("About to initiate connection to remote secure_comms_port.\n");
       sleep(3);
-      sockfd = connect_for_socket_fd(secure_sock,remote_peer,s);
+      sockfd = connect_for_socket_fd(s->secure_socket,remote_peer,s);
       printf("Secure socket fd: %d\n",s->secure_socket->socket);
       break;
 
     case SC_RECEIVER:
       printf("Setting up recevier.\n");
-      sockfd = listen_for_socket_fd(secure_sock,remote_peer,s);
+      sockfd = listen_for_socket_fd(s->secure_socket,remote_peer,s);
       JNXCHECK(sockfd != -1);
       printf("Secure socket fd: %d\n",s->secure_socket->socket);
       break;
   }
   JNXCHECK(sockfd != -1);
-  s->secure_socket = secure_sock;
   return s->secure_socket;
 }
 jnx_socket* secure_comms_receiver_start(discovery_service *ds,
