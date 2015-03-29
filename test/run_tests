@@ -49,12 +49,17 @@ function test_against_file()
     echo "Compile failed!"
     exit 1
   fi
-  if hash lldb 2>/dev/null; then
-    echo "Running command => $TESTCOMPILER -f $current -o run -o exit"
-    $TESTCOMPILER -f $current -o run -o exit
+  if [ "$ARGS" == "DEBUG" ]; then
+    echo "Using debugger..."
+    if hash lldb 2>/dev/null; then
+      echo "Running command => $TESTCOMPILER -f $current -o run -o exit"
+      $TESTCOMPILER -f $current -o run -o exit
+    else
+      echo "Running command => $TESTCOMPILER --args $current"
+      $TESTCOMPILER --args $current
+    fi
   else
-    echo "Running command => $TESTCOMPILER --args $current"
-    $TESTCOMPILER --args $current
+    ./$current
   fi
   out=$?
   if [ ! $out -eq 0 ]; then
@@ -104,6 +109,8 @@ function run_single_test()
 }
 
 pushd test
+ARGS=$2
+echo "Args => $ARGS"
 if [ -z "$1"  ]; then 
   run_full_suite
 else

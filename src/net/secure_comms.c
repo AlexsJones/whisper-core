@@ -103,6 +103,9 @@ jnx_socket* secure_comms_start(secure_comms_endpoint e, discovery_service *ds,
       sockfd = listen_for_socket_fd(s->secure_socket,remote_peer,s);
       JNXCHECK(sockfd != -1);
       printf("Secure socket fd: %d\n",s->secure_socket->socket);
+
+      /* The receiver will not have linked the sessions yet */
+
       break;
   }
   JNXCHECK(sockfd != -1);

@@ -56,9 +56,12 @@ static void session_service_add_session(session_service *service, session *s) {
   jnx_list_add_ts(service->session_list,s);
   JNXCHECK(service->session_list->counter == kc + 1);
 }
-session_service *session_service_create() {
+session_service *session_service_create(session_linking_service_func linking_func,
+    session_unlinking_service_func unlinking_func) {
   session_service *s = malloc(sizeof(session_service));
   s->session_list = jnx_list_create();
+  s->unlinking_func = unlinking_func;
+  s->linking_func = linking_func;
   return s;
 }
 void session_service_destroy(session_service **service) {
@@ -208,7 +211,7 @@ session_state session_service_destroy_session(session_service *service,\
   return e;
 }
 session_state session_service_link_sessions(session_service *s,
-    session_linking_service_func fn,void *optargs,
+    void *linking_args,
     jnx_guid *session_guid, peer *local_peer, peer *remote_peer) {
   session *osession;
   session_state e = session_service_fetch_session(s,session_guid,&osession);
@@ -217,13 +220,12 @@ session_state session_service_link_sessions(session_service *s,
   }
   osession->local_peer_guid = local_peer->guid;
   osession->remote_peer_guid = remote_peer->guid;
-  int r = fn(osession,optargs);
+  int r =  s->unlinking_func(osession,linking_args);
   return r ? SESSION_STATE_FAIL : SESSION_STATE_OKAY;
 }
 session_state session_service_unlink_sessions(session_service *s,
-    session_unlinking_service_func fn, void *optargs, jnx_guid \
+    void *linking_args, jnx_guid \
     *session_guid) {
-
   session *osession;
   session_state e = session_service_fetch_session(s,session_guid,&osession);
   if(e != SESSION_STATE_OKAY) {
@@ -237,7 +239,7 @@ session_state session_service_unlink_sessions(session_service *s,
   JNXCHECK(is_guid_blank(&osession->local_peer_guid));
   JNXCHECK(is_guid_blank(&osession->remote_peer_guid));
 
-  int r = fn(osession,optargs);
+  int r = s->unlinking_func(osession,linking_args);
   session_disconnect(osession);
   JNX_LOG(NULL,"Disconnected session");
   return r ? SESSION_STATE_FAIL : SESSION_STATE_OKAY;

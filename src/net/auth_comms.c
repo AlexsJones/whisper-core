@@ -68,8 +68,18 @@ static void listener_callback(const jnx_uint8 *payload,
       session *osession;
       session_state e = session_service_create_shared_session(t->ss,
           a->session_guid,&osession);
-      /* First thing we store is the GUID of the remote peer in this new session */
-      session_add_remote_peer_guid(osession,a->initiator_guid);
+      /* First thing we'll do is link sessions */
+
+      peer *local_peer = peerstore_get_local_peer(t->ds->peers);
+      JNXCHECK(local_peer);
+      peer *remote_peer = peerstore_lookup(t->ds->peers,&g);
+      JNXCHECK(remote_peer);
+      session_service_link_sessions(t->ss,
+      NULL,&session_g, local_peer, remote_peer);
+
+      printf("Created a linked session with the local peer %s and remote peer %s\n",
+        local_peer->user_name,remote_peer->user_name);
+
       /* setting our response key as the 'remote public key' */
       session_add_initiator_public_key(osession,a->initiator_public_key); 
       session_add_secure_comms_port(osession,a->secure_comms_port);
