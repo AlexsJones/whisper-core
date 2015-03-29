@@ -25,7 +25,7 @@ typedef struct auth_comms_service {
 auth_comms_service *auth_comms_create();
 
 void auth_comms_listener_start(auth_comms_service *ac,
-    discovery_service *ds,session_service *ss);
+    discovery_service *ds,session_service *ss,void *linking_args);
 
 void auth_comms_destroy(auth_comms_service **ac);
 

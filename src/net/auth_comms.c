@@ -23,6 +23,7 @@ typedef struct transport_options {
   discovery_service *ds;
   session_service *ss;
   auth_comms_service *ac;
+  void *linking_args;
 }transport_options;
 /* Listener Thread */
 static void send_data(jnx_char *hostname, jnx_char *port,
@@ -77,7 +78,7 @@ static void listener_callback(const jnx_uint8 *payload,
       JNXCHECK(remote_peer);
       printf("Got remote peer\n");
       session_service_link_sessions(t->ss,
-      NULL,&session_g, local_peer, remote_peer);
+      t->linking_args,&session_g, local_peer, remote_peer);
 
       printf("Created a linked session with the local peer %s and remote peer %s\n",
         local_peer->user_name,remote_peer->user_name);
@@ -161,12 +162,12 @@ auth_comms_service *auth_comms_create() {
   return malloc(sizeof(auth_comms_service));
 }
 void auth_comms_listener_start(auth_comms_service *ac, discovery_service *ds,
-    session_service *ss) {
+    session_service *ss,void *linking_args) {
   transport_options *ts = malloc(sizeof(transport_options));
   ts->ac = ac;
   ts->ds = ds;
   ts->ss = ss;
-
+  ts->linking_args = linking_args;
   ac->listener_thread = jnx_thread_create(listener_bootstrap,ts);
 }
 void auth_comms_destroy(auth_comms_service **ac) {
