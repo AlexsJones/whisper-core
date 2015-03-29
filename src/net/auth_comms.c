@@ -81,7 +81,6 @@ static void listener_callback(const jnx_uint8 *payload,
 
       printf("Created a linked session with the local peer %s and remote peer %s\n",
         local_peer->user_name,remote_peer->user_name);
-
       /* setting our response key as the 'remote public key' */
       session_add_initiator_public_key(osession,a->initiator_public_key); 
       session_add_secure_comms_port(osession,a->secure_comms_port);
