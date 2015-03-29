@@ -220,7 +220,7 @@ session_state session_service_link_sessions(session_service *s,
   }
   osession->local_peer_guid = local_peer->guid;
   osession->remote_peer_guid = remote_peer->guid;
-  int r =  s->unlinking_func(osession,linking_args);
+  int r =  s->linking_func(osession,linking_args);
   return r ? SESSION_STATE_FAIL : SESSION_STATE_OKAY;
 }
 session_state session_service_unlink_sessions(session_service *s,

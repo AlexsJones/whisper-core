@@ -52,7 +52,8 @@ int unlinking_test_procedure(session *s, void *optargs) {
 }
 void test_secure_comms_receiver() {
   JNX_LOG(NULL,"test_linking");
-  session_service *service = session_service_create();
+  session_service *service = session_service_create(linking_test_procedure,
+    unlinking_test_procedure);
   session *os;
   session_state e = session_service_create_session(service,&os);
   JNXCHECK(session_service_session_is_linked(service,&os->session_guid) == 0);
@@ -65,12 +66,12 @@ void test_secure_comms_receiver() {
   peer *l = peer_create(h,"127.0.0.1","Alex", 10);
   peer *n = peer_create(g,"127.0.0.1","Bob", 10);
   e = session_service_link_sessions(service,
-      linking_test_procedure,
       NULL,
       &os->session_guid,l,n);
   JNXCHECK(e == SESSION_STATE_OKAY);
   JNXCHECK(linking_did_use_functor);
   JNXCHECK(session_service_session_is_linked(service,&os->session_guid) == 1);
+
 
   //Fake data required for the session
   os->is_connected = 1;
@@ -92,7 +93,6 @@ void test_secure_comms_receiver() {
   JNXCHECK(connector_sockfd != 0);
   
   e = session_service_unlink_sessions(service,
-      unlinking_test_procedure,
       "PASSED",
       &os->session_guid);
   JNXCHECK(os->is_connected == 0);
@@ -102,6 +102,7 @@ void test_secure_comms_receiver() {
   JNXCHECK(r == 0);
   session_service_destroy(&service);
   JNXCHECK(service == NULL);
+  
 }
 int main(int argc, char **argv) {
   test_secure_comms_receiver();
