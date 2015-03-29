@@ -39,15 +39,15 @@ void *worker(void *args) {
 void fire_threaded_tcp_packet(char *port) {
   jnx_thread_create_disposable(worker,port);
 }
-int linking_test_procedure(session *s,jnx_int is_initiator, void *optargs) {
+int linking_test_procedure(session *s,linking_actor actor, void *optargs) {
   JNX_LOG(NULL,"Session hit linking procedure functor");
   linking_did_use_functor=1;
-  if(is_initiator == 0) {
+  if(actor == E_AM_RECEIVER) {
     is_receiver = 1;
   }
   return 0;
 }
-int unlinking_test_procedure(session *s,jnx_int is_initiator, void *optargs) {
+int unlinking_test_procedure(session *s,linking_actor actor, void *optargs) {
   JNX_LOG(NULL,"Session hit unlinking procedure functor");
   const char *arg = (const char*)optargs;
   JNXCHECK(strcmp(arg,"PASSED") == 0);
@@ -70,7 +70,7 @@ void test_secure_comms_receiver() {
   peer *l = peer_create(h,"127.0.0.1","Alex", 10);
   peer *n = peer_create(g,"127.0.0.1","Bob", 10);
   e = session_service_link_sessions(service,
-      NULL,0,
+      E_AM_RECEIVER,NULL,
       &os->session_guid,l,n);
   JNXCHECK(e == SESSION_STATE_OKAY);
   JNXCHECK(linking_did_use_functor);
