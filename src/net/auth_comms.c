@@ -77,7 +77,7 @@ static void listener_callback(const jnx_uint8 *payload,
       peer *remote_peer = peerstore_lookup(t->ds->peers,&g);
       JNXCHECK(remote_peer);
       printf("Got remote peer\n");
-      session_service_link_sessions(t->ss,
+      session_service_link_sessions(t->ss,0,
       t->linking_args,&session_g, local_peer, remote_peer);
 
       printf("Created a linked session with the local peer %s and remote peer %s\n",
@@ -142,7 +142,8 @@ static void listener_callback(const jnx_uint8 *payload,
       osession->is_connected = 1;
       printf("Handshake complete.\n");
       printf("Starting secure comms channel.\n");
-      secure_comms_receiver_start(t->ds,osession,t->ac->listener->socket->addrfamily);
+      secure_comms_receiver_start(t->ds,osession,
+          t->ac->listener->socket->addrfamily);
       /* free data */
       jnx_encoder_destroy(&encoder);
       auth_initiator__free_unpacked(a,NULL);
@@ -191,7 +192,8 @@ void auth_comms_initiator_start(auth_comms_service *ac, \
 
   printf("Generated initial handshake...[%d/bytes]\n",bytes_read);
   jnx_size replysize;
-  jnx_uint8 *reply = send_data_await_reply(remote_peer->host_address,"9991", 
+  jnx_uint8 *reply = send_data_await_reply(remote_peer->host_address,
+      "9991", 
       ac->listener->socket->addrfamily,
       obuffer,bytes_read,&replysize);
 
@@ -237,7 +239,8 @@ void auth_comms_initiator_start(auth_comms_service *ac, \
         encoded_len,&fbuffer);
 
     jnx_size replysizetwo;
-    jnx_uint8 *replytwo = send_data_await_reply(remote_peer->host_address,"9991", 
+    jnx_uint8 *replytwo = send_data_await_reply(remote_peer->host_address,
+        "9991", 
         ac->listener->socket->addrfamily,
         fbuffer,bytes_read,&replysizetwo);
 

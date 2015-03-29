@@ -24,9 +24,13 @@
 #include "handshake_control.h"
 #include "peer.h"
 
-typedef int (*session_linking_service_func)(session *s,void *optargs);
+typedef int (*session_linking_service_func)(session *s,
+    int is_initiator, 
+    void *optargs);
 
-typedef int (*session_unlinking_service_func)(session *s,void *optargs);
+typedef int (*session_unlinking_service_func)(session *s,
+    int is_initiator,
+    void *optargs);
 
 typedef struct session_service {
   jnx_list *session_list;
@@ -77,10 +81,13 @@ session_state session_service_fetch_all_sessions(session_service *service,\
 session_state session_service_destroy_session(session_service *service,jnx_guid \
     *session_guid);
 
-session_state session_service_link_sessions(session_service *s, void *linking_args,
+session_state session_service_link_sessions(session_service *s,
+    jnx_int is_initiator,
+    void *linking_args,
     jnx_guid *session_guid, peer *local_peer, peer *remote_peer);
 
 session_state session_service_unlink_sessions(session_service *s,
+    jnx_int is_initiator,
     void *linking_args, jnx_guid \
     *session_guid);
 
