@@ -69,11 +69,13 @@ static void listener_callback(const jnx_uint8 *payload,
       session_state e = session_service_create_shared_session(t->ss,
           a->session_guid,&osession);
       /* First thing we'll do is link sessions */
-
+      printf("Created shared session\n");
       peer *local_peer = peerstore_get_local_peer(t->ds->peers);
       JNXCHECK(local_peer);
+      printf("Got local peer\n");
       peer *remote_peer = peerstore_lookup(t->ds->peers,&g);
       JNXCHECK(remote_peer);
+      printf("Got remote peer\n");
       session_service_link_sessions(t->ss,
       NULL,&session_g, local_peer, remote_peer);
 
