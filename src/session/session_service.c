@@ -211,7 +211,7 @@ session_state session_service_destroy_session(session_service *service,\
   return e;
 }
 session_state session_service_link_sessions(session_service *s,
-    linking_actor actor,
+    linked_session_type session_type,
     void *linking_args,
     jnx_guid *session_guid, peer *local_peer, peer *remote_peer) {
   session *osession;
@@ -222,11 +222,11 @@ session_state session_service_link_sessions(session_service *s,
   osession->local_peer_guid = local_peer->guid;
   osession->remote_peer_guid = remote_peer->guid;
   JNX_LOG(NULL,"Linking function from session service");
-  int r =  s->linking_func(osession,actor,linking_args);
+  int r =  s->linking_func(osession,session_type,linking_args);
   return r ? SESSION_STATE_FAIL : SESSION_STATE_OKAY;
 }
 session_state session_service_unlink_sessions(session_service *s,
-    linking_actor actor,
+    linked_session_type session_type,
     void *linking_args, jnx_guid \
     *session_guid) {
   session *osession;
@@ -243,7 +243,7 @@ session_state session_service_unlink_sessions(session_service *s,
   JNXCHECK(is_guid_blank(&osession->remote_peer_guid));
 
   JNX_LOG(NULL,"Unlinking function from session service");
-  int r = s->unlinking_func(osession,actor,linking_args);
+  int r = s->unlinking_func(osession,session_type,linking_args);
   session_disconnect(osession);
   JNX_LOG(NULL,"Disconnected session");
   return r ? SESSION_STATE_FAIL : SESSION_STATE_OKAY;

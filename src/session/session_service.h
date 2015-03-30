@@ -24,17 +24,17 @@
 #include "handshake_control.h"
 #include "peer.h"
 
-typedef enum linking_actor {
+typedef enum linked_session_type {
   E_AM_RECEIVER,
   E_AM_INITIATOR
-}linking_actor;
+}linked_session_type;
 
 typedef int (*session_linking_service_func)(session *s,
-    linking_actor actor,
+    linked_session_type session_type,
     void *optargs);
 
 typedef int (*session_unlinking_service_func)(session *s,
-    linking_actor actor,
+    linked_session_type session_type,
     void *optargs);
 
 typedef struct session_service {
@@ -88,12 +88,12 @@ session_state session_service_destroy_session(session_service *service,jnx_guid 
     *session_guid);
 
 session_state session_service_link_sessions(session_service *s,
-    linking_actor actor,
+    linked_session_type session_type,
     void *linking_args,
     jnx_guid *session_guid, peer *local_peer, peer *remote_peer);
 
 session_state session_service_unlink_sessions(session_service *s,
-    linking_actor actor,
+    linked_session_type session_type,
     void *linking_args, jnx_guid \
     *session_guid);
 
