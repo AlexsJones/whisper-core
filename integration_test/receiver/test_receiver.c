@@ -23,22 +23,23 @@
 #include "discovery.h"
 static char *baddr = NULL;
 
+
 int linking_test_procedure(session *s,linked_session_type session_type,
     void *optargs) {
-  JNXCHECK(session_type == E_AM_INITIATOR);
-  discovery_service *ds = (discovery_service*)optargs;
-  JNX_LOG(NULL,"Session hit linking procedure functor");
+  JNX_LOG(NULL,"Linking now..");
+/*
   jnx_char *default_secure_comms = "6666";
   auth_comms_service *ac = auth_comms_create();
   ac->listener = jnx_socket_tcp_listener_create("9991",AF_INET,15);
-  auth_comms_initiator_start(ac,ds,s,default_secure_comms);
+  auth_comms_initiator_start(ac,ds,os,default_secure_comms);
+*/
   return 0;
 }
 int unlinking_test_procedure(session *s,linked_session_type session_type, 
     void *optargs) {
   return 0;
 }
-void test_initiator() {
+void test_receiver() {
   JNX_LOG(NULL,"test_linking");
   session_service *service = session_service_create(linking_test_procedure,
       unlinking_test_procedure);
@@ -57,28 +58,12 @@ void test_initiator() {
 
   discovery_service_start(ds,BROADCAST_UPDATE_STRATEGY);
 
-  int remote_peers = 0;
-  jnx_guid **active_guids;
-  peer *local = peerstore_get_local_peer(store);
-  peer *remote_peer = NULL;
-  while(!remote_peers) {
-    int num_guids = peerstore_get_active_guids(store,&active_guids);
-    int i;
-    for(i=0;i<num_guids;i++) {
-      jnx_guid *guid = active_guids[i];
-      peer *p = peerstore_lookup(store,guid);
-      if(peers_compare(p,local) != 0) {
-        printf("Found a remote peer! Breaking!\n");
-        remote_peers = 1;
-        remote_peer = p;
-        break;
-      }
-    }
-  } 
-  session_service_link_sessions(service,E_AM_INITIATOR,
-      ds,&(*os).session_guid,local,remote_peer);
+  auth_comms_service *ac = auth_comms_create();
+  ac->listener = jnx_socket_tcp_listener_create("9991",AF_INET,15);
+  auth_comms_listener_start(ac,ds,service,NULL);
+  
 }
 int main(int argc, char **argv) {
-  test_initiator();
+  test_receiver();
   return 0;
 }
