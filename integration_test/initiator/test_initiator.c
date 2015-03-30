@@ -17,6 +17,7 @@
  */
 #include <stdlib.h>
 #include <jnxc_headers/jnxsocket.h>
+#include <jnxc_headers/jnxthread.h>
 #include <jnxc_headers/jnx_tcp_socket.h>
 #include "session_service.h"
 #include "auth_comms.h"
@@ -25,13 +26,15 @@ static char *baddr = NULL;
 
 int linking_test_procedure(session *s,linked_session_type session_type,
     void *optargs) {
-  JNXCHECK(session_type == E_AM_INITIATOR);
-  discovery_service *ds = (discovery_service*)optargs;
-  JNX_LOG(NULL,"Session hit linking procedure functor");
-  jnx_char *default_secure_comms = "6666";
-  auth_comms_service *ac = auth_comms_create();
-  ac->listener = jnx_socket_tcp_listener_create("9991",AF_INET,15);
-  auth_comms_initiator_start(ac,ds,s,default_secure_comms);
+  if(session_type == E_AM_INITIATOR){
+    JNXCHECK(session_type == E_AM_INITIATOR);
+    JNX_LOG(NULL,"Session hit linking procedure functor");
+    discovery_service *ds = (discovery_service*)optargs;
+    jnx_char *default_secure_comms = "6666";
+    auth_comms_service *ac = auth_comms_create();
+    ac->listener = jnx_socket_tcp_listener_create("9991",AF_INET,15);
+    auth_comms_initiator_start(ac,ds,s,default_secure_comms);
+  }
   return 0;
 }
 int unlinking_test_procedure(session *s,linked_session_type session_type, 
@@ -55,6 +58,7 @@ void test_initiator() {
 
   discovery_service *ds = discovery_service_create(1234, AF_INET, baddr, store);
 
+
   discovery_service_start(ds,BROADCAST_UPDATE_STRATEGY);
 
   int remote_peers = 0;
@@ -77,6 +81,7 @@ void test_initiator() {
   } 
   session_service_link_sessions(service,E_AM_INITIATOR,
       ds,&(*os).session_guid,local,remote_peer);
+
 }
 int main(int argc, char **argv) {
   test_initiator();

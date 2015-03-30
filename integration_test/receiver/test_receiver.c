@@ -26,7 +26,7 @@ static char *baddr = NULL;
 
 int linking_test_procedure(session *s,linked_session_type session_type,
     void *optargs) {
-  JNX_LOG(NULL,"Linking now..");
+  JNX_LOG(NULL,"Linking now the receiver session..");
 /*
   jnx_char *default_secure_comms = "6666";
   auth_comms_service *ac = auth_comms_create();
@@ -61,7 +61,11 @@ void test_receiver() {
   auth_comms_service *ac = auth_comms_create();
   ac->listener = jnx_socket_tcp_listener_create("9991",AF_INET,15);
   auth_comms_listener_start(ac,ds,service,NULL);
-  
+ 
+  while(!os->is_connected) {
+    JNX_LOG("Awaiting connection completion");
+    sleep(.5);
+  }
 }
 int main(int argc, char **argv) {
   test_receiver();
