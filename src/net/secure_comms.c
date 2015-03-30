@@ -68,7 +68,6 @@ int connect_for_socket_fd(jnx_socket *s, peer *remote_peer,session *ses) {
     }
     s->isconnected = 1;
   }
-  printf("- - 2\n");
   freeaddrinfo(res);
   return s->socket;
 }
