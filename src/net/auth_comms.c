@@ -38,9 +38,10 @@ static jnx_uint8 *send_data_await_reply(jnx_char *hostname, jnx_char *port,
     jnx_int bytes, jnx_size *receipt_bytes) {
   jnx_socket *sock = jnx_socket_tcp_create(family);
   jnx_uint8 *reply;
-  printf("awaiting reply from %s\n",hostname);
+  JNX_LOG(NULL,"Awaiting reply from %s",hostname);
   *receipt_bytes = jnx_socket_tcp_send_with_receipt(sock,hostname,port,buffer,\
       bytes,&reply);
+  JNX_LOG(NULL,"Reply received");
   jnx_socket_destroy(&sock);
   return reply;
 }
