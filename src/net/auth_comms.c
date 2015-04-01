@@ -18,7 +18,7 @@
 #include "secure_comms.h"
 #define CHALLENGE_REQUEST_PUBLIC_KEY 1
 #define CHALLENGE_REQUEST_FINISH 0
-
+#define DEFAULT_AUTH_COMMS_PORT "9991"
 typedef struct transport_options {
   discovery_service *ds;
   session_service *ss;
@@ -194,7 +194,7 @@ void auth_comms_initiator_start(auth_comms_service *ac, \
   printf("Generated initial handshake...[%d/bytes]\n",bytes_read);
   jnx_size replysize;
   jnx_uint8 *reply = send_data_await_reply(remote_peer->host_address,
-      "9991", 
+      DEFAULT_AUTH_COMMS_PORT, 
       ac->listener->socket->addrfamily,
       obuffer,bytes_read,&replysize);
 
@@ -241,7 +241,7 @@ void auth_comms_initiator_start(auth_comms_service *ac, \
 
     jnx_size replysizetwo;
     jnx_uint8 *replytwo = send_data_await_reply(remote_peer->host_address,
-        "9991", 
+        DEFAULT_AUTH_COMMS_PORT, 
         ac->listener->socket->addrfamily,
         fbuffer,bytes_read,&replysizetwo);
 
