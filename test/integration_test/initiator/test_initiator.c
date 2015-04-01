@@ -23,7 +23,7 @@
 #include "auth_comms.h"
 #include "discovery.h"
 static char *baddr = NULL;
-
+static auth_comms_service *ac = NULL;
 int linking_test_procedure(session *s,linked_session_type session_type,
     void *optargs) {
   if(session_type == E_AM_INITIATOR){
@@ -31,7 +31,7 @@ int linking_test_procedure(session *s,linked_session_type session_type,
     JNX_LOG(NULL,"Session hit linking procedure functor");
     discovery_service *ds = (discovery_service*)optargs;
     jnx_char *default_secure_comms = "6666";
-    auth_comms_service *ac = auth_comms_create();
+    ac = auth_comms_create();
     ac->listener = jnx_socket_tcp_listener_create("9991",AF_INET,15);
     auth_comms_initiator_start(ac,ds,s,default_secure_comms);
   }
@@ -39,6 +39,8 @@ int linking_test_procedure(session *s,linked_session_type session_type,
 }
 int unlinking_test_procedure(session *s,linked_session_type session_type,
     void *optargs) {
+
+  auth_comms_stop(ac,s);
   return 0;
 }
 void test_initiator() {
@@ -81,6 +83,11 @@ void test_initiator() {
   session_service_link_sessions(service,E_AM_INITIATOR,
       ds,&(*os).session_guid,local,remote_peer);
 
+  printf("Sessions linked - now going to unlink\n");
+ 
+  session_service_unlink_sessions(service,E_AM_INITIATOR,
+      ds,&(*os).session_guid);
+  JNXCHECK(session_service_session_is_linked(service,&os->session_guid) == 0);
 }
 int main(int argc, char **argv) {
   test_initiator();
