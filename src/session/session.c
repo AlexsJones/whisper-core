@@ -31,11 +31,11 @@ jnx_int session_message_read(session *s, jnx_char **omessage) {
   *omessage = NULL;
   if(!s->is_connected) {
     JNX_LOG(0,"Session not connected, cannot read");
-    return 0;
+    return -1;
   }
   if(!s->secure_socket) {
     JNX_LOG(0,"Session cannot read from a null socket");
-    return 0;
+    return -1;
   }
   jnx_char buffer[2048];
   bzero(buffer,2048);
@@ -45,7 +45,7 @@ jnx_int session_message_read(session *s, jnx_char **omessage) {
         buffer,bytes_read);
     *omessage = decrypted_message;
   }
-  return 0;
+  return bytes_read;
 }
 session_state session_message_read_and_decrypt(session *s, 
     jnx_char *message,jnx_char **omessage) {
