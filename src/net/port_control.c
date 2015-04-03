@@ -15,6 +15,7 @@ jnx_int is_port_available(jnx_int port) {
   p = res;
   while(p != NULL) {
     if(bind(sock,p->ai_addr,p->ai_addrlen) == -1) {
+      freeaddrinfo(res);
       return 0;
     }
     break;
