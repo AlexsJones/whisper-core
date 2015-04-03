@@ -20,6 +20,7 @@
 #include <jnxc_headers/jnxthread.h>
 #include <jnxc_headers/jnx_tcp_socket.h>
 #include "session_service.h"
+#include "port_control.h"
 #include "auth_comms.h"
 #include "discovery.h"
 static char *baddr = NULL;
@@ -31,9 +32,13 @@ int linking_test_procedure(session *s,linked_session_type session_type,
     JNX_LOG(NULL,"Session hit linking procedure functor");
     discovery_service *ds = (discovery_service*)optargs;
     jnx_char *default_secure_comms = "6666";
+    /* Adding port control service */
+    port_control_service *ps = port_control_service_create(9001,12341,1);
+    
     ac = auth_comms_create();
+
     ac->listener = jnx_socket_tcp_listener_create("9991",AF_INET,15);
-    auth_comms_initiator_start(ac,ds,s,default_secure_comms);
+    auth_comms_initiator_start(ac,ds,ps,s);
   }
   return 0;
 }
