@@ -27,16 +27,14 @@ jnx_int is_port_available(jnx_int port) {
 jnx_int port_control_scan_range(port_control *p,E_SCAN_STATE
     state) {
   jnx_int x;
-  for(x=p->lrange;x<p->urange;x=x+p->interval) {
+  for(x=p->lrange;x<(p->urange + 1);x=x+p->interval) {
+    JNX_LOG(NULL,"Testing port %d [%d:%d]",x,p->lrange,p->urange);
     jnx_int is_available = is_port_available(x);
     if(is_available) {
-      if(state == RETURN_EARLY_SCAN) {
-        return x;
-      }
-      /* TODO: */
+      return x;
     }
   }
-  return 0;
+  return -1;
 }
 jnx_int port_control_next_available(port_control *p) {
   return port_control_scan_range(p,1);
