@@ -176,13 +176,17 @@ void auth_comms_destroy(auth_comms_service **ac) {
   jnx_socket_tcp_listener_destroy(&(*ac)->listener);
 }
 void auth_comms_initiator_start(auth_comms_service *ac, \
-    discovery_service *ds, session *s, jnx_char *secure_port) {
+    discovery_service *ds, port_control_service *ps, 
+    session *s, jnx_char *secure_port) {
 
   if(s->is_connected) {
     printf("This session is already connected.\n");
     return;
   }
-  session_add_secure_comms_port(s,secure_port);
+
+  jnx_char *sport = port_control_service_next_available_to_s(ps);
+
+  session_add_secure_comms_port(s,sport);
 
   peer *remote_peer = peerstore_lookup(ds->peers,&(*s).remote_peer_guid);
   JNXCHECK(remote_peer);

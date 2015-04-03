@@ -11,6 +11,7 @@
 #include <jnxc_headers/jnx_tcp_socket.h>
 #include "session.h"
 #include "session_service.h"
+#include "port_control.h"
 #include <jnxc_headers/jnxthread.h>
 
 typedef int (*accept_reject_callback)(discovery_service *, 
@@ -32,7 +33,8 @@ void auth_comms_listener_start(auth_comms_service *ac,
 void auth_comms_destroy(auth_comms_service **ac);
 
 void auth_comms_initiator_start(auth_comms_service *ac, \
-    discovery_service *ds, session *s, jnx_char *port);
+    discovery_service *ds, port_control_service *ps, 
+    session *s, jnx_char *port);
 
 void auth_comms_stop(auth_comms_service *ac,session *s);
 

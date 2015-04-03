@@ -27,7 +27,7 @@ jnx_int is_port_available(jnx_int port) {
   close(sock);
   return 1;
 }
-jnx_int port_control_scan_range(port_control *p,E_SCAN_STATE
+jnx_int port_control_service_scan_range(port_control_service *p,E_SCAN_STATE
     state) {
   jnx_int x;
   for(x=p->lrange;x<(p->urange + 1);x=x+p->interval) {
@@ -39,27 +39,27 @@ jnx_int port_control_scan_range(port_control *p,E_SCAN_STATE
   }
   return -1;
 }
-jnx_int port_control_next_available(port_control *p) {
-  return port_control_scan_range(p,1);
+jnx_int port_control_service_next_available(port_control_service *p) {
+  return port_control_service_scan_range(p,1);
 }
-jnx_char* port_control_next_available_to_s(port_control *p) {
+jnx_char* port_control_service_next_available_to_s(port_control_service *p) {
   jnx_char buffer[46]={};
-  jnx_int port = port_control_next_available(p);
+  jnx_int port = port_control_service_next_available(p);
   sprintf(buffer,"%d",port);
   return strdup(buffer);
 }
-port_control *port_control_create(jnx_int lrange, 
+port_control_service *port_control_service_create(jnx_int lrange, 
     jnx_int urange, jnx_int interval) {
   JNXCHECK(lrange > 0);
   JNXCHECK(urange > lrange);
   JNXCHECK(interval > 0);
-  port_control *p = malloc(sizeof(port_control));
+  port_control_service *p = malloc(sizeof(port_control_service));
   p->lrange = lrange;
   p->urange = urange;
   p->interval = interval;
   return p;
 }
-void port_control_destroy(port_control **p){
+void port_control_service_destroy(port_control_service **p){
   free(*p);
   *p = NULL;
 }
