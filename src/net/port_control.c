@@ -2,14 +2,16 @@
 #include <stdlib.h>
 #include <jnxc_headers/jnx_tcp_socket.h>
 
-jnx_int is_port_available(jnx_char* port) {
+jnx_int is_port_available(jnx_int port) {
   struct addrinfo hints, *res, *p;
   jnx_int32 sock = socket(AF_INET,SOCK_STREAM,0);
   memset(&hints,0,sizeof(hints));
   hints.ai_family = AF_INET;
   hints.ai_socktype = SOCK_STREAM;
   hints.ai_flags = AI_PASSIVE;
-  getaddrinfo(NULL,port,&hints,&res);
+  jnx_char sport[46]={};
+  sprintf(sport,"%d",port);
+  getaddrinfo(NULL,sport,&hints,&res);
   p = res;
   while(p != NULL) {
     if(bind(sock,p->ai_addr,p->ai_addrlen) == -1) {
@@ -26,9 +28,7 @@ jnx_int port_control_scan_range(port_control *p,E_SCAN_STATE
     state) {
   jnx_int x;
   for(x=p->lrange;x<p->urange;x=x+p->interval) {
-    jnx_char buf[64] ={};
-    sprintf(buf,"%d",x);
-    jnx_int is_available = is_port_available(buf);
+    jnx_int is_available = is_port_available(x);
     if(is_available) {
       if(state == RETURN_EARLY_SCAN) {
         return x;
@@ -42,7 +42,10 @@ jnx_int port_control_next_available(port_control *p) {
   return port_control_scan_range(p,1);
 }
 jnx_char* port_control_next_available_to_s(port_control *p) {
-
+  jnx_char buffer[46]={};
+  jnx_int port = port_control_next_available(p);
+  sprintf(buffer,"%d",port);
+  return strdup(buffer);
 }
 port_control *port_control_create(jnx_int lrange, 
     jnx_int urange, jnx_int interval) {

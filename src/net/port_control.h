@@ -19,7 +19,8 @@ jnx_int port_control_next_available(port_control *p);
 
 jnx_char* port_control_next_available_to_s(port_control *p);
 
-port_control *port_control_create(jnx_int lrange, jnx_int urange, jnx_int interval);
+port_control *port_control_create(jnx_int lrange, 
+    jnx_int urange, jnx_int interval);
 
 void port_control_destroy(port_control **p);
 
