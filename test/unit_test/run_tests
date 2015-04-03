@@ -43,7 +43,7 @@ function test_against_file()
 {
   file=$1
   echo "Compiling $file"
-  `$COMPILER $file ../../src/util/*.c ../../src/data/*.c ../../src/net/*.c ../../src/session/*.c ../../src/integrity/*.c ../../src/crypto/*.c -I../../src/crypto -I../../src/data -I../../src/err -I../../src/integrity -I../../src/net -I../../src/session -I../../src/util -o ${file:0:${#file}-2} -pthread -w -rdynamic -lcrypto -lssl -ljnxc -lprotobuf-c -g -DDEBUG`
+  `$COMPILER $file ../../src/util/*.c ../../src/data/*.c ../../src/net/*.c ../../src/session/*.c ../../src/integrity/*.c ../../src/crypto/*.c -I../../src/crypto -I../../src/data -I../../src/err -I../../src/integrity -I../../src/net -I../../src/session -I../../src/util -o ${file:0:${#file}-2} -pthread -w -rdynamic -lcrypto -lssl -ljnxc -lprotobuf-c -g`
   out=$?
   if [ ! $out -eq 0 ]; then
     echo "Compile failed!"
