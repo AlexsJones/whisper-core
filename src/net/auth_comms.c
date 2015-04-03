@@ -179,7 +179,6 @@ void auth_comms_initiator_start(auth_comms_service *ac, \
     discovery_service *ds, session *s, jnx_char *secure_port) {
 
   if(s->is_connected) {
-
     printf("This session is already connected.\n");
     return;
   }
@@ -200,7 +199,6 @@ void auth_comms_initiator_start(auth_comms_service *ac, \
 
   /* expect an AuthReceiver public key reply here */
   void *object;
-  printf("Received reply on initial handshake.\n");
   if(handshake_did_receive_receiver_request(reply,replysize,&object)) {
     AuthReceiver *r = (AuthReceiver *)object;
  
@@ -257,10 +255,9 @@ void auth_comms_initiator_start(auth_comms_service *ac, \
     auth_receiver__free_unpacked(r,NULL);
 
     void *finish_object;
-    printf("Checking object type 2.\n");
+
     if(handshake_did_receive_receiver_request(replytwo,replysizetwo,
           &finish_object)){
-      printf("Unpacked auth receiver request\n");
       AuthReceiver *ar = (AuthReceiver *)finish_object;
       if(ar->is_receiving_finish == 1 && ar->is_receiving_public_key == 0) {
         s->is_connected = 1;
