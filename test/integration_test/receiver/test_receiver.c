@@ -72,10 +72,17 @@ void test_receiver() {
     sleep(3);
     if(olist) {
       session *s = jnx_list_remove_front(&olist);
-    
+
+      jnx_char *message = NULL:
+
+      session_message_read(s,&message);
+
+      printf("Remote message => %s\n",message);
+
       session_service_unlink_sessions(service,
           E_AM_RECEIVER,NULL,
           &(*s).session_guid);
+
       printf("Unlinked from remote session\n");
       jnx_list_destroy(&olist);
     }

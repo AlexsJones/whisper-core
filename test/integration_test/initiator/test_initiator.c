@@ -89,7 +89,9 @@ void test_initiator() {
       ds,&(*os).session_guid,local,remote_peer);
 
   printf("Sessions linked - now going to unlink\n");
- 
+  sleep(5);
+  session_message_write(os,"Hello from initiator!");
+
   session_service_unlink_sessions(service,E_AM_INITIATOR,
       ds,&(*os).session_guid);
   JNXCHECK(session_service_session_is_linked(service,&os->session_guid) == 0);
