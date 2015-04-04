@@ -36,7 +36,7 @@ typedef struct session {
   /* crypto */
   jnx_char *initiator_public_key;
   jnx_char *receiver_public_key;
-  jnx_char *shared_secret;
+  jnx_uint8 *shared_secret;
   /* secure network */
   jnx_int is_connected;
   jnx_char *secure_comms_port;
@@ -53,12 +53,12 @@ typedef struct session {
 void default_session_callback(void *gui_context, jnx_guid *session_guid,
     jnx_char *decrypted_message);
 
-session_state session_message_write(session *s,jnx_char *message);
+session_state session_message_write(session *s,jnx_uint8 *message);
 
-jnx_int session_message_read(session *s, jnx_char **omessage);
+jnx_int session_message_read(session *s, jnx_uint8 **omessage);
 
-session_state session_message_read_and_decrypt(session *s, jnx_char *message,
-    jnx_char **omessage);
+session_state session_message_read_and_decrypt(session *s, jnx_uint8 *message,
+    jnx_uint8 **omessage);
 
 session_state session_disconnect(session *s);
 
@@ -66,7 +66,7 @@ void session_add_initiator_public_key(session *s, jnx_char *key);
 
 void session_add_receiver_public_key(session *s, jnx_char *key);
 
-void session_add_shared_secret(session *s, jnx_char *secret);
+void session_add_shared_secret(session *s, jnx_uint8 *secret);
 
 void session_add_secure_comms_port(session *s, jnx_char *comms_port);
 

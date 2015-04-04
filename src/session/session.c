@@ -14,11 +14,11 @@ void default_session_callback(void *gui_context, jnx_guid *session_guid,
   printf("default_session_callback: %s.\n",decrypted_message);
   free(decrypted_message);
 }
-session_state session_message_write(session *s,jnx_char *message) {
+session_state session_message_write(session *s,jnx_uint8 *message) {
   /* take the raw message and des encrypt it */
   jnx_size len = strlen(message);
-  jnx_char *encrypted = symmetrical_encrypt((jnx_uint8*)s->shared_secret,
-      (jnx_uint8*)message,
+  jnx_char *encrypted = symmetrical_encrypt(s->shared_secret,
+      message,
       len);
 
   int send_result = 0;
@@ -30,7 +30,7 @@ session_state session_message_write(session *s,jnx_char *message) {
   JNX_LOG(0,"Send result => %d\n",send_result);
   return SESSION_STATE_OKAY;
 }
-jnx_int session_message_read(session *s, jnx_char **omessage) {
+jnx_int session_message_read(session *s, jnx_uint8 **omessage) {
   *omessage = NULL;
   if(!s->is_connected) {
     JNX_LOG(0,"Session not connected, cannot read");
@@ -40,7 +40,7 @@ jnx_int session_message_read(session *s, jnx_char **omessage) {
     JNX_LOG(0,"Session cannot read from a null socket");
     return -1;
   }
-  jnx_char buffer[2048];
+  jnx_uint8 buffer[2048];
   bzero(buffer,2048);
   jnx_int bytes_read = recv(s->secure_socket,buffer,2048,0);
   if(bytes_read > 0) {
@@ -53,10 +53,10 @@ jnx_int session_message_read(session *s, jnx_char **omessage) {
   return bytes_read;
 }
 session_state session_message_read_and_decrypt(session *s, 
-    jnx_char *message,jnx_char **omessage) {
+    jnx_uint8 *message,jnx_uint8 **omessage) {
   jnx_size len = strlen(message);
-  jnx_char *decrypted = symmetrical_decrypt((jnx_uint8*)s->shared_secret,
-      (jnx_uint8*)message,len);
+  jnx_char *decrypted = symmetrical_decrypt(s->shared_secret,
+      message,len);
   *omessage = decrypted;
   return SESSION_STATE_OKAY;
 }
@@ -81,10 +81,10 @@ void session_add_receiver_public_key(session *s, jnx_char *key) {
   s->receiver_public_key = malloc(len * sizeof(jnx_char));
   memcpy(s->receiver_public_key,key,len);
 }
-void session_add_shared_secret(session *s, jnx_char *secret) {
+void session_add_shared_secret(session *s, jnx_uint8 *secret) {
   JNXCHECK(secret);
   jnx_size len = strlen(secret);
-  s->shared_secret = malloc(len * sizeof(jnx_char));
+  s->shared_secret = malloc(len * sizeof(jnx_uint8));
   memcpy(s->shared_secret,secret,len);
 }
 void session_add_secure_comms_port(session *s, jnx_char *comms_port) {
