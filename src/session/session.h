@@ -44,8 +44,6 @@ typedef struct session {
 
   /* gui */
   void *gui_context;
-  void (*session_callback)(void *gui_context, jnx_guid *session_guid,
-      jnx_char *decrypted_message);
   /* local only */
   RSA *keypair;
 }session;
@@ -59,6 +57,8 @@ jnx_int session_message_read(session *s, jnx_uint8 **omessage);
 
 session_state session_message_read_and_decrypt(session *s, jnx_uint8 *message,
     jnx_uint8 **omessage);
+
+jnx_int session_is_active(session *s);
 
 session_state session_disconnect(session *s);
 

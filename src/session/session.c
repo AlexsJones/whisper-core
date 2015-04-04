@@ -8,11 +8,12 @@
 #include "session.h"
 #include "secure_comms.h"
 
-void default_session_callback(void *gui_context, jnx_guid *session_guid,
-    jnx_char *decrypted_message) {
-
-  printf("default_session_callback: %s.\n",decrypted_message);
-  free(decrypted_message);
+jnx_int session_is_active(session *s) {
+  jnx_int is_socket_live = secure_comms_is_socket_linked(s->secure_socket);
+  if(s->is_connected && is_socket_live) {
+    return 1;
+  }
+  return 0;
 }
 session_state session_message_write(session *s,jnx_uint8 *message) {
   /* take the raw message and des encrypt it */

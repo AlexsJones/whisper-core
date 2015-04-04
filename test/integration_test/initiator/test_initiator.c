@@ -89,7 +89,10 @@ void test_initiator() {
       ds,&(*os).session_guid,local,remote_peer);
 
 
-  printf("shared secret os => %s\n",os->shared_secret);
+  while(!session_is_active(os)) {
+    printf("Awaiting session active...\n");
+    sleep(2);
+  }
 
   printf("-------------------------------------\n");
   session_message_write(os,"Hello Ballface! what's going on!");
