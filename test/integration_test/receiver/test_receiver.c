@@ -71,7 +71,13 @@ void test_receiver() {
     printf("Awaiting connection completion\n");
     sleep(3);
     if(olist) {
-      free(olist);
+      session *s = jnx_list_remove_front(&olist);
+    
+      session_service_unlink_sessions(service,
+          E_AM_RECEIVER,NULL,
+          &(*s).session_guid);
+      printf("Unlinked from remote session\n");
+      jnx_list_destroy(&olist);
     }
   }
 }
