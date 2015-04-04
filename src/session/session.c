@@ -17,24 +17,10 @@ void default_session_callback(void *gui_context, jnx_guid *session_guid,
 session_state session_message_write(session *s,jnx_uint8 *message) {
   /* take the raw message and des encrypt it */
   jnx_size len = strlen(message);
-  
+
   jnx_char *encrypted = symmetrical_encrypt(s->shared_secret,
       message,
       len);
-
-#ifdef DEBUG
-  int i;
-  for(i=0;i<strlen(encrypted);++i) {
-    printf("0x%x ",*(encrypted + i) );
-  }
-  printf("\n");
-
-  jnx_char *decrypt = symmetrical_decrypt(s->shared_secret,
-      encrypted,
-      strlen(encrypted));
-  JNX_LOG(0,"Decrypted => %s",decrypt);
-  free(decrypt);
-#endif
 
   int send_result = 0;
   if (0 > (send_result = send(s->secure_socket,encrypted,strlen(encrypted),0))) {

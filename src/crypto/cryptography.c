@@ -99,7 +99,7 @@ jnx_char *asymmetrical_decrypt(RSA *keypair, jnx_uint8 *message, \
   return decrypted_message;
 }
 jnx_char *symmetrical_encrypt(jnx_uint8 *key,jnx_uint8 *msg, jnx_size size){
-#ifdef NOCRYPTO
+#ifdef NOSYMMETRICALCRYPTO
   JNX_LOG(NULL,"---------------------NOT USING CRYPTOGRAPHY----------------");
   return strdup(msg);
 #endif
@@ -117,7 +117,7 @@ jnx_char *symmetrical_encrypt(jnx_uint8 *key,jnx_uint8 *msg, jnx_size size){
   return res;
 }
 jnx_char *symmetrical_decrypt(jnx_uint8 *key,jnx_uint8 *msg, jnx_size size){
-#ifdef NOCRYPTO
+#ifdef NOSYMMETRICALCRYPTO
   JNX_LOG(NULL,"---------------------NOT USING CRYPTOGRAPHY----------------");
   return strdup(msg);
 #endif
