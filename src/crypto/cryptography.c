@@ -99,6 +99,9 @@ jnx_char *asymmetrical_decrypt(RSA *keypair, jnx_uint8 *message, \
   return decrypted_message;
 }
 jnx_char *symmetrical_encrypt(jnx_uint8 *key,jnx_uint8 *msg, jnx_size size){
+#ifdef NOCRYPTO
+  return strdup(msg);
+#endif
   jnx_char *res;
   DES_cblock key2;
   DES_key_schedule schedule;
@@ -113,6 +116,9 @@ jnx_char *symmetrical_encrypt(jnx_uint8 *key,jnx_uint8 *msg, jnx_size size){
   return res;
 }
 jnx_char *symmetrical_decrypt(jnx_uint8 *key,jnx_uint8 *msg, jnx_size size){
+#ifdef NOCRYPTO
+  return strdup(msg);
+#endif
   jnx_char *res;
   DES_cblock key2;
   jnx_int n = 0;
