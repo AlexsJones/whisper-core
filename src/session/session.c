@@ -17,10 +17,7 @@ void default_session_callback(void *gui_context, jnx_guid *session_guid,
 session_state session_message_write(session *s,jnx_uint8 *message) {
   /* take the raw message and des encrypt it */
   jnx_size len = strlen(message);
-
-  JNX_LOG(0,"Message length => Length of message: %d Message:%s",len,message);
-  JNX_LOG(0,"shared_secret => >----%s<---",s->shared_secret);
-
+  
   jnx_char *encrypted = symmetrical_encrypt(s->shared_secret,
       message,
       len);

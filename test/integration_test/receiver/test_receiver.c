@@ -93,7 +93,7 @@ void test_receiver() {
         size = session_message_read(s, &buffy);
       }
       if(size) {
-        printf("size -> %d, buffy -> %s\n", size, &buffy);
+        printf("size -> %d, buffy -> %s\n", size, buffy);
         break;
       }    
     }
