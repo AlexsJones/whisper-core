@@ -94,6 +94,13 @@ void test_receiver() {
       }
       if(size) {
         printf("size -> %d, buffy -> %s\n", size, buffy);
+      
+        JNXCHECK(session_is_active(s) == 1);
+        
+        session_service_unlink_sessions(service,E_AM_RECEIVER,
+            ds,&(*s).session_guid);
+  
+        JNXCHECK(session_is_active(s) == 0);
         break;
       }    
     }
