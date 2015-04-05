@@ -32,7 +32,12 @@ int linking_test_procedure(session *s,linked_session_type session_type,
     JNX_LOG(NULL,"Session hit linking procedure functor");
     discovery_service *ds = (discovery_service*)optargs;
     /* Adding port control service */
-    port_control_service *ps = port_control_service_create(9001,12341,1);
+
+    int init_port = rand() % 1000;
+
+    port_control_service *ps = port_control_service_create(8000 + 
+        init_port,
+        12341,1);
     
     ac = auth_comms_create();
 
