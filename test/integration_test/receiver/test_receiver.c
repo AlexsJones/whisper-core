@@ -80,8 +80,7 @@ void test_receiver() {
 
       session *s = jnx_list_remove_front(&olist);
 
-      while (s->secure_socket == -1) sleep(1);
-      while (!secure_comms_is_socket_linked(s->secure_socket)) {
+      while (!session_is_active(s)){
         printf("secure_socket is %d\n", s->secure_socket);
         sleep(1);
       }
