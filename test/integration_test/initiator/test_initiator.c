@@ -99,6 +99,8 @@ void test_initiator() {
   session_service_unlink_sessions(service,E_AM_INITIATOR,
       ds,&(*os).session_guid);
 
+  JNXCHECK(session_is_active(os) == 0);
+  
   JNXCHECK(session_service_session_is_linked(service,&os->session_guid) == 0);
 }
 int main(int argc, char **argv) {
