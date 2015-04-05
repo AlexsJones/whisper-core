@@ -84,15 +84,12 @@ void test_initiator() {
       }
     }
   }
+  JNXCHECK(session_is_active(os) == 0);
 
   session_service_link_sessions(service,E_AM_INITIATOR,
       ds,&(*os).session_guid,local,remote_peer);
 
-
-  while(!session_is_active(os)) {
-    printf("Awaiting session active...\n");
-    sleep(2);
-  }
+  JNXCHECK(session_is_active(os) == 1);
 
   printf("-------------------------------------\n");
   session_message_write(os,"Hello Ballface! what's going on!");

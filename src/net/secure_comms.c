@@ -18,11 +18,16 @@
 #include <jnxc_headers/jnx_tcp_socket.h>
 
 jnx_int secure_comms_is_socket_linked(jnx_int sock) {
-  if(send(sock,"PING",4,0) < 0 ) {
-    perror("send:");
+  if(sock == -1) {
     return 0;
   }
-  return 1;
+  jnx_int error = 0;
+  socklen_t len = sizeof(error);
+  jnx_int retval = getsockopt(sock,SOL_SOCKET,SO_ERROR,&error,&len);
+  if(retval == 0) {
+    return 1;
+  }
+  return 0;
 }
 int listen_for_socket_fd(peer *remote_peer,session *ses) {
   jnx_int32 sock = socket(AF_INET,SOCK_STREAM,0);
