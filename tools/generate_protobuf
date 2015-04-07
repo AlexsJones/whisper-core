@@ -1,0 +1,11 @@
+#!/bin/bash
+filelist=`ls src/**/*.proto`
+
+
+for file in $filelist; do
+  dir=$(dirname ${file})
+  pushd $dir
+    protoc-c --c_out=. *.proto
+  popd
+done;
+

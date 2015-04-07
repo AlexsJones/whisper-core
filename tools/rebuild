@@ -1,0 +1,4 @@
+git clean -fdx
+./tools/destroy_library 
+cmake .
+make

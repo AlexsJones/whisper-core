@@ -18,6 +18,7 @@ include_directories(${PROJECT_INC_DIR}src/net)
 include_directories(${PROJECT_INC_DIR}src/session)
 include_directories(${PROJECT_INC_DIR}src/util)
 
+execute_process(COMMAND ./tools/generate_protobuf)
 file(GLOB HEADERS "src/**/*.h")
 file(GLOB RAW_SRC "src/**/*.c")
 file(COPY ${HEADERS} DESTINATION whisper-core)
