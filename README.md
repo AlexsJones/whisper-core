@@ -1,4 +1,6 @@
 
+ ![CoreImage](http://i.imgur.com/Qh67mKG.jpg)
+
 > Imagine being able to work in an environment where your conversations arent monitored continuously.
   Take that idea and apply it to your everyday workplace where having an outspoken opinion remains locked away due to fear of leaving a digital footprint.
   Whisper aims to help provide a platform for inter-domain level chat.
