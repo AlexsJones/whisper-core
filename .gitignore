@@ -1,4 +1,4 @@
-whisper-core_headers
+whisper-core
 libwhisper*
 .DS_Store
 install_manifest.txt

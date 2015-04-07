@@ -20,7 +20,7 @@ include_directories(${PROJECT_INC_DIR}src/util)
 
 file(GLOB HEADERS "src/**/*.h")
 file(GLOB RAW_SRC "src/**/*.c")
-file(COPY ${HEADERS} DESTINATION whisper-core_headers)
+file(COPY ${HEADERS} DESTINATION whisper-core)
 
 add_library(whisper-core-static STATIC ${RAW_SRC})
 add_library(whisper-core SHARED ${RAW_SRC})
@@ -28,4 +28,4 @@ target_link_libraries(whisper-core -ljnxc -lcrypto -lssl -g -lprotobuf-c -lncurs
 target_link_libraries(whisper-core-static -ljnxc -lcrypto -lssl -g -lprotobuf-c -lncurses -lpthread)
 install(TARGETS whisper-core-static DESTINATION ${INSTALL_PREFIX}/lib)
 install(TARGETS whisper-core DESTINATION ${INSTALL_PREFIX}/lib)
-install(DIRECTORY whisper-core_headers DESTINATION ${INSTALL_PREFIX}/include)
+install(DIRECTORY whisper-core DESTINATION ${INSTALL_PREFIX}/include)
