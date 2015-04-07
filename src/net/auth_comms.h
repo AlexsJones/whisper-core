@@ -7,10 +7,10 @@
 
 #ifndef AUTH_COMMS_H
 #define AUTH_COMMS_H
-#include "../net/discovery.h"
+#include "discovery.h"
 #include <jnxc_headers/jnx_tcp_socket.h>
-#include "../session/session.h"
-#include "../session/session_service.h"
+#include "session.h"
+#include "session_service.h"
 #include <jnxc_headers/jnxthread.h>
 
 typedef int (*accept_reject_callback)(discovery_service *, jnx_guid *, jnx_guid *);

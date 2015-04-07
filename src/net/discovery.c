@@ -25,8 +25,8 @@
 #include <jnxc_headers/jnxlog.h>
 #include <jnxc_headers/jnxcheck.h>
 #include "discovery.h"
-#include "../data/peer.h"
-#include "../err/whisper_errors.h"
+#include "peer.h"
+#include "whisper_errors.h"
 
 extern void peerstore_peer_no_longer_active(peerstore *ps, peer *p);
 

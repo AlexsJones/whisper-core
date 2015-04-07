@@ -6,7 +6,6 @@
  */
 #include <sys/socket.h>
 #include "session.h"
-#include "../gui/gui.h"
 
 void default_session_callback(void *gui_context, jnx_guid *session_guid,
     jnx_char *decrypted_message) {

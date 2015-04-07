@@ -21,7 +21,7 @@ AirlineTheme badwolf
 #include <jnxc_headers/jnxlog.h>
 #include "peer.h"
 #include "peer.pb-c.h"
-#include "../net/discovery.h"
+#include "discovery.h"
 
 size_t peerton(peer *p, void **out) {
   Peer msg = PEER__INIT;

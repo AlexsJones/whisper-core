@@ -9,8 +9,8 @@
 #include <ifaddrs.h>
 #include <arpa/inet.h>
 #include <sys/ioctl.h>
-#include "../crypto/cryptography.h"
-#include "../util/utils.h"
+#include "cryptography.h"
+#include "utils.h"
 #include "auth_initiator.pb-c.h"
 #include "auth_receiver.pb-c.h"
 

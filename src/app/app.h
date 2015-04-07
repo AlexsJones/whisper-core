@@ -22,9 +22,9 @@
 #include <jnxc_headers/jnxhash.h>
 #include <jnxc_headers/jnxvector.h>
 #include <jnxc_headers/jnxunixsocket.h>
-#include "../net/discovery.h"
-#include "../net/auth_comms.h"
-#include "../session/session_service.h"
+#include "discovery.h"
+#include "auth_comms.h"
+#include "session_service.h"
 #define CMDLEN 64
 
 #define CMD_SESSION 1
@@ -50,7 +50,7 @@ void app_show_help();
 void app_quit_message();
 int app_code_for_command_with_param(char *command,\
     jnx_size cmd_len, char **oparam);
-void app_create_gui_session(session *s);
+//void app_create_gui_session(session *s);
 void app_list_active_peers(app_context_t *context);
 peer *app_peer_from_input(app_context_t *context,char *param);
 void app_initiate_handshake(app_context_t *context,session *s);

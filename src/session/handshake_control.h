@@ -8,7 +8,7 @@
 #ifndef HANDSHAKE_CONTROL_H
 #define HANDSHAKE_CONTROL_H
 #include "session.h"
-#include "../net/discovery.h"
+#include "discovery.h"
 #include <jnxc_headers/jnxsocket.h>
 #include <jnxc_headers/jnxthread.h>
 

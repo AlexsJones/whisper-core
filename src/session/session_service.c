@@ -17,7 +17,7 @@
  */
 #include <stdlib.h>
 #include "session_service.h"
-#include "../util/utils.h"
+#include "utils.h"
 
 static void destroy_session(session *s);
 

@@ -22,7 +22,7 @@
 #include <jnxc_headers/jnxcheck.h>
 #include "session.h"
 #include "handshake_control.h"
-#include "../data/peer.h"
+#include "peer.h"
 
 typedef struct session_service {
   jnx_list *session_list;

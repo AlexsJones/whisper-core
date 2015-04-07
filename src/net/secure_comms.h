@@ -7,8 +7,8 @@
 
 #ifndef SECURE_COMMS_H
 #define SECURE_COMMS_H
-#include "../session/session.h"
-#include "../net/discovery.h"
+#include "session.h"
+#include "discovery.h"
 #include <jnxc_headers/jnxtypes.h>
 /* Called from both remote endpoints simultaneously */
 typedef enum {

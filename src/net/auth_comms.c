@@ -10,12 +10,12 @@
 #include <ifaddrs.h>
 #include <arpa/inet.h>
 #include <sys/ioctl.h>
-#include "../crypto/cryptography.h"
-#include "../util/utils.h"
-#include "../session/auth_initiator.pb-c.h"
-#include "../session/auth_receiver.pb-c.h"
-#include "../session/handshake_control.h"
-#include "../net/secure_comms.h"
+#include "cryptography.h"
+#include "utils.h"
+#include "auth_initiator.pb-c.h"
+#include "auth_receiver.pb-c.h"
+#include "handshake_control.h"
+#include "secure_comms.h"
 #define CHALLENGE_REQUEST_PUBLIC_KEY 1
 #define CHALLENGE_REQUEST_FINISH 0
 

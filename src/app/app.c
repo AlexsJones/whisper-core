@@ -23,8 +23,7 @@
 #include <jnxc_headers/jnx_tcp_socket.h>
  #include <jnxc_headers/jnx_udp_socket.h>
 #include "app.h"
-#include "../gui/gui.h"
-#include "../net/auth_comms.h"
+#include "auth_comms.h"
 
 #define END_LISTEN -1
 #define SESSION_INTERACTION "session_interaction"
@@ -91,6 +90,7 @@ int app_accept_or_reject_session(discovery_service *ds,
   jnx_unix_socket_destroy(&s);
   return ar.abort;
 }
+/*
 void pair_session_with_gui(session *s, void *gui_context) {
   s->gui_context = gui_context;
   s->session_callback = gui_receive_message;
@@ -105,6 +105,7 @@ void app_create_gui_session(session *s) {
   read_loop((void *)c);
   unpair_session_from_gui(s, (void *)c);
 }
+*/
 int is_equivalent(char *command, char *expected) {
   if (strcmp(command, expected) == 0) {
     return 1;
