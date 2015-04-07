@@ -15,6 +15,7 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <jnxc_headers/jnxthread.h>
+#include <jnxc_headers/jnx_tcp_socket.h>
 
 static int listen_for_socket_fd(jnx_socket *s, peer *remote_peer,session *ses) {
   jnx_int32 optval = 1;
