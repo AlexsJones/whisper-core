@@ -16,7 +16,7 @@
  */
 #ifndef __SESSION_H__
 #define __SESSION_H__
-#include "../crypto/cryptography.h"
+#include "cryptography.h"
 #include <jnxc_headers/jnxguid.h>
 #include <jnxc_headers/jnxqueue.h>
 
