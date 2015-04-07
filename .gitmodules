@@ -1,0 +1,3 @@
+[submodule "jnxlibc"]
+	path = jnxlibc
+	url = git@github.com:AlexsJones/jnxlibc.git

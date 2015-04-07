@@ -1,0 +1,6 @@
+message peer {
+	required bytes guid=1;
+	required string host_address=2;
+	required string user_name=3;
+  required uint32 discovery_interval=4;
+}

@@ -1,0 +1,17 @@
+whisper-core_headers
+libwhisper*
+.DS_Store
+install_manifest.txt
+cmake_install.cmake
+CMakeCache*
+Makefile
+whisper
+CMakeFiles
+tags
+cscope.out
+*.dSYM
+backtrace
+core
+seg_wrapper.sh
+*.pb-c.c
+*.pb-c.h
