@@ -52,7 +52,6 @@ function test_against_file()
   out=$?
   if [ ! $out -eq 0 ]; then
     echo_red "Test failed"
-    rm $current
     exit 1
   else
     echo_green "Test passed"

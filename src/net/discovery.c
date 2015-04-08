@@ -366,8 +366,8 @@ void discovery_service_cleanup(discovery_service **ppsvc) {
   JNXCHECK(svc);
   if (svc->isrunning) {
     discovery_service_stop(svc);
+    jnx_socket_udp_listener_destroy(&svc->udp_listener);
   }
-  jnx_socket_udp_listener_destroy(&svc->udp_listener);
   jnx_thread_mutex_destroy(&svc->update_time_lock);
   peerstore_destroy(&(svc->peers));
   free(svc);
