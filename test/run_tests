@@ -21,33 +21,11 @@ function echo_green()
   tput sgr0
 }
 
-function copy_headers()
-{
-  if [ ! -d test/include ]; then
-    mkdir -p test/include
-  fi
- 
-  headers=`find src -name *.h`
-  for h in $headers; do 
-    cp $h test/include 
-  done
-}
-
 function test_against_file()
 {
-  copy_headers 
   file=$1
   echo "Compiling $file"
-  `$COMPILER $file \
-    src/util/*.c \
-    src/data/*.c \
-    src/net/*.c \
-    src/session/*.c \
-    src/integrity/*.c \
-    src/crypto/*.c \
-    -Itest/include -Isrc \
-    -o ${file:0:${#file}-2} \
-    -pthread -w -rdynamic -lcrypto -lssl -ljnxc -lprotobuf-c -g`
+  `$COMPILER $file src/util/*.c src/data/*.c src/net/*.c src/session/*.c src/integrity/*.c src/crypto/*.c -Isrc/crypto -Isrc/data -Isrc/err -Isrc/integrity -Isrc/net -Isrc/session -Isrc/util -o ${file:0:${#file}-2} -pthread -w -rdynamic -lcrypto -lssl -ljnxc -lprotobuf-c -g`
   ./$current
   out=$?
   if [ ! $out -eq 0 ]; then
@@ -57,7 +35,6 @@ function test_against_file()
     echo_green "Test passed"
     rm $current
   fi
-  rm -rf test/include
 }
 
 function run_full_suite()

@@ -18,8 +18,8 @@
 #include <stdlib.h>
 #include <jnxc_headers/jnxcheck.h>
 #include <jnxc_headers/jnxlog.h>
-#include "data/peer.h"
-#include "data/peerstore.h"
+#include "peer.h"
+#include "peerstore.h"
 
 int inactive(time_t ts, peer *p) {
   return 0;

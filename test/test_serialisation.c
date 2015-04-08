@@ -19,7 +19,7 @@
 #include <string.h>
 #include <jnxc_headers/jnxcheck.h>
 #include <jnxc_headers/jnxlog.h>
-#include "data/peer.h"
+#include "peer.h"
 
 void test_peer_serialisation() {
 	jnx_guid gd;

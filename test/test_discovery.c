@@ -21,9 +21,9 @@
 #include <ifaddrs.h>
 #include <arpa/inet.h>
 #include <string.h>
-#include "net/discovery.h"
-#include "data/peer.h"
-#include "data/peerstore.h"
+#include "discovery.h"
+#include "peer.h"
+#include "peerstore.h"
 #include <jnxc_headers/jnxcheck.h>
 #include <jnxc_headers/jnxlog.h>
 
@@ -93,7 +93,11 @@ int test_service_creation(discovery_service *svc) {
   JNXCHECK(svc->family == AF_INET);
   JNXCHECK(svc->isrunning == 0);
   JNXCHECK(svc->sock_send == NULL);
+<<<<<<< HEAD
   JNXCHECK(svc->udp_listener == NULL);
+=======
+  JNXCHECK(svc->udp_listener->socket == NULL);
+>>>>>>> upstream/master
   return CLEANUP;
 }
 int test_service_cleanup(discovery_service *svc) {
@@ -108,7 +112,11 @@ int test_starting_service(discovery_service *svc) {
   JNXCHECK(svc->sock_send->socket > 0 
       && svc->sock_send->addrfamily == AF_INET
       && svc->sock_send->stype == SOCK_DGRAM);
+<<<<<<< HEAD
   JNXCHECK(svc->udp_listener->socket > 0 
+=======
+  JNXCHECK(svc->udp_listener->socket->socket > 0 
+>>>>>>> upstream/master
       && svc->udp_listener->socket->addrfamily == AF_INET
       && svc->udp_listener->socket->stype == SOCK_DGRAM);
 
