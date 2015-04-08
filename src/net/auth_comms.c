@@ -65,6 +65,9 @@ static void listener_callback(const jnx_uint8 *payload,
       jnx_guid_from_string(a->initiator_guid,&g);
       jnx_guid_from_string(a->session_guid,&session_g);
 
+      if(a->initiator_message) {
+        JNX_LOG(NULL,"The incoming session says: %s\n",a->initiator_message);
+      }
       abort_token = t->ac->ar_callback(t->ds,&g,&session_g);
 
       printf("Did receive handshake request.\n");
