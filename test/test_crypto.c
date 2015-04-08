@@ -16,7 +16,7 @@
  * =====================================================================================
  */
 #include <stdlib.h>
-#include "../src/crypto/cryptography.h"
+#include "cryptography.h"
 #include <jnxc_headers/jnxcheck.h>
 #include <jnxc_headers/jnxlog.h>
 

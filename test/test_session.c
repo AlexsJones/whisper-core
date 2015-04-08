@@ -16,7 +16,7 @@
  * =====================================================================================
  */
 #include <stdlib.h>
-#include "../src/session/session_service.h"
+#include "session_service.h"
 void test_create_destroy() {
   JNX_LOG(NULL,"test_create_destroy");
   session_service *service = session_service_create();
