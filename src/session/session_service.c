@@ -123,7 +123,6 @@ session_state session_service_fetch_all_sessions(session_service *service,
     jnx_list **olist) {
   *olist = NULL;
   if(service->session_list->counter == 0) {
-    JNXLOG(LDEBUG,"Session list is empty");
     return SESSION_STATE_NOT_FOUND;
   }
   jnx_node *h = service->session_list->head,
