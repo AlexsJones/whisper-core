@@ -224,9 +224,10 @@ jnx_int32 broadcast_update_strategy(discovery_service *svc) {
 
 // Discovery listener and loop - async thread
 
-void discovery_receive_handler(jnx_uint8 *payload, jnx_size bytesread, void *context) {
+void discovery_receive_handler(const jnx_uint8 *j, jnx_size bytesread, void *context) {
   discovery_service *svc = (discovery_service *) context;
   char command[5];
+  char *payload = (char*)j;
   memset(command, 0, 5);
   memcpy(command, payload, 4);
   if (0 == strcmp(command, "LIST")) {

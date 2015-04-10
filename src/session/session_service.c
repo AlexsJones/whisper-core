@@ -132,6 +132,10 @@ session_state session_service_fetch_all_sessions(session_service *service, jnx_l
   return SESSION_STATE_OKAY;
 }
 session_state session_service_fetch_session(session_service *service, jnx_guid *g, session **osession) {
+  if(!service) {
+    JNX_LOG(NULL,"Session service is null");
+    return SESSION_STATE_NOT_FOUND;
+  }
   if(service->session_list->counter == 0) {
     JNX_LOG(NULL,"Session list is empty");
     return SESSION_STATE_NOT_FOUND;
@@ -212,6 +216,7 @@ session_state session_service_link_sessions(session_service *s,\
 session_state session_service_unlink_sessions(session_service *s,\
     jnx_guid *session_guid) {
   session *osession;
+  
   session_state e = session_service_fetch_session(s,session_guid,&osession);
   if(e != SESSION_STATE_OKAY) {
     return e;
