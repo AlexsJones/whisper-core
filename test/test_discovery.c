@@ -53,13 +53,19 @@ void wait_for_flag(int *flag) {
   *flag = 0;
 }
 
+void assert_valid_command(char *message) {
+  char command[5];
+  memcpy(command, message, 4);
+  command[4] = '\0';
+  JNXCHECK(strcmp(command, "PEER") == 0
+           || strcmp(command, "LIST") == 0
+           || strcmp(command, "STOP") == 0);
+}
 static int list_message_received = 0;
 int starting_service_spy(char *message, int len, jnx_socket *s, void *context) {
-  JNXCHECK(strncmp(message, "PEER", 4) == 0
-           || strcmp(message, "LIST") == 0);
-  if (strcmp(message, "LIST") == 0) {
+  assert_valid_command(message);
+  if (strncmp(message, "LIST", 4) == 0) {
     list_message_received = 1;
-    return -1;
   }
   return 0;
 }
@@ -93,11 +99,7 @@ int test_service_creation(discovery_service *svc) {
   JNXCHECK(svc->family == AF_INET);
   JNXCHECK(svc->isrunning == 0);
   JNXCHECK(svc->sock_send == NULL);
-<<<<<<< HEAD
   JNXCHECK(svc->udp_listener == NULL);
-=======
-  JNXCHECK(svc->udp_listener->socket == NULL);
->>>>>>> upstream/master
   return CLEANUP;
 }
 int test_service_cleanup(discovery_service *svc) {
@@ -112,16 +114,12 @@ int test_starting_service(discovery_service *svc) {
   JNXCHECK(svc->sock_send->socket > 0 
       && svc->sock_send->addrfamily == AF_INET
       && svc->sock_send->stype == SOCK_DGRAM);
-<<<<<<< HEAD
   JNXCHECK(svc->udp_listener->socket > 0 
-=======
-  JNXCHECK(svc->udp_listener->socket->socket > 0 
->>>>>>> upstream/master
       && svc->udp_listener->socket->addrfamily == AF_INET
       && svc->udp_listener->socket->stype == SOCK_DGRAM);
 
   if (svc->isrunning) {
-    // check send socket is up and listening
+    // check send socket is up and sending
     int error = 0;
     socklen_t len = sizeof(error);
     retval = getsockopt(svc->sock_send->socket, SOL_SOCKET, SO_ERROR, &error, &len);
@@ -134,7 +132,7 @@ int test_starting_service(discovery_service *svc) {
 int test_stopping_service(discovery_service *svc) {
   test_starting_service(svc);
   discovery_service_stop(svc);
-  JNXCHECK(svc->udp_listener->socket == 0);
+  JNXCHECK(svc->udp_listener == NULL);
   JNXCHECK(svc->sock_send == 0);
   JNXCHECK(svc->isrunning == 0);
   list_message_received = 0;
@@ -175,27 +173,27 @@ int main(int argc, char **argv) {
   JNX_LOG(NULL,"Test service creation.");
   run_discovery_service_test(test_service_creation);
 
-//  JNX_LOG(NULL,"Test service cleanup.");
-//  run_discovery_service_test(test_service_cleanup);
-//
-//  JNX_LOG(NULL, "Test starting discovery service.");
-//  run_discovery_service_test(test_starting_service);
-//
-//  JNX_LOG(NULL, "Test stopping discovery service.");
-//  run_discovery_service_test(test_stopping_service);
-//
-//  JNX_LOG(NULL, "Test restarting discovery service.");
-//  run_discovery_service_test(test_restarting_service);
-//
-//  JNX_LOG(NULL, "Test setting peer_update_interval global variable.");
-//  run_discovery_service_test(test_setting_peer_update_interval);
-//
-//  JNX_LOG(NULL, "Test broadcast update strategy.");
-//  run_discovery_service_test(test_broadcast_update_strategy);
-// 
-//  JNX_LOG(NULL, "Test polling update strategy.");
-//  run_discovery_service_test(test_polling_update_strategy);
-//  
-	free(baddr);
-	return 0;
+  JNX_LOG(NULL,"Test service cleanup.");
+  run_discovery_service_test(test_service_cleanup);
+
+  JNX_LOG(NULL, "Test starting discovery service.");
+  run_discovery_service_test(test_starting_service);
+
+  JNX_LOG(NULL, "Test stopping discovery service.");
+  run_discovery_service_test(test_stopping_service);
+
+  JNX_LOG(NULL, "Test restarting discovery service.");
+  run_discovery_service_test(test_restarting_service);
+
+  JNX_LOG(NULL, "Test setting peer_update_interval global variable.");
+  run_discovery_service_test(test_setting_peer_update_interval);
+
+  JNX_LOG(NULL, "Test broadcast update strategy.");
+  run_discovery_service_test(test_broadcast_update_strategy);
+
+  JNX_LOG(NULL, "Test polling update strategy.");
+  run_discovery_service_test(test_polling_update_strategy);
+  
+  free(baddr);
+  return 0;
 }

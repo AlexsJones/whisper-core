@@ -327,7 +327,9 @@ int discovery_service_start(discovery_service *svc, discovery_strategy *strategy
   // or changing the function signature and calling either
   // set_up_sockets_for_broadcast or set_up_sockets_for_multicast.
  // set_up_sockets_for_broadcast(svc);
-  svc->sock_send = jnx_socket_udp_create(svc->family);  
+  svc->sock_send = jnx_socket_udp_create(svc->family);
+  svc->udp_listener = jnx_socket_udp_listener_broadcast_create(
+          port_to_string(svc), svc->family);
 
   svc->isrunning = 1;
   
@@ -359,6 +361,7 @@ int discovery_service_stop(discovery_service *svc) {
   pthread_join(svc->listening_thread->system_thread, NULL);
 
   jnx_socket_destroy(&(svc->sock_send));
+  jnx_socket_udp_listener_destroy(&svc->udp_listener);
   return 0;
 }
 void discovery_service_cleanup(discovery_service **ppsvc) {
@@ -366,7 +369,6 @@ void discovery_service_cleanup(discovery_service **ppsvc) {
   JNXCHECK(svc);
   if (svc->isrunning) {
     discovery_service_stop(svc);
-    jnx_socket_udp_listener_destroy(&svc->udp_listener);
   }
   jnx_thread_mutex_destroy(&svc->update_time_lock);
   peerstore_destroy(&(svc->peers));
