@@ -66,5 +66,6 @@ This currently uses a wildcard `*.proto` with an assumption for now that there i
 |Integrity Service|DONE|
 |Commandline IO|DONE|
 |Basic GUI|DONE|
+|Web service interface to core| NOT STARTED|
 
 
