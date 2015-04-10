@@ -155,7 +155,22 @@ session_state session_service_fetch_session(session_service *service, jnx_guid *
   return SESSION_STATE_NOT_FOUND;
 }
 static void destroy_session(session *s) {
-  printf("Destroying session not implemented!\n");
+  if(s->is_connected) {
+  printf("Warning: destroying a connected session\n");
+  }
+  if(s->keypair) {
+    asymmetrical_destroy_key(s->keypair); 
+  }
+  if(s->initiator_public_key) {
+    free(s->initiator_public_key);
+  }
+  if(s->receiver_public_key) {
+    free(s->receiver_public_key);
+  }
+  if(s->shared_secret) {
+    free(s->shared_secret);
+  }
+  free(s);
 }
 session_state session_service_destroy_session(session_service *service,\
     jnx_guid *g) {

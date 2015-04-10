@@ -18,6 +18,10 @@ It has multi-protocol finding ability which includes multicasting upto top tier 
 
 The aim is to finish the kernel in C and bring it to other platforms with a variety of GUI and language hooks.
 
+The core acts as the framework for higher level programs to hook into.
+
+![CoreStructure](http://i.imgur.com/0mUNLxm.png)
+
 ### Table of Contents
   * [Installation](#installation)
   * [Additional Deps](#Deps)
@@ -62,5 +66,6 @@ This currently uses a wildcard `*.proto` with an assumption for now that there i
 |Integrity Service|DONE|
 |Commandline IO|DONE|
 |Basic GUI|DONE|
+|Web service interface to core| NOT STARTED|
 
 
