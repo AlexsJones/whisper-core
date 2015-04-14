@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="UTF-8">
+    <title>Whisper-core by AlexsJones</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+  </head>
+  <body>
+    <section class="page-header">
+      <h1 class="project-name">Whisper-core</h1>
+      <h2 class="project-tagline">Core library for whisper secure domain P2P chat</h2>
+      <a href="https://github.com/AlexsJones/whisper-core" class="btn">View on GitHub</a>
+      <a href="https://github.com/AlexsJones/whisper-core/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/AlexsJones/whisper-core/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
+
+    <section class="main-content">
+      <p><img src="http://i.imgur.com/Qh67mKG.jpg" alt="CoreImage"></p>
+
+<blockquote>
+<p>Imagine being able to work in an environment where your conversations arent monitored continuously.
+  Take that idea and apply it to your everyday workplace where having an outspoken opinion remains locked away due to fear of leaving a digital footprint.
+  Whisper aims to help provide a platform for inter-domain level chat.
+  Using dynamically generated dual encrypted one time sessions; we're giving you the tools to speak your mind without   worrying about who is listening in.</p>
+</blockquote>
+
+<hr>
+
+<h2>
+<a id="for-developers" class="anchor" href="#for-developers" aria-hidden="true"><span class="octicon octicon-link"></span></a>For Developers</h2>
+
+<p><a href="https://travis-ci.org/AlexsJones/whisper-core"><img src="https://travis-ci.org/AlexsJones/whisper-core.svg?branch=master" alt="Build Status"></a></p>
+
+<p>Status: In active development, not ready for general consumption.</p>
+
+<p>Whisper uses a combination of asymmetric 2048bit key RSA with a DES cipher for establishing sessions.
+It has multi-protocol finding ability which includes multicasting upto top tier router domain and drop n' replace cyptography solutions.</p>
+
+<p>The aim is to finish the kernel in C and bring it to other platforms with a variety of GUI and language hooks.</p>
+
+<p>The core acts as the framework for higher level programs to hook into.</p>
+
+<p><img src="http://i.imgur.com/0mUNLxm.png" alt="CoreStructure"></p>
+
+<h3>
+<a id="table-of-contents" class="anchor" href="#table-of-contents" aria-hidden="true"><span class="octicon octicon-link"></span></a>Table of Contents</h3>
+
+<ul>
+<li><a href="#installation">Installation</a></li>
+<li><a href="#Deps">Additional Deps</a></li>
+<li><a href="#protobuf">Protobuf</a></li>
+<li><a href="#components">Components</a></li>
+</ul>
+
+<h4>
+<a id="installation-" class="anchor" href="#installation-" aria-hidden="true"><span class="octicon octicon-link"></span></a>Installation <a id="installation"></a>
+</h4>
+
+<pre><code>cmake . -DRUN_TESTS=ON #Or ignore the flag for no tests
+make
+sudo make install 
+</code></pre>
+
+<h4>
+<a id="additional-deps-" class="anchor" href="#additional-deps-" aria-hidden="true"><span class="octicon octicon-link"></span></a>Additional Deps <a id="Deps"></a>
+</h4>
+
+<pre><code>-lssl -lcrypto -lprotobuf-c
+</code></pre>
+
+<h4>
+<a id="regenerate-protobuf-files-" class="anchor" href="#regenerate-protobuf-files-" aria-hidden="true"><span class="octicon octicon-link"></span></a>Regenerate Protobuf files <a id="protobuf"></a>
+</h4>
+
+<pre><code>./tools/generate_protobuf
+</code></pre>
+
+<p>This currently uses a wildcard <code>*.proto</code> with an assumption for now that there is one proto file in a directory</p>
+
+<h4>
+<a id="components-" class="anchor" href="#components-" aria-hidden="true"><span class="octicon octicon-link"></span></a>Components <a id="components"></a>
+</h4>
+
+<table>
+<thead>
+<tr>
+<th align="right">Component</th>
+<th align="right">Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="right">Session Service</td>
+<td align="right">DONE</td>
+</tr>
+<tr>
+<td align="right">Session Object</td>
+<td align="right">DONE</td>
+</tr>
+<tr>
+<td align="right">Discovery Service</td>
+<td align="right">DONE</td>
+</tr>
+<tr>
+<td align="right">Multicast Service</td>
+<td align="right">DONE</td>
+</tr>
+<tr>
+<td align="right">Secure Sockets</td>
+<td align="right">DONE</td>
+</tr>
+<tr>
+<td align="right">Key encrypt/decrpt</td>
+<td align="right">DONE</td>
+</tr>
+<tr>
+<td align="right">Integrity Service</td>
+<td align="right">DONE</td>
+</tr>
+<tr>
+<td align="right">Commandline IO</td>
+<td align="right">DONE</td>
+</tr>
+<tr>
+<td align="right">Basic GUI</td>
+<td align="right">DONE</td>
+</tr>
+<tr>
+<td align="right">Web service interface to core</td>
+<td align="right">NOT STARTED</td>
+</tr>
+</tbody>
+</table>
+
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/AlexsJones/whisper-core">Whisper-core</a> is maintained by <a href="https://github.com/AlexsJones">AlexsJones</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+      </footer>
+
+    </section>
+
+  
+  </body>
+</html>
+
