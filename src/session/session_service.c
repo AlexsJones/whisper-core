@@ -215,10 +215,11 @@ session_state session_service_link_sessions(session_service *s,
   int r = fn(osession,optargs); 
   return r ? SESSION_STATE_FAIL : SESSION_STATE_OKAY;
 }
-session_state session_service_unlink_sessions(session_service *s,\
-    jnx_guid *session_guid) {
+session_state session_service_unlink_sessions(session_service *s,
+    session_unlinking_service_func fn, void *optargs, jnx_guid \
+    *session_guid) {
+
   session *osession;
-  
   session_state e = session_service_fetch_session(s,session_guid,&osession);
   if(e != SESSION_STATE_OKAY) {
     return e;
@@ -230,10 +231,12 @@ session_state session_service_unlink_sessions(session_service *s,\
   osession->remote_peer_guid = h;
   JNXCHECK(is_guid_blank(&osession->local_peer_guid));
   JNXCHECK(is_guid_blank(&osession->remote_peer_guid));
-  
+ 
+  int r = fn(osession,optargs);
+
   session_disconnect(osession);
 
-  return SESSION_STATE_OKAY;
+  return r ? SESSION_STATE_FAIL : SESSION_STATE_OKAY;
 }
 jnx_int session_service_session_is_linked(session_service *s,\
     jnx_guid *session_guid) {
