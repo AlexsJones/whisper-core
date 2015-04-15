@@ -33,7 +33,8 @@ static void send_data(jnx_char *hostname, jnx_char *port,
   jnx_socket_destroy(&sock);
 }
 static jnx_uint8 *send_data_await_reply(jnx_char *hostname, jnx_char *port,
-    unsigned int family, jnx_uint8 *buffer, jnx_int bytes, jnx_size *receipt_bytes) {
+    unsigned int family, jnx_uint8 *buffer, 
+    jnx_int bytes, jnx_size *receipt_bytes) {
   jnx_socket *sock = jnx_socket_tcp_create(family);
   jnx_uint8 *reply;
   printf("awaiting reply from %s\n",hostname);
@@ -220,7 +221,8 @@ void auth_comms_initiator_start(auth_comms_service *ac, \
     /*                                                            */
 
     jnx_uint8 *fbuffer;
-    bytes_read = handshake_generate_finish_request(s,encoded_secret,encoded_len,&fbuffer);
+    bytes_read = handshake_generate_finish_request(s,encoded_secret,
+        encoded_len,&fbuffer);
 
     jnx_size replysizetwo;
     jnx_uint8 *replytwo = send_data_await_reply(remote_peer->host_address,"9991", 
@@ -240,7 +242,8 @@ void auth_comms_initiator_start(auth_comms_service *ac, \
 
     void *finish_object;
     printf("Checking object type 2.\n");
-    if(handshake_did_receive_receiver_request(replytwo,replysizetwo,&finish_object)){
+    if(handshake_did_receive_receiver_request(replytwo,replysizetwo,
+          &finish_object)){
       printf("Unpacked auth receiver request\n");
       AuthReceiver *ar = (AuthReceiver *)finish_object;
       if(ar->is_receiving_finish == 1 && ar->is_receiving_public_key == 0) {

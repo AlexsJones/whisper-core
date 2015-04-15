@@ -24,4 +24,7 @@ void secure_comms_receiver_start(discovery_service *ds,
 
 void secure_comms_initiator_start(discovery_service *ds,
     session *s,jnx_unsigned_int addr_family); 
+
+void secure_comms_end(discovery_service *ds,session *s);
+
 #endif /* !SECURE_COMMS_H */
