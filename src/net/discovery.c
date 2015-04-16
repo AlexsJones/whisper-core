@@ -108,12 +108,12 @@ typedef struct sockaddr*(*address_mapping)(struct ifaddrs *);
 
 static void get_ip(char *buffer, address_mapping filter) {
   struct ifaddrs *ifap;
-  printf("Getting IP\n");
+  printf("Getting IP - 1\n");
   if (0 != getifaddrs(&ifap)) {
     JNX_LOG(0, "[ERROR] Couldn't get descriptions of network interfaces.");
     exit(1);
   }
-
+  printf("Getting IP - 2\n");
   struct ifaddrs *current = ifap;
   while (0 != current) {
     struct sockaddr *ip = current->ifa_addr;
@@ -126,13 +126,17 @@ static void get_ip(char *buffer, address_mapping filter) {
         continue;
       }
       char *ip_str = inet_ntoa(((struct sockaddr_in *) filter(current))->sin_addr);
+      printf("Getting IP - 3\n");
       JNXCHECK(ip_str);
       strncpy(buffer, ip_str, strlen(ip_str) + 1);
+      printf("Getting IP - 4\n");
 			break;
     } 
     current = current->ifa_next;
   }
+  printf("Getting IP - 5\n");
   freeifaddrs(ifap);
+  printf("Getting IP - 6\n");
 }
 // Broadcast address IPv4
 static struct sockaddr *filter_broadcast_address(struct ifaddrs *addr) {
