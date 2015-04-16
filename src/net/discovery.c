@@ -120,17 +120,18 @@ static void get_ip(char *buffer, address_mapping filter) {
     if (ip->sa_family == AF_INET) {
       struct sockaddr *netmask = current->ifa_netmask;
       char *aip = inet_ntoa(((struct sockaddr_in *) ip)->sin_addr);
+      JNXCHECK(aip);
       if (strcmp("127.0.0.1", aip) == 0) { // skip loopback interface
         current = current->ifa_next;
         continue;
       }
       char *ip_str = inet_ntoa(((struct sockaddr_in *) filter(current))->sin_addr);
+      JNXCHECK(ip_str);
       strncpy(buffer, ip_str, strlen(ip_str) + 1);
 			break;
     } 
     current = current->ifa_next;
   }
-
   freeifaddrs(ifap);
 }
 // Broadcast address IPv4
