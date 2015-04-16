@@ -108,49 +108,36 @@ typedef struct sockaddr*(*address_mapping)(struct ifaddrs *);
 
 static void get_ip(char *buffer, address_mapping filter) {
   struct ifaddrs *ifap;
-  printf("Getting IP - 1\n");
   if (0 != getifaddrs(&ifap)) {
     JNX_LOG(0, "[ERROR] Couldn't get descriptions of network interfaces.");
     exit(1);
   }
-  printf("Getting IP - 2\n");
+
   struct ifaddrs *current = ifap;
-  int x=0;
   while (0 != current) {
     struct sockaddr *ip = current->ifa_addr;
-    printf("Getting IP - 2.25 loop:%d\n",x);
     if (ip != NULL) {
       JNXCHECK(ip);
       JNXCHECK(ip->sa_family);
 
-      ++x;
       if (ip->sa_family == AF_INET) {
-        printf("Getting IP - 2.3\n");
         struct sockaddr *netmask = current->ifa_netmask;
-        printf("Getting IP - 2.4\n");
         char *aip = inet_ntoa(((struct sockaddr_in *) ip)->sin_addr);
         JNXCHECK(aip);
         if (strcmp("127.0.0.1", aip) == 0) { // skip loopback interface
           current = current->ifa_next;
           continue;
         }
-        printf("Getting IP - 2.5\n");
         char *ip_str = inet_ntoa(((struct sockaddr_in *) filter(current))->sin_addr);
-        printf("Getting IP - 3\n");
         JNXCHECK(ip_str);
         strncpy(buffer, ip_str, strlen(ip_str) + 1);
-        printf("Getting IP - 4\n");
         break;
       }
     }
-    else {
-      printf("ip is NULL\n");
-    }
     current = current->ifa_next;
   }
-  printf("Getting IP - 5\n");
+
   freeifaddrs(ifap);
-  printf("Getting IP - 6\n");
 }
 // Broadcast address IPv4
 static struct sockaddr *filter_broadcast_address(struct ifaddrs *addr) {
