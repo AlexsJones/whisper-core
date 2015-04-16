@@ -115,9 +115,14 @@ static void get_ip(char *buffer, address_mapping filter) {
   }
   printf("Getting IP - 2\n");
   struct ifaddrs *current = ifap;
+  int x=0;
   while (0 != current) {
     struct sockaddr *ip = current->ifa_addr;
-    printf("Getting IP - 2.25\n");
+    printf("Getting IP - 2.25 loop:%d\n",x);
+    JNXCHECK(ip);
+    JNXCHECK(ip->sa_family);
+    
+    ++x;
     if (ip->sa_family == AF_INET) {
     printf("Getting IP - 2.3\n");
       struct sockaddr *netmask = current->ifa_netmask;
