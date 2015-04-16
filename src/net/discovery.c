@@ -125,6 +125,7 @@ static void get_ip(char *buffer, address_mapping filter) {
         current = current->ifa_next;
         continue;
       }
+      printf("Getting IP - 2.5\n");
       char *ip_str = inet_ntoa(((struct sockaddr_in *) filter(current))->sin_addr);
       printf("Getting IP - 3\n");
       JNXCHECK(ip_str);
