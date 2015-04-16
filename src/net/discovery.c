@@ -113,11 +113,11 @@ static void get_ip(char *buffer, address_mapping filter) {
     JNX_LOG(0, "[ERROR] Couldn't get descriptions of network interfaces.");
     exit(1);
   }
-  printf("Getting IP - 2\n");
   struct ifaddrs *current = ifap;
   while (0 != current) {
     struct sockaddr *ip = current->ifa_addr;
     if (ip->sa_family == AF_INET) {
+      printf("Getting IP - 2\n");
       struct sockaddr *netmask = current->ifa_netmask;
       char *aip = inet_ntoa(((struct sockaddr_in *) ip)->sin_addr);
       JNXCHECK(aip);
