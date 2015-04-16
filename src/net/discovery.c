@@ -108,6 +108,7 @@ typedef struct sockaddr*(*address_mapping)(struct ifaddrs *);
 
 static void get_ip(char *buffer, address_mapping filter) {
   struct ifaddrs *ifap;
+  printf("Getting IP\n");
   if (0 != getifaddrs(&ifap)) {
     JNX_LOG(0, "[ERROR] Couldn't get descriptions of network interfaces.");
     exit(1);
@@ -285,6 +286,7 @@ static void set_up_sockets_for_multicast(discovery_service *svc) {
 */
 // Public interface functions
 void get_local_ip(char **local_ip) {
+	printf("Getting broadcast IP\n");
 	*local_ip = calloc(16, sizeof(char));
 	get_ip(*local_ip, filter_local_ip_address);
   JNX_LOG(0, "Local IP is %s", *local_ip); 
