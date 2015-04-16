@@ -117,8 +117,11 @@ static void get_ip(char *buffer, address_mapping filter) {
   struct ifaddrs *current = ifap;
   while (0 != current) {
     struct sockaddr *ip = current->ifa_addr;
+    printf("Getting IP - 2.25\n");
     if (ip->sa_family == AF_INET) {
+    printf("Getting IP - 2.3\n");
       struct sockaddr *netmask = current->ifa_netmask;
+      printf("Getting IP - 2.4\n");
       char *aip = inet_ntoa(((struct sockaddr_in *) ip)->sin_addr);
       JNXCHECK(aip);
       if (strcmp("127.0.0.1", aip) == 0) { // skip loopback interface
