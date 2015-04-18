@@ -76,8 +76,8 @@ void *secure_comms_bootstrap_listener(void *args) {
     bzero(buffer,2048);
     int bytes_read = recv(s->secure_comms_fd,
         buffer,2048, 0);
-    if (bytes_read > 0) { 
-      jnx_char *decrypted_message = 
+    if (bytes_read > 0) {
+      jnx_char *decrypted_message =
         symmetrical_decrypt(s->shared_secret,buffer,strlen(buffer));
       if (s->is_connected) {
         s->session_callback(s->gui_context, &s->session_guid, decrypted_message);
@@ -90,7 +90,10 @@ void *secure_comms_bootstrap_listener(void *args) {
       // the other side has closed the chat
       if (s->is_connected) {
         session_disconnect(s);
-        s->session_callback(s->gui_context, &s->session_guid, "The chat has terminated. Type :q to end the session.");
+        if (s->session_callback != NULL) {
+          s->session_callback(s->gui_context, &s->session_guid,
+            "The chat has terminated. Type :q to end the session.");
+        }
       }
       break;
     }
@@ -103,13 +106,13 @@ void secure_comms_start(secure_comms_endpoint e, discovery_service *ds,
   printf("Starting secure comms on %s.\n",s->secure_comms_port);
 
   peer *local_peer = peerstore_get_local_peer(ds->peers);
-  JNXCHECK(local_peer); 
+  JNXCHECK(local_peer);
   peer *remote_peer = peerstore_lookup(ds->peers,&(*s).remote_peer_guid);
   JNXCHECK(remote_peer);
   printf("Starting a tunnel to %s\n",remote_peer->host_address);
 
   jnx_socket *secure_sock = jnx_socket_tcp_create(addr_family);
-  /* Not using standard jnx_socket networking here due to bespoke nature of 
+  /* Not using standard jnx_socket networking here due to bespoke nature of
    * bi directional socket with non-blocking write properties */
   jnx_int sockfd = -1;
   switch(e) {
@@ -117,25 +120,25 @@ void secure_comms_start(secure_comms_endpoint e, discovery_service *ds,
     case SC_INITIATOR:
       printf("About to initiate connection to remote secure_comms_port.\n");
       sleep(3);
-      sockfd = connect_for_socket_fd(secure_sock,remote_peer,s); 
+      sockfd = connect_for_socket_fd(secure_sock,remote_peer,s);
       s->secure_comms_fd = sockfd;
       printf("Secure socket fd: %d\n",s->secure_comms_fd);
       break;
 
     case SC_RECEIVER:
       printf("Setting up recevier.\n");
-      sockfd = listen_for_socket_fd(secure_sock,remote_peer,s);     
+      sockfd = listen_for_socket_fd(secure_sock,remote_peer,s);
       JNXCHECK(sockfd != -1);
       s->secure_comms_fd = sockfd;
       printf("Secure socket fd: %d\n",s->secure_comms_fd);
       break;
   }
   JNXCHECK(sockfd != -1);
-  // At this point both the initiator and receiver are equal and have fd's relevent to them 
+  // At this point both the initiator and receiver are equal and have fd's relevent to them
   //  that are connected *
 
   jnx_thread_create_disposable(secure_comms_bootstrap_listener,s);
-} 
+}
 void secure_comms_receiver_start(discovery_service *ds,
     session *s,jnx_unsigned_int addr_family) {
   secure_comms_start(SC_RECEIVER,ds,s,addr_family);
