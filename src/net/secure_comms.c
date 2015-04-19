@@ -17,36 +17,6 @@
 #include <jnxc_headers/jnxthread.h>
 #include <jnxc_headers/jnx_tcp_socket.h>
 
-static int listen_for_socket_fd(jnx_socket *s, peer *remote_peer,session *ses) {
-  jnx_int32 optval = 1;
-  struct addrinfo hints, *res, *p;
-  struct sockaddr_storage their_addr;
-  memset(&hints,0,sizeof(hints));
-  hints.ai_family = s->addrfamily;
-  hints.ai_socktype = s->stype;
-  hints.ai_flags = AI_PASSIVE;
-  JNXCHECK(getaddrinfo(NULL,ses->secure_comms_port,&hints,&res) == 0);
-  p = res;
-  while(p != NULL) {
-    if (setsockopt(s->socket,
-          SOL_SOCKET,
-          SO_REUSEADDR,
-          &optval,sizeof(jnx_int32)) == -1) {
-      perror("setsockopt");
-      exit(1);
-    }
-    if (bind(s->socket, p->ai_addr, p->ai_addrlen) == -1) {
-      perror("server: bind");
-      return -1;
-    }
-    break;
-    p = p->ai_next;
-  }
-  freeaddrinfo(res);
-  listen(s->socket,1);
-  socklen_t addr_size = sizeof(their_addr);
-  return accept(s->socket,(struct sockaddr*)&their_addr,&addr_size);
-}
 static int connect_for_socket_fd(jnx_socket *s, peer *remote_peer,session *ses) {
   struct addrinfo hints, *res;
   memset(&hints,0,sizeof(hints));
@@ -66,6 +36,7 @@ static int connect_for_socket_fd(jnx_socket *s, peer *remote_peer,session *ses) 
     }
     s->isconnected = 1;
   }
+  write(s->socket,"CONNECT",8);
   freeaddrinfo(res);
   return s->socket;
 }
@@ -100,6 +71,12 @@ void *secure_comms_bootstrap_listener(void *args) {
   }
   return NULL;
 }
+void secure_tcp_listener_tick_callback(const jnx_uint8 *payload, \
+      jnx_size bytes_read, int connected_socket, void *args) {
+    printf("secure_tcp_listener_tick_callback hit with connected socket: %d\n",connected_socket);
+    session *s = (session*)args;
+    s->secure_comms_fd = connected_socket;
+}
 void secure_comms_start(secure_comms_endpoint e, discovery_service *ds,
     session *s,jnx_unsigned_int addr_family) {
   JNXCHECK(s->is_connected);
@@ -112,28 +89,25 @@ void secure_comms_start(secure_comms_endpoint e, discovery_service *ds,
   printf("Starting a tunnel to %s\n",remote_peer->host_address);
 
   jnx_socket *secure_sock = jnx_socket_tcp_create(addr_family);
-  /* Not using standard jnx_socket networking here due to bespoke nature of
-   * bi directional socket with non-blocking write properties */
-  jnx_int sockfd = -1;
   switch(e) {
-
     case SC_INITIATOR:
       printf("About to initiate connection to remote secure_comms_port.\n");
       sleep(3);
-      sockfd = connect_for_socket_fd(secure_sock,remote_peer,s);
-      s->secure_comms_fd = sockfd;
-      printf("Secure socket fd: %d\n",s->secure_comms_fd);
+      s->secure_comms_fd = connect_for_socket_fd(secure_sock,remote_peer,s);
+      printf("Secure Initiator socket fd: %d\n",s->secure_comms_fd);
       break;
 
     case SC_RECEIVER:
-      printf("Setting up recevier\n");
-      sockfd = listen_for_socket_fd(secure_sock,remote_peer,s);
-      JNXCHECK(sockfd != -1);
-      s->secure_comms_fd = sockfd;
+      printf("Setting up recevier.\n");
+      s->secure_tcp_listener = jnx_socket_tcp_listener_create(s->secure_comms_port,addr_family,1);
+      while(s->secure_comms_fd == 0) {
+        jnx_socket_tcp_listener_tick(s->secure_tcp_listener,secure_tcp_listener_tick_callback,s);
+      }
+      jnx_socket_tcp_listener_destroy(&(*s).secure_tcp_listener);
       printf("Secure socket fd: %d\n",s->secure_comms_fd);
       break;
   }
-  JNXCHECK(sockfd != -1);
+  JNXCHECK(s->secure_comms_fd != 0);
   // At this point both the initiator and receiver are equal and have fd's relevent to them
   //  that are connected *
 
@@ -147,4 +121,3 @@ void secure_comms_initiator_start(discovery_service *ds,
     session *s,jnx_unsigned_int addr_family) {
   secure_comms_start(SC_INITIATOR,ds,s,addr_family);
 } 
-

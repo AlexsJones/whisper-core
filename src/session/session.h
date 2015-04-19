@@ -19,6 +19,7 @@
 #include "cryptography.h"
 #include <jnxc_headers/jnxguid.h>
 #include <jnxc_headers/jnxqueue.h>
+#include <jnxc_headers/jnx_tcp_socket.h>
 
 typedef enum session_state {
   SESSION_STATE_OKAY,
@@ -40,7 +41,7 @@ typedef struct session {
   jnx_int is_connected;
   jnx_char *secure_comms_port;
   jnx_int secure_comms_fd;
-
+  jnx_tcp_listener *secure_tcp_listener;
   /* gui */
   void *gui_context;
   void (*session_callback)(void *gui_context, jnx_guid *session_guid,
