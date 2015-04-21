@@ -20,6 +20,10 @@
 #include <time.h>
 #include <string.h>
 #include <jnxc_headers/jnxcheck.h>
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+#pragma clang diagnostic ignored "-Wpointer-sign"
+
 RSA *asymmetrical_generate_key(jnx_size length) {
   srand(time(NULL));
   return RSA_generate_key(length,3,NULL,NULL);
@@ -33,7 +37,10 @@ RSA *asymmetrical_key_from_string(jnx_char *string, key_type type) {
   switch(type) {
     case PUBLIC:
     PEM_read_bio_RSAPublicKey(key,&rsa,0,NULL);
+
     break;
+    case PRIVATE:
+      JNX_LOG(NULL,"asymmetrical private key from string not supported!");
   }
   BIO_free(key);
   return rsa;
@@ -139,3 +146,5 @@ jnx_size generate_shared_secret(jnx_uint8 **buffer) {
 
   return size;
 } 
+
+#pragma clang diagnostic pop

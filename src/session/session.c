@@ -17,7 +17,7 @@ session_state session_message_write(session *s,jnx_char *message) {
 
   /* take the raw message and des encrypt it */
   jnx_size len = strlen(message);
-  jnx_char *encrypted = symmetrical_encrypt(s->shared_secret,message,
+  jnx_char *encrypted = symmetrical_encrypt((jnx_uint8*)s->shared_secret,(jnx_uint8*)message,
       len);
   if (0 > send(s->secure_comms_fd,encrypted,strlen(encrypted),0)) {
     session_disconnect(s);
@@ -29,8 +29,8 @@ session_state session_message_write(session *s,jnx_char *message) {
 session_state session_message_read_and_decrypt(session *s, 
     jnx_char *message,jnx_char **omessage) {
   jnx_size len = strlen(message);
-  jnx_char *decrypted = symmetrical_decrypt(s->shared_secret,
-      message,len);
+  jnx_char *decrypted = symmetrical_decrypt((jnx_uint8*)s->shared_secret,
+                                            (jnx_uint8*)message,len);
   *omessage = decrypted;
   return SESSION_STATE_OKAY;
 }
@@ -71,6 +71,6 @@ void session_add_secure_comms_port(session *s, jnx_char *comms_port) {
 void session_add_remote_peer_guid(session *s, jnx_uint8 *guid_str) {
   JNXCHECK(guid_str);
   jnx_guid g;
-  jnx_guid_from_string(guid_str,&g);
+  jnx_guid_from_string((jnx_char*)guid_str,&g);
   s->remote_peer_guid = g;
 }

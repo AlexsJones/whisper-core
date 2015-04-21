@@ -18,10 +18,10 @@
 #ifndef __ENCODING_H__
 #define __ENCODING_H__
 #include <jnxc_headers/jnxtypes.h>
-jnx_uint8 *encode_from_string(jnx_char *input, jnx_size input_length, 
+jnx_uint8 *encode_from_string(jnx_uint8 *input, jnx_size input_length,
     jnx_size *output_length);
 
-jnx_char *decode_to_string(jnx_char *input, jnx_size input_length,
+jnx_char *decode_to_string(jnx_uint8 *input, jnx_size input_length,
     jnx_size *output_length);
 
 #endif

@@ -17,6 +17,10 @@ include_directories(${PROJECT_INC_DIR}src/net)
 include_directories(${PROJECT_INC_DIR}src/session)
 include_directories(${PROJECT_INC_DIR}src/util)
 
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+  set (CMAKE_C_FLAGS "-Wno-deprecated-declarations -Wno-pointer-sign -Wno-switch")
+endif()
+
 execute_process(COMMAND ./tools/generate_protobuf)
 file(GLOB HEADERS "src/**/*.h")
 file(GLOB RAW_SRC "src/**/*.c")

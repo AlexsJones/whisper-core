@@ -265,6 +265,7 @@ static void *discovery_loop(void* data) {
         data);
   }
   free(port);
+  return 0;
 }
 static jnx_int32 listen_for_discovery_packets(discovery_service *svc) {
   svc->listening_thread = jnx_thread_create(discovery_loop, (void*) svc);
