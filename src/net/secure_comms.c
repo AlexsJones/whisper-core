@@ -103,7 +103,7 @@ void *secure_comms_bootstrap_listener(void *args) {
 void secure_comms_end(session *s) {
 
 }
-void secure_comms_start(secure_comms_endpoint e, discovery_service *ds,
+jnx_int secure_comms_start(secure_comms_endpoint e, discovery_service *ds,
     session *s,jnx_unsigned_int addr_family) {
   JNXCHECK(s->is_connected);
   printf("Starting secure comms on %s.\n",s->secure_comms_port);
@@ -140,13 +140,13 @@ void secure_comms_start(secure_comms_endpoint e, discovery_service *ds,
   // At this point both the initiator and receiver are equal and have fd's relevent to them
   //  that are connected *
 
-  jnx_thread_create_disposable(secure_comms_bootstrap_listener,s);
+  return s->secure_comms_fd;
 }
-void secure_comms_receiver_start(discovery_service *ds,
+jnx_int secure_comms_receiver_start(discovery_service *ds,
     session *s,jnx_unsigned_int addr_family) {
-  secure_comms_start(SC_RECEIVER,ds,s,addr_family);
+  return secure_comms_start(SC_RECEIVER,ds,s,addr_family);
 }
-void secure_comms_initiator_start(discovery_service *ds,
+jnx_int secure_comms_initiator_start(discovery_service *ds,
     session *s,jnx_unsigned_int addr_family) {
-  secure_comms_start(SC_INITIATOR,ds,s,addr_family);
-} 
+  return secure_comms_start(SC_INITIATOR,ds,s,addr_family);
+}
