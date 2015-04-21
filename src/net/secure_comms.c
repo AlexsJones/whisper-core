@@ -84,8 +84,7 @@ jnx_int secure_comms_start(secure_comms_endpoint e, discovery_service *ds,
   printf("Starting a tunnel to %s\n",remote_peer->host_address);
 
   jnx_socket *secure_sock = jnx_socket_tcp_create(addr_family);
-  /* Not using standard jnx_socket networking here due to bespoke nature of
-   * bi directional socket with non-blocking write properties */
+
   jnx_int sockfd = -1;
   switch(e) {
 
@@ -107,6 +106,7 @@ jnx_int secure_comms_start(secure_comms_endpoint e, discovery_service *ds,
   }
   JNXCHECK(sockfd != -1);
 
+  s->secure_sock = secure_sock;
   return s->secure_comms_fd;
 }
 jnx_int secure_comms_receiver_start(discovery_service *ds,
