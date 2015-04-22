@@ -20,6 +20,8 @@ For an example of a user level implementation see: https://github.com/AlexsJones
 
 [![Build Status](https://travis-ci.org/AlexsJones/whisper-core.svg?branch=master)](https://travis-ci.org/AlexsJones/whisper-core)
 
+![Codeship Status](https://codeship.com/projects/YOUR_PROJECT_UUID/status?branch=master)
+
 Status: In active development, not ready for general consumption.
 
 Whisper uses a combination of asymmetric 2048bit key RSA with a DES cipher for establishing sessions.
