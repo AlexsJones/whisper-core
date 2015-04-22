@@ -2,14 +2,7 @@ language: c
 compiler:
     - gcc
     - clang
-script: sudo apt-get install libprotobuf-c0-dev protobuf-c-compiler uuid-dev 
-&& git submodule update --init && cd jnxlibc &&
-cmake . && make && sudo make install && cd ../ &&
-cd src/data && protoc-c *.proto --c_out=. &&
-cd ../../ && export C_INCLUDE_PATH=/usr/include/google &&
-cmake . -DRUN_TESTS=ON && make && cd test 
-&& ls -la
-&& ./run_tests
+script: sudo apt-get install libprotobuf-c0-dev protobuf-c-compiler uuid-dev && git submodule update --init && cd jnxlibc &&cmake . && make && sudo make install && cd ../ &&cd src/data && protoc-c *.proto --c_out=. &&cd ../../ && export C_INCLUDE_PATH=/usr/include/google &&cmake . -DRUN_TESTS=ON && make && cd test && ls -la && ./run_tests
 notifications:
     irc:
         channels:
