@@ -18,9 +18,7 @@ For an example of a user level implementation see: https://github.com/AlexsJones
 ---
 ##For Developers
 
-[![Build Status](https://travis-ci.org/AlexsJones/whisper-core.svg?branch=master)](https://travis-ci.org/AlexsJones/whisper-core)
-
-![Codeship Status](https://codeship.com/projects/YOUR_PROJECT_UUID/status?branch=master)
+![Build Status](https://travis-ci.org/AlexsJones/whisper-core.svg?branch=master)](https://travis-ci.org/AlexsJones/whisper-core)
 
 Status: In active development, not ready for general consumption.
 
