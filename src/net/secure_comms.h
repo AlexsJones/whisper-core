@@ -10,20 +10,34 @@
 #include "session.h"
 #include "discovery.h"
 #include <jnxc_headers/jnxtypes.h>
-/* Called from both remote endpoints simultaneously */
+/* Called from both remote endpoints near simultaneously */
 typedef enum {
   SC_INITIATOR,
   SC_RECEIVER
 }secure_comms_endpoint;
 
-void secure_comms_start(secure_comms_endpoint e, discovery_service *ds,
-    session *s,jnx_unsigned_int addr_family); 
-
-void secure_comms_receiver_start(discovery_service *ds,
+/*
+ *@fn jnx_int secure_comms_receiver_start(discovery_service *ds,
+     session *s,jnx_unsigned_int addr_family)
+ @brief This function binds a secure_comms_file descriptor for usage
+ @param ds is the discovery service reference
+ @param s is the current session to attach secure_comms_fd too
+ @param addr_family is the family (AFINET or AFINET6)
+ @return bound socket ref
+*/
+jnx_socket* secure_comms_receiver_start(discovery_service *ds,
     session *s,jnx_unsigned_int addr_family);
-
-void secure_comms_initiator_start(discovery_service *ds,
-    session *s,jnx_unsigned_int addr_family); 
+/*
+  *@fn jnx_int secure_comms_receiver_start(discovery_service *ds,
+  session *s,jnx_unsigned_int addr_family)
+  *@brief This function binds a secure_comms_file descriptor for usage
+  @param ds is the discovery service reference
+  @param s is the current session to attach secure_comms_fd too
+  @param addr_family is the family (AFINET or AFINET6)
+  @return bound socket ref
+*/
+jnx_socket* secure_comms_initiator_start(discovery_service *ds,
+    session *s,jnx_unsigned_int addr_family);
 
 void secure_comms_end(session *s);
 

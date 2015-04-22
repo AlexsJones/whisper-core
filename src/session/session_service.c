@@ -3,15 +3,15 @@
  *
  *       Filename:  session_service.c
  *
- *    Description:  
+ *    Description:
  *
  *        Version:  1.0
  *        Created:  02/09/2015 05:54:58 AM
  *       Revision:  none
  *       Compiler:  gcc
  *
- *         Author:  YOUR NAME (), 
- *   Organization:  
+ *         Author:  YOUR NAME (),
+ *   Organization:
  *
  * =====================================================================================
  */
@@ -81,20 +81,20 @@ void session_service_destroy(session_service **service) {
   free(*service);
   *service = NULL;
 }
-session_state session_service_create_session(session_service *service, 
+session_state session_service_create_session(session_service *service,
     session **osession) {
   session *s = calloc(1, sizeof(session));
-  s->keypair = asymmetrical_generate_key(2048);  
+  s->keypair = asymmetrical_generate_key(2048);
   s->is_connected = 0;
   s->initiator_public_key = NULL;
   s->receiver_public_key = NULL;
   s->shared_secret = NULL;
-  s->secure_comms_fd = 0;
+  s->secure_socket = NULL;
   s->session_callback = NULL;
   s->gui_context = NULL;
   jnx_guid_create(&s->session_guid);
-  generate_blank_guid(&s->local_peer_guid); 
-  generate_blank_guid(&s->remote_peer_guid); 
+  generate_blank_guid(&s->local_peer_guid);
+  generate_blank_guid(&s->remote_peer_guid);
   if(session_service_does_exist(service,&s->session_guid)){
     return SESSION_STATE_EXISTS;
   }
@@ -103,12 +103,12 @@ session_state session_service_create_session(session_service *service,
   return SESSION_STATE_OKAY;
 }
 session_state session_service_create_shared_session(session_service *service,\
-    jnx_char *input_guid_string,session **osession) 
+    jnx_char *input_guid_string,session **osession)
 {
   jnx_guid g;
   jnx_guid_from_string(input_guid_string,&g);
   session_state e;
-  if((e = session_service_fetch_session(service,&g,osession)) == 
+  if((e = session_service_fetch_session(service,&g,osession)) ==
       SESSION_STATE_OKAY) {
     printf("Returning existing session.\n");
     return e;
@@ -117,7 +117,7 @@ session_state session_service_create_shared_session(session_service *service,\
   (*osession)->session_guid = g;
   return e;
 }
-session_state session_service_fetch_all_sessions(session_service *service, 
+session_state session_service_fetch_all_sessions(session_service *service,
     jnx_list **olist) {
   *olist = NULL;
   if(service->session_list->counter == 0) {
@@ -129,13 +129,13 @@ session_state session_service_fetch_all_sessions(session_service *service,
   *olist = jnx_list_create();
   while(h) {
     session *s = h->_data;
-    jnx_list_add_ts(*olist,s); 
+    jnx_list_add_ts(*olist,s);
     h = h->next_node;
   }
   service->session_list->head = r;
   return SESSION_STATE_OKAY;
 }
-session_state session_service_fetch_session(session_service *service, 
+session_state session_service_fetch_session(session_service *service,
     jnx_guid *g, session **osession) {
   if(!service) {
     JNX_LOG(NULL,"Session service is null");
@@ -168,7 +168,7 @@ static void destroy_session(session *s) {
     printf("Warning: destroying a connected session\n");
   }
   if(s->keypair) {
-    asymmetrical_destroy_key(s->keypair); 
+    asymmetrical_destroy_key(s->keypair);
   }
   if(s->initiator_public_key) {
     free(s->initiator_public_key);
@@ -200,7 +200,7 @@ session_state session_service_destroy_session(session_service *service,\
     h = h->next_node;
   }
   service->session_list->head = r;
-  jnx_list_destroy(&service->session_list); 
+  jnx_list_destroy(&service->session_list);
   if(cl) {
     destroy_session(retrieved_session);
   }
@@ -209,7 +209,7 @@ session_state session_service_destroy_session(session_service *service,\
 }
 session_state session_service_link_sessions(session_service *s,
     session_linking_service_func fn,void *optargs,
-    jnx_guid *session_guid, peer *local_peer, peer *remote_peer) { 
+    jnx_guid *session_guid, peer *local_peer, peer *remote_peer) {
   session *osession;
   session_state e = session_service_fetch_session(s,session_guid,&osession);
   if(e != SESSION_STATE_OKAY) {
@@ -217,7 +217,7 @@ session_state session_service_link_sessions(session_service *s,
   }
   osession->local_peer_guid = local_peer->guid;
   osession->remote_peer_guid = remote_peer->guid;
-  int r = fn(osession,optargs); 
+  int r = fn(osession,optargs);
   return r ? SESSION_STATE_FAIL : SESSION_STATE_OKAY;
 }
 session_state session_service_unlink_sessions(session_service *s,
@@ -236,10 +236,9 @@ session_state session_service_unlink_sessions(session_service *s,
   osession->remote_peer_guid = h;
   JNXCHECK(is_guid_blank(&osession->local_peer_guid));
   JNXCHECK(is_guid_blank(&osession->remote_peer_guid));
- 
+
   int r = fn(osession,optargs);
   session_disconnect(osession);
-  secure_comms_end(osession);
   JNX_LOG(NULL,"Disconnected session");
   return r ? SESSION_STATE_FAIL : SESSION_STATE_OKAY;
 }

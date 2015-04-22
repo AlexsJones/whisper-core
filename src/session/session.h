@@ -3,14 +3,14 @@
  *
  *       Filename:  session.h
  *
- *    Description:  
+ *    Description:
  *
  *        Version:  1.0
  *        Created:  25/01/2015 20:50:54
  *       Revision:  none
  *       Compiler:  gcc
- *         Author:  YOUR NAME (), 
- *   Organization:  
+ *         Author:  YOUR NAME (),
+ *   Organization:
  *
  * =====================================================================================
  */
@@ -19,7 +19,7 @@
 #include "cryptography.h"
 #include <jnxc_headers/jnxguid.h>
 #include <jnxc_headers/jnxqueue.h>
-#include <jnxc_headers/jnx_tcp_socket.h>
+#include <jnxc_headers/jnxsocket.h>
 
 typedef enum session_state {
   SESSION_STATE_OKAY,
@@ -37,10 +37,10 @@ typedef struct session {
   jnx_char *initiator_public_key;
   jnx_char *receiver_public_key;
   jnx_char *shared_secret;
-  /* secure network */ 
+  /* secure network */
   jnx_int is_connected;
   jnx_char *secure_comms_port;
-  jnx_int secure_comms_fd;
+  jnx_socket *secure_socket;
   /* gui */
   void *gui_context;
   void (*session_callback)(void *gui_context, jnx_guid *session_guid,

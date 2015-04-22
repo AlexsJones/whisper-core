@@ -1,11 +1,29 @@
 #!/bin/bash
 OS=`uname`
-if [ "$OS" == "Darwin" ]; then
-  echo "Building with Clang"
+echo "System: $OS"
+if hash clang 2>/dev/null; then
   COMPILER=clang
+  echo "Using clang for test compiler"
 else
-  echo "Building with GCC"
-  COMPILER=gcc
+  if hash gcc 2>/dev/null; then
+    COMPILER=gcc
+    echo "Using gcc for test compiler"
+  else
+    echo "gcc not found - Cannot compile"
+    exit 1
+  fi
+fi
+if hash lldb 2>/dev/null; then
+  TESTCOMPILER=lldb
+  echo "Using lldb for test debugger"
+else
+  if hash gdb 2>/dev/null; then
+    TESTCOMPILER=gdb
+    echo "Using gdb for test debugger"
+  else
+    echo "gdb not found - Cannot run tests without any debugger"
+    exit 1
+  fi
 fi
 function echo_red()
 {
@@ -25,8 +43,19 @@ function test_against_file()
 {
   file=$1
   echo "Compiling $file"
-  `$COMPILER $file src/util/*.c src/data/*.c src/net/*.c src/session/*.c src/integrity/*.c src/crypto/*.c -Isrc/crypto -Isrc/data -Isrc/err -Isrc/integrity -Isrc/net -Isrc/session -Isrc/util -o ${file:0:${#file}-2} -pthread -w -rdynamic -lcrypto -lssl -ljnxc -lprotobuf-c -g`
-  ./$current
+  `$COMPILER $file ../src/util/*.c ../src/data/*.c ../src/net/*.c ../src/session/*.c ../src/integrity/*.c ../src/crypto/*.c -I../src/crypto -I../src/data -I../src/err -I../src/integrity -I../src/net -I../src/session -I../src/util -o ${file:0:${#file}-2} -pthread -w -rdynamic -lcrypto -lssl -ljnxc -lprotobuf-c -g`
+  out=$?
+  if [ ! $out -eq 0 ]; then
+    echo "Compile failed!"
+    exit 1
+  fi
+  if hash lldb 2>/dev/null; then
+    echo "Running command => $TESTCOMPILER -f $current -o run -o exit"
+    $TESTCOMPILER -f $current -o run -o exit
+  else
+    echo "Running command => $TESTCOMPILER --args $current"
+    $TESTCOMPILER --args $current
+  fi
   out=$?
   if [ ! $out -eq 0 ]; then
     echo_red "Test failed"
@@ -40,7 +69,7 @@ function test_against_file()
 
 function run_full_suite()
 {
-  filelist=`ls test/*.c`
+  filelist=`ls *.c`
   for file in $filelist; do
     if [ "$file" == "run_tests" ] 
     then
@@ -58,7 +87,7 @@ function run_full_suite()
 
 function run_single_test()
 {
-  filelist=`ls test/*.c`
+  filelist=`ls *.c`
   for file in $filelist; do
     if [ "$file" == "$1"  ]; then
       echo "found match"
