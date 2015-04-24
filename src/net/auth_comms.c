@@ -272,4 +272,8 @@ void auth_comms_initiator_start(auth_comms_service *ac, \
     }
   }
 }
-
+void auth_comms_stop(auth_comms_service *ac,session *s) {
+    JNXCHECK(ac);
+    JNXCHECK(s);
+    secure_comms_end(s);
+}

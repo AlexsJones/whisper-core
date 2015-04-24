@@ -34,4 +34,6 @@ void auth_comms_destroy(auth_comms_service **ac);
 void auth_comms_initiator_start(auth_comms_service *ac, \
     discovery_service *ds, session *s, jnx_char *port);
 
+void auth_comms_stop(auth_comms_service *ac,session *s);
+
 #endif /* !AUTH_COMMS_H */

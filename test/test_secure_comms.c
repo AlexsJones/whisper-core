@@ -16,6 +16,8 @@
  * =====================================================================================
  */
 #include <stdlib.h>
+#include <jnxc_headers/jnxsocket.h>
+#include <jnxc_headers/jnx_tcp_socket.h>
 #include "session_service.h"
 #include "secure_comms.h"
 #include "discovery.h"
@@ -34,6 +36,7 @@ void *worker(void *args) {
   sleep(2);
   dtostr *d = (dtostr*)args;
   jnx_socket *t = jnx_socket_tcp_create(AF_INET);
+  JNXCHECK(t->stype);
   connector_sockfd = connect_for_socket_fd(t,d->p,d->sess);
 }
 void fire_threaded_tcp_packet(char *port) {
@@ -95,6 +98,7 @@ void test_secure_comms_receiver() {
   fire_threaded_tcp_packet(d);
   secure_comms_start(SC_RECEIVER,ds,os,AF_INET);
 
+  printf("connector_sockfd => %d\n",connector_sockfd);
   JNXCHECK(connector_sockfd != 0);
   
   e = session_service_unlink_sessions(service,0,
