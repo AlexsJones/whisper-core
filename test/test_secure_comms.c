@@ -33,6 +33,7 @@ typedef struct dtostr {
 void *worker(void *args) {
   sleep(2);
   dtostr *d = (dtostr*)args;
+  printf("About to connect to find the correct socket fd\n");
   jnx_socket *t = jnx_socket_tcp_create(AF_INET);
   connector_sockfd = connect_for_socket_fd(t,d->p,d->sess);
 }
