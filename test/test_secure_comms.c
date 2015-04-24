@@ -16,6 +16,8 @@
  * =====================================================================================
  */
 #include <stdlib.h>
+#include <jnxc_headers/jnxsocket.h>
+ #include <jnxc_headers/jnx_tcp_socket.h>
 #include "session_service.h"
 #include "secure_comms.h"
 #include "discovery.h"
@@ -33,8 +35,8 @@ typedef struct dtostr {
 void *worker(void *args) {
   sleep(2);
   dtostr *d = (dtostr*)args;
-  printf("About to connect to find the correct socket fd\n");
   jnx_socket *t = jnx_socket_tcp_create(AF_INET);
+  JNXCHECK(t->stype);
   connector_sockfd = connect_for_socket_fd(t,d->p,d->sess);
 }
 void fire_threaded_tcp_packet(char *port) {

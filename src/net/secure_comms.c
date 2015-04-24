@@ -71,7 +71,6 @@ int connect_for_socket_fd(jnx_socket *s, peer *remote_peer,session *ses) {
   freeaddrinfo(res);
   return s->socket;
 }
-
 void secure_comms_end(session *s) {
   if(s->secure_socket) {
     jnx_socket_destroy(&(*s).secure_socket);
