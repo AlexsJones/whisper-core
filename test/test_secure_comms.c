@@ -17,7 +17,7 @@
  */
 #include <stdlib.h>
 #include <jnxc_headers/jnxsocket.h>
- #include <jnxc_headers/jnx_tcp_socket.h>
+#include <jnxc_headers/jnx_tcp_socket.h>
 #include "session_service.h"
 #include "secure_comms.h"
 #include "discovery.h"
