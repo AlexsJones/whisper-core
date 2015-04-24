@@ -63,7 +63,7 @@ void test_receiver() {
   auth_comms_listener_start(ac,ds,service,NULL);
  
   while(!os->is_connected) {
-    JNX_LOG("Awaiting connection completion");
+    JNX_LOG(NULL,"Awaiting connection completion");
     sleep(.5);
   }
 }
