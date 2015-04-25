@@ -37,7 +37,7 @@ int linking_test_procedure(session *s,linked_session_type session_type,
   }
   return 0;
 }
-int unlinking_test_procedure(session *s,linked_session_type session_type, 
+int unlinking_test_procedure(session *s,linked_session_type session_type,
     void *optargs) {
   return 0;
 }
@@ -58,7 +58,6 @@ void test_initiator() {
 
   discovery_service *ds = discovery_service_create(1234, AF_INET, baddr, store);
 
-
   discovery_service_start(ds,BROADCAST_UPDATE_STRATEGY);
 
   int remote_peers = 0;
@@ -78,7 +77,7 @@ void test_initiator() {
         break;
       }
     }
-  } 
+  }
   session_service_link_sessions(service,E_AM_INITIATOR,
       ds,&(*os).session_guid,local,remote_peer);
 
