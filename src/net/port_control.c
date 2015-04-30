@@ -1,8 +1,10 @@
 #include "port_control.h"
 #include <stdlib.h>
 #include <jnxc_headers/jnx_tcp_socket.h>
+#include <string.h>
 
 jnx_int is_port_available(jnx_int port) {
+  JNXCHECK(port > 0);
   struct addrinfo hints, *res, *p;
   jnx_int32 sock = socket(AF_INET,SOCK_STREAM,0);
   memset(&hints,0,sizeof(hints));
@@ -47,15 +49,16 @@ jnx_char* port_control_next_available_to_s(port_control *p) {
 }
 port_control *port_control_create(jnx_int lrange, 
     jnx_int urange, jnx_int interval) {
-	JNXCHECK(lrange > 0);
-	JNXCHECK(urange > lrange);
-	JNXCHECK(interval > 0);
-	port_control *p = malloc(sizeof(port_control));
-	p->lrange = lrange;
-	p->urange = urange;
-	p->interval = interval;
+  JNXCHECK(lrange > 0);
+  JNXCHECK(urange > lrange);
+  JNXCHECK(interval > 0);
+  port_control *p = malloc(sizeof(port_control));
+  p->lrange = lrange;
+  p->urange = urange;
+  p->interval = interval;
+  return p;
 }
 void port_control_destroy(port_control **p){
-	free(*p);
-	*p = NULL;
+  free(*p);
+  *p = NULL;
 }

@@ -14,10 +14,6 @@
 void test_single_port() {
   int is_available = is_port_available(DEFAULT_SINGLE_PORT);
   JNXCHECK(is_available == 1);
-  is_available = is_port_available(-1);
-  JNXCHECK(is_available == 0);
-  is_available = is_port_available(DEFAULT_SINGLE_PORT);
-  JNXCHECK(is_available == 1);
 }
 void test_port_control_scan() {
   port_control *p = port_control_create(8001,9010,2);
