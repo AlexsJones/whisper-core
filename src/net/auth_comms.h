@@ -51,11 +51,11 @@ void auth_comms_listener_start(auth_comms_service *ac,
 void auth_comms_destroy(auth_comms_service **ac);
 /*
  * @fn auth_comms_initiator_start(auth_comms_service *ac, \
-    discovery_service *ds, port_control_service *ps,
-    session *s)
-    @brief starts the handshaking process between two peers
-    that eventually leads to secure comms and returns valid sock fd's
-    with full encryption to the session
+ *   discovery_service *ds, port_control_service *ps,
+ *   session *s)
+ *   @brief starts the handshaking process between two peers
+ *   that eventually leads to secure comms and returns valid sock fd's
+ *   with full encryption to the session
  * @param ac is a pointer to initialised auth_comm_service
  * @param dc is a pointer to initialised discovery_service
  * @param ps is a pointer to initialised port_control_service

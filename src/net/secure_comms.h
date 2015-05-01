@@ -39,6 +39,11 @@ jnx_socket* secure_comms_receiver_start(discovery_service *ds,
 jnx_socket* secure_comms_initiator_start(discovery_service *ds,
     session *s,jnx_unsigned_int addr_family);
 
+/*
+ *@fn secure_comms_end(session *s)
+ *@brief destroys secure comms
+ *@param s is the current session
+ */
 void secure_comms_end(session *s);
 
 #endif /* !SECURE_COMMS_H */

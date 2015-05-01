@@ -23,10 +23,13 @@ typedef enum {
   RESPONSE_PUBLIC_KEY,
   RESPONSE_FINISH
 }handshake_receiver_state;
+
 int handshake_did_receive_initiator_request(jnx_uint8 *obuffer,
     jnx_size bytes_read,void **oobject);
+
 int handshake_did_receive_receiver_request(jnx_uint8 *obuffer,
     jnx_size bytes_read,void **oobject);
+
 int handshake_initiator_command_generate(session *ses,\
     handshake_initiator_state state, jnx_uint8 *shared_secret,jnx_size len,
     jnx_uint8 **onetbuffer);
@@ -44,6 +47,7 @@ int handshake_receiver_command_generate(session *ses, \
 int handshake_generate_public_key_response(session *ses,\
     jnx_int abort,
     jnx_uint8 **onetbuffer);
+
 int handshake_generate_finish_response(session *ses,\
     jnx_int abort,
     jnx_uint8 **onetbuffer);
