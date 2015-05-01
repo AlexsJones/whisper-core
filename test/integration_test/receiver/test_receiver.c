@@ -73,7 +73,7 @@ void test_receiver() {
     if(olist) {
       session *s = jnx_list_remove_front(&olist);
 
-      jnx_char *message = NULL:
+      jnx_char *message = NULL;
 
       session_message_read(s,&message);
 
