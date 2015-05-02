@@ -40,7 +40,8 @@ typedef struct session {
   /* secure network */
   jnx_int is_connected;
   jnx_char *secure_comms_port;
-  jnx_socket *secure_socket;
+  jnx_int secure_socket;
+
   /* gui */
   void *gui_context;
   void (*session_callback)(void *gui_context, jnx_guid *session_guid,

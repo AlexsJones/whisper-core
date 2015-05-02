@@ -20,11 +20,14 @@ session_state session_message_write(session *s,jnx_char *message) {
   jnx_char *encrypted = symmetrical_encrypt((jnx_uint8*)s->shared_secret,
       (jnx_uint8*)message,
       len);
-  if (0 > send(s->secure_socket->socket,encrypted,strlen(encrypted),0)) {
+
+  int send_result = 0;
+  if (0 > (send_result = send(s->secure_socket,encrypted,strlen(encrypted),0))) {
     session_disconnect(s);
     perror("session: write");
     return SESSION_STATE_FAIL;
   }
+  JNX_LOG(0,"Send result => %d\n",send_result);
   return SESSION_STATE_OKAY;
 }
 jnx_int session_message_read(session *s, jnx_char **omessage) {
@@ -33,13 +36,13 @@ jnx_int session_message_read(session *s, jnx_char **omessage) {
     JNX_LOG(0,"Session not connected, cannot read");
     return -1;
   }
-  if(!s->secure_socket) {
+  if(s->secure_socket == -1 ) {
     JNX_LOG(0,"Session cannot read from a null socket");
     return -1;
   }
   jnx_char buffer[2048];
   bzero(buffer,2048);
-  jnx_int bytes_read = recv(s->secure_socket->socket,buffer,2048,0);
+  jnx_int bytes_read = recv(s->secure_socket,buffer,2048,0);
   if(bytes_read > 0) {
     jnx_char *decrypted_message = symmetrical_decrypt(s->shared_secret,
         buffer,bytes_read);

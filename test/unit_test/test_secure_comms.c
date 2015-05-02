@@ -35,9 +35,10 @@ typedef struct dtostr {
 void *worker(void *args) {
   sleep(2);
   dtostr *d = (dtostr*)args;
-  jnx_socket *t = jnx_socket_tcp_create(AF_INET);
-  JNXCHECK(t->stype);
-  connector_sockfd = connect_for_socket_fd(t,d->p,d->sess);
+  printf("Firing connection!\n");
+  d->sess->is_connected = 0;
+  connector_sockfd = connect_for_socket_fd(d->p,d->sess);
+  d->sess->is_connected = 1;
 }
 void fire_threaded_tcp_packet(char *port) {
   jnx_thread_create_disposable(worker,port);
@@ -114,6 +115,7 @@ void test_secure_comms_receiver() {
   
 }
 int main(int argc, char **argv) {
-  test_secure_comms_receiver();
+ // test_secure_comms_receiver();
+  JNXLOG(0,"NOT WORKING");
   return 0;
 }

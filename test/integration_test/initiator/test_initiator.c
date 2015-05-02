@@ -31,7 +31,6 @@ int linking_test_procedure(session *s,linked_session_type session_type,
     JNXCHECK(session_type == E_AM_INITIATOR);
     JNX_LOG(NULL,"Session hit linking procedure functor");
     discovery_service *ds = (discovery_service*)optargs;
-    jnx_char *default_secure_comms = "6666";
     /* Adding port control service */
     port_control_service *ps = port_control_service_create(9001,12341,1);
     
@@ -87,6 +86,18 @@ void test_initiator() {
   }
   session_service_link_sessions(service,E_AM_INITIATOR,
       ds,&(*os).session_guid,local,remote_peer);
+
+  int is_connected = 0;
+  while(!is_connected) {
+    if(os->secure_socket->isconnected) {
+      printf("Sending..\n");
+      session_message_write(os,"hello!");
+      sleep(1);
+      is_connected = 1;
+    }
+    sleep(.5);
+  }
+
 
   printf("Sessions linked - now going to unlink\n");
   session_service_unlink_sessions(service,E_AM_INITIATOR,
