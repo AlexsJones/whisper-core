@@ -25,7 +25,7 @@ typedef enum {
  @param addr_family is the family (AFINET or AFINET6)
  @return bound socket ref
 */
-jnx_socket* secure_comms_receiver_start(discovery_service *ds,
+jnx_int secure_comms_receiver_start(discovery_service *ds,
     session *s,jnx_unsigned_int addr_family);
 /*
   *@fn jnx_int secure_comms_receiver_start(discovery_service *ds,
@@ -36,7 +36,7 @@ jnx_socket* secure_comms_receiver_start(discovery_service *ds,
   @param addr_family is the family (AFINET or AFINET6)
   @return bound socket ref
 */
-jnx_socket* secure_comms_initiator_start(discovery_service *ds,
+jnx_int secure_comms_initiator_start(discovery_service *ds,
     session *s,jnx_unsigned_int addr_family);
 
 /*

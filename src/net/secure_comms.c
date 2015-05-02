@@ -18,7 +18,8 @@
 #include <jnxc_headers/jnx_tcp_socket.h>
 
 jnx_int secure_comms_is_socket_linked(jnx_int sock) {
-  if(send(sock,"PING",4,0) < 0) {
+  if(send(sock,"PING",4,0) < 0 ) {
+    perror("send:");
     return 0;
   }
   return 1;
@@ -100,10 +101,10 @@ int connect_for_socket_fd(peer *remote_peer,session *ses) {
 }
 void secure_comms_end(session *s) {
   if(s->secure_socket) {
-    jnx_socket_destroy(&(*s).secure_socket);
+    close(s->secure_socket);
   }
 }
-jnx_socket* secure_comms_start(secure_comms_endpoint e, discovery_service *ds,
+jnx_int secure_comms_start(secure_comms_endpoint e, discovery_service *ds,
     session *s,jnx_unsigned_int addr_family) {
   JNXCHECK(s);
   JNXCHECK(s->is_connected);
@@ -115,10 +116,10 @@ jnx_socket* secure_comms_start(secure_comms_endpoint e, discovery_service *ds,
   JNXCHECK(remote_peer);
   printf("Starting a tunnel to %s\n",remote_peer->host_address);
 
-  if(s->secure_socket != NULL) {
-    JNX_LOG(NULL,"Found an existing secure comms socket, closing now");
-    secure_comms_end(s);
-  }
+//  if(s->secure_socket ) {
+//    JNX_LOG(NULL,"Found an existing secure comms socket, closing now");
+//    secure_comms_end(s);
+//  }
   
   s->secure_socket = -1;
 
@@ -141,11 +142,11 @@ jnx_socket* secure_comms_start(secure_comms_endpoint e, discovery_service *ds,
   JNXCHECK(s->secure_socket != -1);
   return s->secure_socket;
 }
-jnx_socket* secure_comms_receiver_start(discovery_service *ds,
+jnx_int secure_comms_receiver_start(discovery_service *ds,
     session *s,jnx_unsigned_int addr_family) {
   return secure_comms_start(SC_RECEIVER,ds,s,addr_family);
 }
-jnx_socket* secure_comms_initiator_start(discovery_service *ds,
+jnx_int secure_comms_initiator_start(discovery_service *ds,
     session *s,jnx_unsigned_int addr_family) {
   return secure_comms_start(SC_INITIATOR,ds,s,addr_family);
 }
