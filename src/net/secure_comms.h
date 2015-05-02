@@ -46,4 +46,6 @@ jnx_socket* secure_comms_initiator_start(discovery_service *ds,
  */
 void secure_comms_end(session *s);
 
+jnx_int secure_comms_is_socket_linked(jnx_int socket);
+
 #endif /* !SECURE_COMMS_H */

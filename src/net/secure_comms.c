@@ -17,6 +17,9 @@
 #include <jnxc_headers/jnxthread.h>
 #include <jnxc_headers/jnx_tcp_socket.h>
 
+jnx_int secure_comms_is_socket_linked(jnx_int sock) {
+  return send(sock,"PING",4,0) ? 1 : 0;
+}
 int listen_for_socket_fd(peer *remote_peer,session *ses) {
   jnx_int32 sock = socket(AF_INET,SOCK_STREAM,0);
   jnx_int32 optval = 1;
@@ -87,6 +90,8 @@ int connect_for_socket_fd(peer *remote_peer,session *ses) {
     ses->is_connected = 1;
     JNX_LOG(0,"connect_for_socket_fd: ses->is_connected connected!");
   }
+
+  printf("--------->%d\n",__LINE__);
   freeaddrinfo(res);
   return sock;
 }
@@ -130,6 +135,7 @@ jnx_socket* secure_comms_start(secure_comms_endpoint e, discovery_service *ds,
       break;
   }
 
+printf("--------->%d\n",__LINE__);
   JNXCHECK(s->secure_socket != -1);
 
   return s->secure_socket;

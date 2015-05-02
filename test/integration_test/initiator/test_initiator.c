@@ -84,24 +84,22 @@ void test_initiator() {
       }
     }
   }
+  
   session_service_link_sessions(service,E_AM_INITIATOR,
       ds,&(*os).session_guid,local,remote_peer);
 
-  int is_connected = 0;
-  while(!is_connected) {
-    if(os->secure_socket->isconnected) {
-      printf("Sending..\n");
-      session_message_write(os,"hello!");
-      sleep(1);
-      is_connected = 1;
-    }
-    sleep(.5);
-  }
 
+  printf("--------->%d\n",__LINE__);
+  int r = secure_comms_is_socket_linked(os->secure_socket);
+  printf("--------->%d\n",__LINE__);
+
+  printf("Socket linkage is => %d\n",r);
 
   printf("Sessions linked - now going to unlink\n");
+
   session_service_unlink_sessions(service,E_AM_INITIATOR,
       ds,&(*os).session_guid);
+
   JNXCHECK(session_service_session_is_linked(service,&os->session_guid) == 0);
 }
 int main(int argc, char **argv) {
