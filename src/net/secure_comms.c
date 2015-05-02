@@ -18,7 +18,10 @@
 #include <jnxc_headers/jnx_tcp_socket.h>
 
 jnx_int secure_comms_is_socket_linked(jnx_int sock) {
-  return send(sock,"PING",4,0) ? 1 : 0;
+  if(send(sock,"PING",4,0) < 0) {
+    return 0;
+  }
+  return 1;
 }
 int listen_for_socket_fd(peer *remote_peer,session *ses) {
   jnx_int32 sock = socket(AF_INET,SOCK_STREAM,0);
@@ -135,9 +138,7 @@ jnx_socket* secure_comms_start(secure_comms_endpoint e, discovery_service *ds,
       break;
   }
 
-printf("--------->%d\n",__LINE__);
   JNXCHECK(s->secure_socket != -1);
-
   return s->secure_socket;
 }
 jnx_socket* secure_comms_receiver_start(discovery_service *ds,
