@@ -52,7 +52,7 @@ void test_receiver() {
   jnx_guid h;
   jnx_guid_create(&h);
 
-  peerstore *store = peerstore_init(local_peer_for_user("initiator_bob",10), 0);
+  peerstore *store = peerstore_init(local_peer_for_user("receiver_bob",10), 0);
 
   get_broadcast_ip(&baddr);
 
@@ -76,18 +76,18 @@ void test_receiver() {
 
       session *s = jnx_list_remove_front(&olist);
 
-
-      if(!s->is_connected) {
-        printf("Session is live!\n");
-
-        //    session_service_unlink_sessions(service,
-        //    E_AM_RECEIVER,NULL,
-        //    &(*s).session_guid);
-        break;
+      while (s->secure_socket == -1) sleep(1);
+      while (!secure_comms_is_socket_linked(s->secure_socket)) {
+        printf("secure_socket is %d\n", s->secure_socket);
+        sleep(1);
       }
-      else {
-        printf("Session pending...\n");
-      }
+
+      char buffy[1024];
+      int size = 0;
+      do {
+        size = session_message_read(s, &buffy);
+        printf("buffy -> %s\n", buffy);
+      } while (size <= 0);
       jnx_list_destroy(&olist);
     }
   }
