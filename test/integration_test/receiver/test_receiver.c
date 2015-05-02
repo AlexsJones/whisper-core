@@ -27,12 +27,12 @@ static char *baddr = NULL;
 int linking_test_procedure(session *s,linked_session_type session_type,
     void *optargs) {
   JNX_LOG(NULL,"Linking now the receiver session..");
-/*
-  jnx_char *default_secure_comms = "6666";
-  auth_comms_service *ac = auth_comms_create();
-  ac->listener = jnx_socket_tcp_listener_create("9991",AF_INET,15);
-  auth_comms_initiator_start(ac,ds,os,default_secure_comms);
-*/
+  /*
+     jnx_char *default_secure_comms = "6666";
+     auth_comms_service *ac = auth_comms_create();
+     ac->listener = jnx_socket_tcp_listener_create("9991",AF_INET,15);
+     auth_comms_initiator_start(ac,ds,os,default_secure_comms);
+     */
   return 0;
 }
 int unlinking_test_procedure(session *s,linked_session_type session_type,
@@ -40,7 +40,7 @@ int unlinking_test_procedure(session *s,linked_session_type session_type,
   return 0;
 }
 int app_accept_reject(discovery_service *ds, jnx_guid *initiator_guild,
-jnx_guid *session_guid) {
+    jnx_guid *session_guid) {
   return 0;
 }
 void test_receiver() {
@@ -65,25 +65,29 @@ void test_receiver() {
   ac->listener = jnx_socket_tcp_listener_create("9991",AF_INET,15);
   auth_comms_listener_start(ac,ds,service,NULL);
 
-  jnx_list *olist = NULL;
-  while(session_service_fetch_all_sessions(service,
-  &olist) == SESSION_STATE_NOT_FOUND) {
-    printf("Awaiting connection completion\n");
-    sleep(3);
-    if(olist) {
+  while(1) {
+
+    jnx_list *olist = NULL;
+
+    if(session_service_fetch_all_sessions(service,
+          &olist) != SESSION_STATE_NOT_FOUND) {
+
+      printf("Found a remote session...\n");
+
       session *s = jnx_list_remove_front(&olist);
 
-      jnx_char *message = NULL;
 
-      session_message_read(s,&message);
+      if(!s->is_connected) {
+        printf("Session is live!\n");
 
-      printf("Remote message => %s\n",message);
-
-      session_service_unlink_sessions(service,
-          E_AM_RECEIVER,NULL,
-          &(*s).session_guid);
-
-      printf("Unlinked from remote session\n");
+        //    session_service_unlink_sessions(service,
+        //    E_AM_RECEIVER,NULL,
+        //    &(*s).session_guid);
+        break;
+      }
+      else {
+        printf("Session pending...\n");
+      }
       jnx_list_destroy(&olist);
     }
   }
