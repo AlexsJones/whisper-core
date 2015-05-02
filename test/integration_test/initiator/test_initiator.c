@@ -92,7 +92,7 @@ void test_initiator() {
   printf("shared secret os => %s\n",os->shared_secret);
 
   printf("-------------------------------------\n");
-  session_message_write(os,"Hello Ballface!");
+  session_message_write(os,"Hello Ballface! what's going on!");
   printf("-------------------------------------\n");
   printf("Sessions linked - now going to unlink\n");
 

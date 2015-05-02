@@ -26,6 +26,12 @@ session_state session_message_write(session *s,jnx_uint8 *message) {
       len);
 
 #ifdef DEBUG
+  int i;
+  for(i=0;i<strlen(encrypted);++i) {
+    printf("0x%x ",*(encrypted + i) );
+  }
+  printf("\n");
+
   jnx_char *decrypt = symmetrical_decrypt(s->shared_secret,
       encrypted,
       strlen(encrypted));
