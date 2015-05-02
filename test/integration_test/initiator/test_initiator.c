@@ -62,7 +62,7 @@ void test_initiator() {
   peerstore *store = peerstore_init(local_peer_for_user("initiator_bob",10), 0);
 
   get_broadcast_ip(&baddr);
-
+  printf("%s\n", baddr);
   discovery_service *ds = discovery_service_create(1234, AF_INET, baddr, store);
 
   discovery_service_start(ds,BROADCAST_UPDATE_STRATEGY);
@@ -89,9 +89,6 @@ void test_initiator() {
       ds,&(*os).session_guid,local,remote_peer);
 
   printf("Sessions linked - now going to unlink\n");
-  sleep(5);
-  session_message_write(os,"Hello from initiator!");
-
   session_service_unlink_sessions(service,E_AM_INITIATOR,
       ds,&(*os).session_guid);
   JNXCHECK(session_service_session_is_linked(service,&os->session_guid) == 0);
