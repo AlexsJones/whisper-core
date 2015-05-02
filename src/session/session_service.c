@@ -145,7 +145,6 @@ session_state session_service_fetch_session(session_service *service,
     return SESSION_STATE_NOT_FOUND;
   }
   if(service->session_list->counter == 0) {
-    JNX_LOG(NULL,"Session list is empty");
     return SESSION_STATE_NOT_FOUND;
   }
   if(session_service_does_exist(service,g) == 0) {

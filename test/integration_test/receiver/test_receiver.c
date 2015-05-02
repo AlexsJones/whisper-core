@@ -86,17 +86,21 @@ void test_receiver() {
         sleep(1);
       }
 
-      char buffy[1024];
-      bzero(&buffy, 1024);
+      jnx_char *buffy = NULL;
 
       int size = 0;
-      while (size <= 0)
+      while (size <= 0) {
         size = session_message_read(s, &buffy);
-      printf("size -> %d, buffy -> %s\n", size, buffy);
-      sleep(10);
+      }
+      if(size) {
+        printf("size -> %d, buffy -> %s\n", size, &buffy);
+        break;
+      }    
     }
-    jnx_list_destroy(&olist);
+    if(olist)
+      jnx_list_destroy(&olist);
   }
+
 }
 
 int main(int argc, char **argv) {

@@ -47,6 +47,8 @@ jnx_int session_message_read(session *s, jnx_char **omessage) {
     jnx_char *decrypted_message = symmetrical_decrypt(s->shared_secret,
         buffer,bytes_read);
     *omessage = decrypted_message;
+
+    printf("%s\n",buffer);
   }
   return bytes_read;
 }

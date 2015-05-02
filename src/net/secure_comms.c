@@ -78,19 +78,19 @@ int connect_for_socket_fd(peer *remote_peer,session *ses) {
   JNX_LOG(0,"connect_for_socket_fd: getaddrinfo");
   jnx_int32 rg = 0;
   if((rg = getaddrinfo(remote_peer->host_address,
-    ses->secure_comms_port,&hints,&res)) != 0) {
+          ses->secure_comms_port,&hints,&res)) != 0) {
 
     JNX_LOG(DEFAULT_CONTEXT,"%s\n",gai_strerror(rg));
     return -1;
   }
 
-    if(connect(sock,res->ai_addr,res->ai_addrlen) != 0) {
-      perror("connect");
-      freeaddrinfo(res);
-      return -1;
-    }
-    ses->is_connected = 1;
-    JNX_LOG(0,"connect_for_socket_fd: ses->is_connected connected!");
+  if(connect(sock,res->ai_addr,res->ai_addrlen) != 0) {
+    perror("connect");
+    freeaddrinfo(res);
+    return -1;
+  }
+  ses->is_connected = 1;
+  JNX_LOG(0,"connect_for_socket_fd: ses->is_connected connected!");
   freeaddrinfo(res);
   return sock;
 }
@@ -112,7 +112,7 @@ jnx_int secure_comms_start(secure_comms_endpoint e, discovery_service *ds,
   JNXCHECK(remote_peer);
   printf("Starting a tunnel to %s\n",remote_peer->host_address);
 
-  
+
   JNXCHECK(s->secure_socket == -1);
 
   switch(e) {
