@@ -116,12 +116,8 @@ jnx_int secure_comms_start(secure_comms_endpoint e, discovery_service *ds,
   JNXCHECK(remote_peer);
   printf("Starting a tunnel to %s\n",remote_peer->host_address);
 
-//  if(s->secure_socket ) {
-//    JNX_LOG(NULL,"Found an existing secure comms socket, closing now");
-//    secure_comms_end(s);
-//  }
   
-  s->secure_socket = -1;
+  JNXCHECK(s->secure_socket == -1);
 
   switch(e) {
 

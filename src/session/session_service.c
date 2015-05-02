@@ -92,7 +92,7 @@ session_state session_service_create_session(session_service *service,
   s->initiator_public_key = NULL;
   s->receiver_public_key = NULL;
   s->shared_secret = NULL;
-  s->secure_socket = NULL;
+  s->secure_socket = -1;
   s->session_callback = NULL;
   s->gui_context = NULL;
   jnx_guid_create(&s->session_guid);
