@@ -58,7 +58,7 @@ int unlinking_test_procedure(session *s,linked_session_type session_type, void *
 void test_secure_comms_setup_link() {
   JNX_LOG(NULL,"test_secure_comms_setup_link");
   session_service *service = session_service_create(linking_test_procedure,
-    unlinking_test_procedure);
+      unlinking_test_procedure);
   session *os;
   session_state e = session_service_create_session(service,&os);
   JNXCHECK(session_service_session_is_linked(service,&os->session_guid) == 0);
@@ -78,12 +78,12 @@ void test_secure_comms_setup_link() {
   JNXCHECK(is_receiver == 1);
   JNXCHECK(session_service_session_is_linked(service,&os->session_guid) == 1);
 
-e = session_service_unlink_sessions(service,0,
+  e = session_service_unlink_sessions(service,0,
       "PASSED",
       &os->session_guid);
 
   JNXCHECK(session_service_session_is_linked(service,&os->session_guid) == 0);
-  
+
   session_service_destroy(&service);
 }
 int main(int argc, char **argv) {
