@@ -91,8 +91,9 @@ void test_initiator() {
 
   printf("shared secret os => %s\n",os->shared_secret);
 
+  printf("-------------------------------------\n");
   session_message_write(os,"Hello Ballface!");
-
+  printf("-------------------------------------\n");
   printf("Sessions linked - now going to unlink\n");
 
   session_service_unlink_sessions(service,E_AM_INITIATOR,

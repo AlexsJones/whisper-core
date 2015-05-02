@@ -18,14 +18,15 @@ session_state session_message_write(session *s,jnx_uint8 *message) {
   /* take the raw message and des encrypt it */
   jnx_size len = strlen(message);
 
-  JNX_LOG(0,"shared_secret => %s",s->shared_secret);
+  JNX_LOG(0,"Message length => Length of message: %d Message:%s",len,message);
+  JNX_LOG(0,"shared_secret => >----%s<---",s->shared_secret);
 
   jnx_char *encrypted = symmetrical_encrypt(s->shared_secret,
       message,
       len);
 
 #ifdef DEBUG
-  jnx_char *decrypt = symmetrical_encrypt(s->shared_secret,
+  jnx_char *decrypt = symmetrical_decrypt(s->shared_secret,
       encrypted,
       strlen(encrypted));
   JNX_LOG(0,"Decrypted => %s",decrypt);
@@ -92,7 +93,7 @@ void session_add_receiver_public_key(session *s, jnx_char *key) {
 }
 void session_add_shared_secret(session *s, jnx_uint8 *secret) {
   JNXCHECK(secret);
-  jnx_size len = strlen(secret);
+  jnx_size len = strlen(secret) + 1;
   s->shared_secret = malloc(len * sizeof(jnx_uint8));
   memcpy(s->shared_secret,secret,len);
 }
