@@ -29,6 +29,7 @@ session_state session_message_write(session *s,jnx_uint8 *message) {
       encrypted,
       strlen(encrypted));
   JNX_LOG(0,"Decrypted => %s",decrypt);
+  free(decrypt);
 #endif
 
   int send_result = 0;
