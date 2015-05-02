@@ -97,6 +97,7 @@ int connect_for_socket_fd(peer *remote_peer,session *ses) {
 void secure_comms_end(session *s) {
   if(s->secure_socket) {
     close(s->secure_socket);
+    s->secure_socket = -1;
   }
 }
 jnx_int secure_comms_start(secure_comms_endpoint e, discovery_service *ds,

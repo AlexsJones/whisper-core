@@ -88,11 +88,8 @@ void test_initiator() {
   session_service_link_sessions(service,E_AM_INITIATOR,
       ds,&(*os).session_guid,local,remote_peer);
 
- 
-  sleep(5);
 
-
-  printf("Socket linkage ");
+  printf("shared secret os => %s\n",os->shared_secret);
 
   session_message_write(os,"Hello Ballface!");
 
