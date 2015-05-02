@@ -88,12 +88,13 @@ void test_initiator() {
   session_service_link_sessions(service,E_AM_INITIATOR,
       ds,&(*os).session_guid,local,remote_peer);
 
+ 
+  sleep(5);
 
-  printf("--------->%d\n",__LINE__);
-  int r = secure_comms_is_socket_linked(os->secure_socket);
-  printf("--------->%d\n",__LINE__);
 
-  printf("Socket linkage is => %d\n",r);
+  printf("Socket linkage ");
+
+  session_message_write(os,"Hello Ballface!");
 
   printf("Sessions linked - now going to unlink\n");
 

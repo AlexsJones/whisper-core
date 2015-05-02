@@ -56,11 +56,11 @@ int listen_for_socket_fd(peer *remote_peer,session *ses) {
   }
   freeaddrinfo(res);
   JNX_LOG(0,"listen_for_socket_fd: listen");
-  listen(sock,1);
+  listen(sock,10);
   socklen_t addr_size = sizeof(their_addr);
   JNX_LOG(0,"listen_for_socket_fd: accept");
   int fd = accept(sock,(struct sockaddr*)&their_addr,&addr_size);
-  if(fd > 0) {
+  if(fd < 0) {
     perror("accept:");
     return -1;
   }
@@ -83,9 +83,7 @@ int connect_for_socket_fd(peer *remote_peer,session *ses) {
     JNX_LOG(DEFAULT_CONTEXT,"%s\n",gai_strerror(rg));
     return -1;
   }
-  JNX_LOG(0,"connect_for_socket_fd: before ses->is_connected connect");
-  if(!ses->is_connected) {
-    JNX_LOG(0,"connect_for_socket_fd: ses->is_connected connect");
+
     if(connect(sock,res->ai_addr,res->ai_addrlen) != 0) {
       perror("connect");
       freeaddrinfo(res);
@@ -93,9 +91,6 @@ int connect_for_socket_fd(peer *remote_peer,session *ses) {
     }
     ses->is_connected = 1;
     JNX_LOG(0,"connect_for_socket_fd: ses->is_connected connected!");
-  }
-
-  printf("--------->%d\n",__LINE__);
   freeaddrinfo(res);
   return sock;
 }
