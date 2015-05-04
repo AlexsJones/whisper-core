@@ -26,7 +26,7 @@ static char *baddr = NULL;
 
 
 int linking_test_procedure(session *s, linked_session_type session_type,
-                           void *optargs) {
+    void *optargs) {
   JNX_LOG(NULL, "Linking now the receiver session..");
   /*
      jnx_char *default_secure_comms = "6666";
@@ -38,19 +38,22 @@ int linking_test_procedure(session *s, linked_session_type session_type,
 }
 
 int unlinking_test_procedure(session *s, linked_session_type session_type,
-                             void *optargs) {
+    void *optargs) {
+
+  auth_comms_service *ac = auth_comms_create();
+  auth_comms_stop(ac,s);
   return 0;
 }
 
 int app_accept_reject(discovery_service *ds, jnx_guid *initiator_guild,
-                      jnx_guid *session_guid) {
+    jnx_guid *session_guid) {
   return 0;
 }
 
 void test_receiver() {
   JNX_LOG(NULL, "test_linking");
   session_service *service = session_service_create(linking_test_procedure,
-                                                    unlinking_test_procedure);
+      unlinking_test_procedure);
 
   //Lets generate the guid of some remote session
   jnx_guid h;
@@ -74,14 +77,13 @@ void test_receiver() {
     jnx_list *olist = NULL;
 
     if (session_service_fetch_all_sessions(service,
-                                           &olist) != SESSION_STATE_NOT_FOUND) {
+          &olist) != SESSION_STATE_NOT_FOUND) {
 
       printf("Found a remote session...\n");
 
       session *s = jnx_list_remove_front(&olist);
 
       while (!session_is_active(s)){
-        printf("secure_socket is %d\n", s->secure_socket);
         sleep(1);
       }
 
@@ -93,12 +95,12 @@ void test_receiver() {
       }
       if(size) {
         printf("size -> %d, buffy -> %s\n", size, buffy);
-      
+
         JNXCHECK(session_is_active(s) == 1);
-        
+
         session_service_unlink_sessions(service,E_AM_RECEIVER,
             ds,&(*s).session_guid);
-  
+
         JNXCHECK(session_is_active(s) == 0);
         break;
       }    

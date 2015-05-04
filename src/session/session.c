@@ -25,8 +25,7 @@ session_state session_message_write(session *s,jnx_uint8 *message) {
 
   int send_result = 0;
   if (0 > (send_result = send(s->secure_socket,encrypted,strlen(encrypted),0))) {
-    session_disconnect(s);
-    perror("session: write");
+    perror("send:");
     return SESSION_STATE_FAIL;
   }
   JNX_LOG(0,"Send result => %d\n",send_result);
@@ -58,15 +57,6 @@ session_state session_message_read_and_decrypt(session *s,
   jnx_char *decrypted = symmetrical_decrypt(s->shared_secret,
       message,len);
   *omessage = decrypted;
-  return SESSION_STATE_OKAY;
-}
-session_state session_disconnect(session *s) {
-  if (s->is_connected) {
-    if(s->secure_socket) {
-      secure_comms_end(s);
-    }
-  }
-  s->is_connected = 0;
   return SESSION_STATE_OKAY;
 }
 void session_add_initiator_public_key(session *s, jnx_char *key) {

@@ -101,7 +101,10 @@ int connect_for_socket_fd(peer *remote_peer,session *ses) {
 }
 void secure_comms_end(session *s) {
   if(s->secure_socket) {
-    close(s->secure_socket);
+    JNX_LOG(NULL,"Secure comms shutting down fd %s",s->secure_socket);
+    if(shutdown(s->secure_socket,SHUT_RDWR) != 0) {
+      perror("socket shutdown: ");
+    }
     s->secure_socket = -1;
   }
 }

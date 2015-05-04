@@ -60,8 +60,6 @@ session_state session_message_read_and_decrypt(session *s, jnx_uint8 *message,
 
 jnx_int session_is_active(session *s);
 
-session_state session_disconnect(session *s);
-
 void session_add_initiator_public_key(session *s, jnx_char *key);
 
 void session_add_receiver_public_key(session *s, jnx_char *key);

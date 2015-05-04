@@ -242,7 +242,6 @@ session_state session_service_unlink_sessions(session_service *s,
 
   JNX_LOG(NULL,"Unlinking function from session service");
   int r = s->unlinking_func(osession,session_type,linking_args);
-  session_disconnect(osession);
   JNX_LOG(NULL,"Disconnected session");
   return r ? SESSION_STATE_FAIL : SESSION_STATE_OKAY;
 }
