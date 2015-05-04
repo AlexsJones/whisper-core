@@ -53,7 +53,7 @@ int listen_for_socket_fd(peer *remote_peer,session *ses) {
     }
     JNX_LOG(0,"listen_for_socket_fd: bind");
     if (bind(sock, p->ai_addr, p->ai_addrlen) == -1) {
-      perror("server: bind");
+      perror("server:");
       return -1;
     }
     break;

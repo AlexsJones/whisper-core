@@ -165,9 +165,6 @@ session_state session_service_fetch_session(session_service *service,
   return SESSION_STATE_NOT_FOUND;
 }
 static void destroy_session(session *s) {
-  if(s->is_connected) {
-    printf("Warning: destroying a connected session\n");
-  }
   if(s->keypair) {
     asymmetrical_destroy_key(s->keypair);
   }

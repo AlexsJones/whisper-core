@@ -72,6 +72,7 @@ void test_receiver() {
   ac->listener = jnx_socket_tcp_listener_create("9991", AF_INET, 15);
   auth_comms_listener_start(ac, ds, service, NULL);
 
+start:
   while (1) {
 
     jnx_list *olist = NULL;
@@ -79,8 +80,7 @@ void test_receiver() {
     if (session_service_fetch_all_sessions(service,
           &olist) != SESSION_STATE_NOT_FOUND) {
 
-      printf("Found a remote session...\n");
-
+      printf("-----------------------------------------------\n");
       session *s = jnx_list_remove_front(&olist);
 
       while (!session_is_active(s)){
@@ -102,6 +102,12 @@ void test_receiver() {
             ds,&(*s).session_guid);
 
         JNXCHECK(session_is_active(s) == 0);
+
+        session_service_destroy_session(service,&(*s).session_guid);
+
+        jnx_list_destroy(&olist);
+
+        goto start;
         break;
       }    
     }
