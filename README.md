@@ -22,6 +22,8 @@ For an example of a user level implementation see: https://github.com/AlexsJones
 
 Status: In active development, not ready for general consumption.
 
+[Please see API documentation](https://github.com/AlexsJones/whisper-core/wiki/Core-API-use)
+
 Whisper uses a combination of asymmetric 2048bit key RSA with a DES cipher for establishing sessions.
 It has multi-protocol finding ability which includes multicasting upto top tier router domain and drop n' replace cyptography solutions.
 
