@@ -19,6 +19,7 @@
 #define __CRYPTOGRAPHY_H__
 #include <jnxc_headers/jnxtypes.h>
 #include <openssl/des.h>
+#include <openssl/rand.h>
 #include <openssl/rsa.h>
 #include <openssl/pem.h>
 #include <openssl/err.h>

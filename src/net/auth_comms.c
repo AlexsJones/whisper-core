@@ -79,10 +79,10 @@ static void listener_callback(const jnx_uint8 *payload,
       JNXCHECK(remote_peer);
       printf("Got remote peer\n");
       session_service_link_sessions(t->ss,0,
-      t->linking_args,&session_g, local_peer, remote_peer);
+          t->linking_args,&session_g, local_peer, remote_peer);
 
       printf("Created a linked session with the local peer %s and remote peer %s\n",
-        local_peer->user_name,remote_peer->user_name);
+          local_peer->user_name,remote_peer->user_name);
       /* setting our response key as the 'remote public key' */
       session_add_initiator_public_key(osession,a->initiator_public_key); 
       session_add_secure_comms_port(osession,a->secure_comms_port);
@@ -99,7 +99,7 @@ static void listener_callback(const jnx_uint8 *payload,
       /* free data */
       free(onetbuffer);    
       auth_initiator__free_unpacked(a,NULL);
-      
+
       if(abort_token) {
         printf("Aborting session.\n");
       }
@@ -157,7 +157,7 @@ static void *listener_bootstrap(void *args) {
   transport_options *t = (transport_options*)args;
   while(1) {
     jnx_socket_tcp_listener_tick(t->ac->listener,
-      listener_callback,t);
+        listener_callback,t);
   }
 }
 auth_comms_service *auth_comms_create() {
@@ -205,7 +205,7 @@ void auth_comms_initiator_start(auth_comms_service *ac, \
   void *object;
   if(handshake_did_receive_receiver_request(reply,replysize,&object)) {
     AuthReceiver *r = (AuthReceiver *)object;
- 
+
     /* first thing we check is if we should abort */
     if(r->should_abort) {
       printf("Handshake has been rejected.\n");
@@ -213,7 +213,7 @@ void auth_comms_initiator_start(auth_comms_service *ac, \
       auth_receiver__free_unpacked(r,NULL);
       return;
     }
-    
+
     /* At this point we have a session with the receiver public key
        we can generate the shared secret and transmit it back */
     jnx_uint8 *secret;
@@ -275,7 +275,7 @@ void auth_comms_initiator_start(auth_comms_service *ac, \
   }
 }
 void auth_comms_stop(auth_comms_service *ac,session *s) {
-    JNXCHECK(ac);
-    JNXCHECK(s);
-    secure_comms_end(s);
+  JNXCHECK(ac);
+  JNXCHECK(s);
+  secure_comms_end(s);
 }

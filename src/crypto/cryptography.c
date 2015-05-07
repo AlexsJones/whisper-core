@@ -135,23 +135,16 @@ jnx_char *symmetrical_decrypt(jnx_uint8 *key,jnx_uint8 *msg, jnx_size size){
   return res;
 }
 jnx_size generate_shared_secret(jnx_uint8 **buffer) {
-  jnx_int num_words = 10;
-  jnx_char *words[] = {
-    "quick", "brown", "shoes", "onomatopoeia", "quintana",
-    "lebowski", "sobchak", "independent", "posh", "pauper"
-  };
-  jnx_int rands[3], i, size = 0;
-  srand(time(0));
-  for (i = 0; i < 3; i++) {
-    rands[i] = rand() % 10;
-    size += strlen(words[rands[i]]);
-  }
 
-  *buffer = calloc(size + 1, sizeof(jnx_uint8));
-  for (i = 0; i < 3; i++) {
-    strcat(*buffer, words[rands[i]]);
-  }
-
+  DES_cblock key;
+  DES_cblock seed = { 0xFE, 0xFC, 0xBA, 0x98, 0x76, 0x54, 0x32, 0x10 };
+  DES_key_schedule keysched;
+  RAND_seed(seed,sizeof(DES_cblock));
+  DES_random_key(&key);
+  jnx_int size = sizeof(DES_cblock);
+  *buffer = calloc(size + 1,sizeof(jnx_uint8));
+  bzero(*buffer,size + 1);
+  memcpy(*buffer,key,size);
   return size;
 } 
 
