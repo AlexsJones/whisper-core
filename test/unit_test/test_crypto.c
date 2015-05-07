@@ -25,7 +25,7 @@ void test_secret_generate() {
 
   jnx_int len = generate_shared_secret(&buffer);
 
-  JNXCHECK(len == 35); 
+  JNXCHECK(len == 8); 
 }
 void test_rsa_encryption() {
 

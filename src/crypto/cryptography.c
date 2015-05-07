@@ -143,11 +143,11 @@ jnx_size generate_shared_secret(jnx_uint8 **buffer) {
     'p','q','r','s','t','u','v','w','x','y','z','1','2','3','4','5','6','7',
   '8','9','0'};
  
-  jnx_char charbuf[sizeof(jnx_char)* 35];
+  jnx_char charbuf[sizeof(jnx_char)* 8];
  
   jnx_int j;
   srand(time(0));
-  for(j=0;j<35; ++j) {
+  for(j=0;j<8; ++j) {
     charbuf[j] = alphabet[rand() % 62];
   }
   jnx_int size = strlen(charbuf);
