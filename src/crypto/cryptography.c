@@ -141,7 +141,6 @@ jnx_size generate_shared_secret(jnx_uint8 **buffer) {
   DES_key_schedule keysched;
   RAND_seed(seed,sizeof(DES_cblock));
   DES_random_key(&key);
-  jnx_int i;
   jnx_int size = sizeof(DES_cblock);
   *buffer = calloc(size + 1,sizeof(jnx_uint8));
   bzero(*buffer,size + 1);
