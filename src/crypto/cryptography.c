@@ -135,22 +135,25 @@ jnx_char *symmetrical_decrypt(jnx_uint8 *key,jnx_uint8 *msg, jnx_size size){
   return res;
 }
 jnx_size generate_shared_secret(jnx_uint8 **buffer) {
-  jnx_int num_words = 10;
-  jnx_char *words[] = {
-    "quick", "brown", "shoes", "onomatopoeia", "quintana",
-    "lebowski", "sobchak", "independent", "posh", "pauper"
-  };
-  jnx_int rands[3], i, size = 0;
-  srand(time(0));
-  for (i = 0; i < 3; i++) {
-    rands[i] = rand() % 10;
-    size += strlen(words[rands[i]]);
-  }
 
-  *buffer = calloc(size + 1, sizeof(jnx_uint8));
-  for (i = 0; i < 3; i++) {
-    strcat(*buffer, words[rands[i]]);
+  jnx_char alphabet[] = {
+    'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O',
+'P','Q','R','S','T','U','V','W','X','Y','Z',
+    'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o',
+    'p','q','r','s','t','u','v','w','x','y','z','1','2','3','4','5','6','7',
+  '8','9','0'};
+ 
+  jnx_char charbuf[sizeof(jnx_char)* 35];
+ 
+  jnx_int j;
+  srand(time(0));
+  for(j=0;j<35; ++j) {
+    charbuf[j] = alphabet[rand() % 62];
   }
+  jnx_int size = strlen(charbuf);
+  *buffer = calloc(size + 1,sizeof(jnx_char));
+  bzero(*buffer,size + 1);
+  memcpy(*buffer,charbuf,size);
 
   return size;
 } 

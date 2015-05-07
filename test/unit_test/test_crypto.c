@@ -20,6 +20,14 @@
 #include <jnxc_headers/jnxcheck.h>
 #include <jnxc_headers/jnxlog.h>
 
+void test_secret_generate() {
+  jnx_uint8 *buffer;
+
+  jnx_int len = generate_shared_secret(&buffer);
+
+  printf("Generated shared secret => %s\n",buffer);
+  
+}
 void test_rsa_encryption() {
 
   RSA *key = asymmetrical_generate_key(2048);
@@ -69,6 +77,8 @@ void test_des_encryption() {
   free(decrypted_message);
 }
 int main(int argc, char **argv) {
+  JNX_LOG(NULL,"Test generate shared secret");
+  test_secret_generate();
   JNX_LOG(NULL,"Test RSA key");
   test_rsa_key();
   JNX_LOG(NULL,"Test RSA encryption");
