@@ -65,15 +65,20 @@ void test_rsa_key() {
 void test_des_encryption() {
   jnx_char *test_message = "Test";
   jnx_size message_size = strlen(test_message);
+  
+  jnx_uint8 *buffer;
 
-  jnx_char *encrypted_message = symmetrical_encrypt("TestKey",test_message,message_size);
+  jnx_int len = generate_shared_secret(&buffer);
 
-  jnx_char *decrypted_message = symmetrical_decrypt("TestKey",encrypted_message,message_size);
+  jnx_char *encrypted_message = symmetrical_encrypt(buffer,test_message,message_size);
+
+  jnx_char *decrypted_message = symmetrical_decrypt(buffer,encrypted_message,message_size);
 
   JNXCHECK(strcmp(decrypted_message,test_message) == 0);
 
   free(encrypted_message);
   free(decrypted_message);
+  free(buffer);
 }
 int main(int argc, char **argv) {
   JNX_LOG(NULL,"Test generate shared secret");
