@@ -36,9 +36,9 @@ RSA *asymmetrical_key_from_string(jnx_char *string, key_type type) {
   RSA *rsa = RSA_new();
   switch(type) {
     case PUBLIC:
-    PEM_read_bio_RSAPublicKey(key,&rsa,0,NULL);
+      PEM_read_bio_RSAPublicKey(key,&rsa,0,NULL);
 
-    break;
+      break;
     case PRIVATE:
       JNX_LOG(NULL,"asymmetrical private key from string not supported!");
   }
