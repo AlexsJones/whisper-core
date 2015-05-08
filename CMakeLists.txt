@@ -18,7 +18,7 @@ include_directories(${PROJECT_INC_DIR}src/session)
 include_directories(${PROJECT_INC_DIR}src/util)
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-  set (CMAKE_C_FLAGS "-Wno-deprecated-declarations -Wno-pointer-sign -Wno-switch")
+  set (CMAKE_C_FLAGS "-Wno-deprecated-declarations -Wno-pointer-sign -Wno-switch -Wno-implicit-function-declaration")
 endif()
 
 execute_process(COMMAND ./tools/generate_protobuf)
