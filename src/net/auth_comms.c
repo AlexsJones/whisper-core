@@ -51,6 +51,7 @@ static void listener_callback(const jnx_uint8 *payload,
   transport_options *t = (transport_options*)context;
   void *object;
   int abort_token = 0;
+
   if(handshake_did_receive_initiator_request((jnx_char*)payload,bytes_read,&object)) {
     AuthInitiator *a = (AuthInitiator*)object;
     /*
@@ -110,8 +111,15 @@ static void listener_callback(const jnx_uint8 *payload,
       session *osession;
       jnx_guid g;
       jnx_guid_from_string(a->session_guid,&g);
-      session_service_fetch_session(t->ss,
-          &g,&osession);
+      if(session_service_fetch_session(t->ss,
+            &g,&osession) != SESSION_STATE_OKAY) {
+
+        JNX_LOG(NULL,"An unknown session has attempted to initiate second stage\
+            handshake");
+        /* TODO: Log this attempt to access second stage handshake possible 
+         * attack */
+        return;
+      } 
 
       jnx_uint8 *onetbuffer;
       int bytes = handshake_generate_finish_response(osession,abort_token,
@@ -121,7 +129,6 @@ static void listener_callback(const jnx_uint8 *payload,
 
       /* The last thing to do is to decrypt the shared secret and store it in
        * the session */
-
       jnx_size olen;
       jnx_size decoded_len;
       jnx_encoder *encoder = jnx_encoder_create();
@@ -134,7 +141,7 @@ static void listener_callback(const jnx_uint8 *payload,
             decoded_len,
             &olen);
       //DEBUG ONLY
-#ifndef RELEASE
+#ifdef DEBUG
       printf("DEBUG => shared secret:%s\n",decrypted_shared_secret);
       printf("DEBUG => secure_comms_port:%s\n",osession->secure_comms_port);
 #endif

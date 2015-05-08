@@ -147,5 +147,4 @@ jnx_size generate_shared_secret(jnx_uint8 **buffer) {
   memcpy(*buffer,key,size);
   return size;
 } 
-
 #pragma clang diagnostic pop
