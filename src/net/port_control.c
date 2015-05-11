@@ -7,6 +7,7 @@ jnx_int is_port_available(jnx_int port) {
   JNXCHECK(port > 0);
   struct addrinfo hints, *res, *p;
   jnx_int32 sock = socket(AF_INET,SOCK_STREAM,0);
+  jnx_int32 optval = 1;
   memset(&hints,0,sizeof(hints));
   hints.ai_family = AF_INET;
   hints.ai_socktype = SOCK_STREAM;
@@ -16,6 +17,13 @@ jnx_int is_port_available(jnx_int port) {
   getaddrinfo(NULL,sport,&hints,&res);
   p = res;
   while(p != NULL) {
+    if (setsockopt(sock,
+          SOL_SOCKET,
+          SO_REUSEADDR,
+          &optval,sizeof(jnx_int32)) == -1) {
+      perror("setsockopt");
+      exit(1);
+    }
     if(bind(sock,p->ai_addr,p->ai_addrlen) == -1) {
       freeaddrinfo(res);
       return 0;
