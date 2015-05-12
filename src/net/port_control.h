@@ -5,8 +5,8 @@
 typedef struct port_control_service {
 	jnx_int lrange;
 	jnx_int urange;
-	jnx_int interval;
-
+	jnx_int crange;
+        jnx_int interval;
 }port_control_service;
 
 typedef enum E_SCAN_STATE {

@@ -24,7 +24,8 @@ void test_port_control_service_next_available() {
   int is_available = is_port_available(DEFAULT_SINGLE_PORT);
   JNXCHECK(is_available == 1);
 
-  port_control_service *p = port_control_service_create(DEFAULT_SINGLE_PORT,DEFAULT_SINGLE_PORT_NEXT,1);
+  port_control_service *p = port_control_service_create(DEFAULT_SINGLE_PORT,
+      DEFAULT_SINGLE_PORT_NEXT,1);
 
   jnx_char *s = port_control_service_next_available_to_s(p);
 
@@ -71,6 +72,26 @@ void test_port_use_sequential() {
   
   close(sockfd);
   close(socktwo);
+  
+  port_control_service_destroy(&p);
+}
+void test_port_increment() {
+  
+  port_control_service *p = port_control_service_create(6000,6001,1);
+  
+  jnx_int next = port_control_service_next_available(p);
+  
+  JNXCHECK(next == 6000);
+  
+  next = port_control_service_next_available(p);
+  
+  JNXCHECK(next == 6001);
+  
+  next = port_control_service_next_available(p);
+  
+  JNXCHECK(next == 6000);
+
+  port_control_service_destroy(&p);
 }
 int main(int argc, char **argv) {
   JNX_LOG(NULL,"Test port control service");
@@ -81,6 +102,8 @@ int main(int argc, char **argv) {
   test_port_control_service_next_available();
   JNX_LOG(NULL,"Test using ports sequentially");
   test_port_use_sequential();
+  JNX_LOG(NULL,"Test port increment");
+  test_port_increment();
   return 0;
 }
 
