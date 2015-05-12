@@ -182,13 +182,13 @@ void auth_comms_listener_start(auth_comms_service *ac, discovery_service *ds,
 void auth_comms_destroy(auth_comms_service **ac) {
   jnx_socket_tcp_listener_destroy(&(*ac)->listener);
 }
-void auth_comms_initiator_start(auth_comms_service *ac, \
+jnx_int auth_comms_initiator_start(auth_comms_service *ac, \
     discovery_service *ds, port_control_service *ps, 
     session *s) {
 
   if(s->is_connected) {
     printf("This session is already connected.\n");
-    return;
+    return 1;
   }
 
   jnx_char *sport = port_control_service_next_available_to_s(ps);
@@ -218,7 +218,7 @@ void auth_comms_initiator_start(auth_comms_service *ac, \
       printf("Handshake has been rejected.\n");
       free(obuffer);
       auth_receiver__free_unpacked(r,NULL);
-      return;
+      return -1;
     }
 
     /* At this point we have a session with the receiver public key
@@ -280,6 +280,7 @@ void auth_comms_initiator_start(auth_comms_service *ac, \
       auth_receiver__free_unpacked(ar,NULL);
     }
   }
+  return 0;
 }
 void auth_comms_stop(auth_comms_service *ac,session *s) {
   JNXCHECK(ac);

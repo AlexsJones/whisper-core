@@ -60,8 +60,9 @@ void auth_comms_destroy(auth_comms_service **ac);
  * @param dc is a pointer to initialised discovery_service
  * @param ps is a pointer to initialised port_control_service
  * @param s is a pointer to the current session
+ * @return 0 on success, -1 on error, 1 means session already connected
  */
-void auth_comms_initiator_start(auth_comms_service *ac, \
+jnx_int auth_comms_initiator_start(auth_comms_service *ac, \
     discovery_service *ds, port_control_service *ps, 
     session *s);
 /*
