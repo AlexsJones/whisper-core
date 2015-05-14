@@ -184,7 +184,7 @@ void auth_comms_destroy(auth_comms_service **ac) {
 }
 jnx_int auth_comms_initiator_start(auth_comms_service *ac, \
     discovery_service *ds, port_control_service *ps, 
-    session *s) {
+    session *s, jnx_uint8 *initiator_message) {
 
   if(s->is_connected) {
     printf("This session is already connected.\n");
@@ -199,7 +199,8 @@ jnx_int auth_comms_initiator_start(auth_comms_service *ac, \
   JNXCHECK(remote_peer);
 
   jnx_uint8 *obuffer;
-  jnx_int bytes_read = handshake_generate_public_key_request(s,&obuffer);
+  jnx_int bytes_read = handshake_generate_public_key_request(s,initiator_message,
+      &obuffer);
 
   printf("Generated initial handshake...[%d/bytes]\n",bytes_read);
   jnx_size replysize;

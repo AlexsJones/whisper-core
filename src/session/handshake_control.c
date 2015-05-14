@@ -41,6 +41,7 @@ int handshake_did_receive_receiver_request(jnx_uint8 *obuffer,
 int handshake_initiator_command_generate(session *ses,\
     handshake_initiator_state state,\
     jnx_uint8 *shared_secret,jnx_size secret_len,
+    jnx_uint8 *initiator_message,
     jnx_uint8 **onetbuffer) {
 
   jnx_char *local_guid_str;
@@ -56,6 +57,11 @@ int handshake_initiator_command_generate(session *ses,\
       printf("Generating initial challenge flags.\n");
       auth_parcel.is_requesting_public_key = 1;
       auth_parcel.is_requesting_finish = 0;
+      if(initiator_message) {
+        auth_parcel.initiator_message = malloc(strlen(initiator_message) + 1);
+        memcpy(auth_parcel.initiator_message,initiator_message,
+            strlen(initiator_message)+1);
+      }
       break;
     case CHALLENGE_FINISH:
       printf("Generating finish request flags.\n");
@@ -158,15 +164,17 @@ int handshake_receiver_command_generate(session *ses, \
   return parcel_len;
 }
 int handshake_generate_public_key_request(session *ses,\
+    jnx_uint8 *initiator_message,
     jnx_uint8 **onetbuffer) {
   return handshake_initiator_command_generate(ses,
-      CHALLENGE_PUBLIC_KEY,NULL,0,onetbuffer);
+      CHALLENGE_PUBLIC_KEY,NULL,0,initiator_message,
+      onetbuffer);
 }
 int handshake_generate_finish_request(session *ses,\
     jnx_uint8 *shared_secret,jnx_size len,
     jnx_uint8 **onetbuffer) {
   return handshake_initiator_command_generate(ses,
-      CHALLENGE_FINISH,shared_secret,len,onetbuffer);
+      CHALLENGE_FINISH,shared_secret,len,NULL,onetbuffer);
 }
 int handshake_generate_public_key_response(session *ses,\
     jnx_int abort,

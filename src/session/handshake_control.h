@@ -32,9 +32,11 @@ int handshake_did_receive_receiver_request(jnx_uint8 *obuffer,
 
 int handshake_initiator_command_generate(session *ses,\
     handshake_initiator_state state, jnx_uint8 *shared_secret,jnx_size len,
+    jnx_uint8 *initiator_message,
     jnx_uint8 **onetbuffer);
 
 int handshake_generate_public_key_request(session *ses,\
+    jnx_uint8 *initiator_message,
     jnx_uint8 **onetbuffer);
 
 int handshake_generate_finish_request(session *ses,\
