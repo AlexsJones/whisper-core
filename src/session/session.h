@@ -44,6 +44,7 @@ typedef struct session {
 
   /* gui */
   void *gui_context;
+  jnx_uint8 *initiator_message;
   /* local only */
   RSA *keypair;
 }session;
