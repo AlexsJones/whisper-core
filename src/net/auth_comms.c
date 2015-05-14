@@ -84,6 +84,11 @@ static void listener_callback(const jnx_uint8 *payload,
 
       printf("Created a linked session with the local peer %s and remote peer %s\n",
           local_peer->user_name,remote_peer->user_name);
+
+      if(a->initiator_message) {
+        JNX_LOG(NULL,"The incoming session says: %s\n",a->initiator_message);
+        session_add_initiator_message(osession,a->initiator_message);
+      }
       /* setting our response key as the 'remote public key' */
       session_add_initiator_public_key(osession,a->initiator_public_key); 
       session_add_secure_comms_port(osession,a->secure_comms_port);
@@ -198,6 +203,11 @@ jnx_int auth_comms_initiator_start(auth_comms_service *ac, \
   peer *remote_peer = peerstore_lookup(ds->peers,&(*s).remote_peer_guid);
   JNXCHECK(remote_peer);
 
+  if(initiator_message) {
+    JNX_LOG(NULL,"Setting initiator message on the session [%s]",
+        initiator_message);
+    session_add_initiator_message(s,initiator_message);
+  }
   jnx_uint8 *obuffer;
   jnx_int bytes_read = handshake_generate_public_key_request(s,initiator_message,
       &obuffer);

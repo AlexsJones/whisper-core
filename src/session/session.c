@@ -90,3 +90,10 @@ void session_add_remote_peer_guid(session *s, jnx_uint8 *guid_str) {
   jnx_guid_from_string((jnx_char*)guid_str,&g);
   s->remote_peer_guid = g;
 }
+void session_add_initiator_message(session *s, jnx_uint8 *message) {
+  JNXCHECK(message);
+  jnx_size len = strlen(message) +1;
+  s->initiator_message = malloc(len * sizeof(jnx_char));
+  bzero(s->initiator_message,len);
+  memcpy(s->initiator_message,message,len);
+}

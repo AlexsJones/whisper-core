@@ -61,6 +61,8 @@ int handshake_initiator_command_generate(session *ses,\
         auth_parcel.initiator_message = malloc(strlen(initiator_message) + 1);
         memcpy(auth_parcel.initiator_message,initiator_message,
             strlen(initiator_message)+1);
+      }else {
+        JNX_LOG(NULL,"handshake_initiator_command_generate: packed without initiator message");
       }
       break;
     case CHALLENGE_FINISH:
