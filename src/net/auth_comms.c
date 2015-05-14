@@ -38,10 +38,10 @@ static jnx_uint8 *send_data_await_reply(jnx_char *hostname, jnx_char *port,
     jnx_int bytes, jnx_size *receipt_bytes) {
   jnx_socket *sock = jnx_socket_tcp_create(family);
   jnx_uint8 *reply;
-  JNX_LOG(NULL,"Awaiting reply from %s",hostname);
+  JNXLOG(LDEBUG,"Awaiting reply from %s",hostname);
   *receipt_bytes = jnx_socket_tcp_send_with_receipt(sock,hostname,port,buffer,\
       bytes,&reply);
-  JNX_LOG(NULL,"Reply received");
+  JNXLOG(LDEBUG,"Reply received");
   jnx_socket_destroy(&sock);
   return reply;
 }
@@ -114,7 +114,7 @@ static void listener_callback(const jnx_uint8 *payload,
       if(session_service_fetch_session(t->ss,
             &g,&osession) != SESSION_STATE_OKAY) {
 
-        JNX_LOG(NULL,"An unknown session has attempted to initiate second stage\
+        JNXLOG(LDEBUG,"An unknown session has attempted to initiate second stage\
             handshake");
         /* TODO: Log this attempt to access second stage handshake possible 
          * attack */

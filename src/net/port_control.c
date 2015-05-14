@@ -39,7 +39,7 @@ jnx_int port_control_service_scan_range(port_control_service *p,E_SCAN_STATE
     state) {
   jnx_int x;
   for(x=p->crange;x<(p->urange + 1);x=x+p->interval) {
-    JNX_LOG(NULL,"Testing port %d [%d:%d]",x,p->crange,p->urange);
+    JNXLOG(LDEBUG,"Testing port %d [%d:%d]",x,p->crange,p->urange);
     jnx_int is_available = is_port_available(x);
     if(is_available) {
       return x;

@@ -27,7 +27,7 @@ static char *baddr = NULL;
 
 int linking_test_procedure(session *s, linked_session_type session_type,
     void *optargs) {
-  JNX_LOG(NULL, "Linking now the receiver session..");
+  JNXLOG(NULL, "Linking now the receiver session..");
   /*
      jnx_char *default_secure_comms = "6666";
      auth_comms_service *ac = auth_comms_create();
@@ -51,7 +51,7 @@ int app_accept_reject(discovery_service *ds, jnx_guid *initiator_guild,
 }
 
 void test_receiver() {
-  JNX_LOG(NULL, "test_linking");
+  JNXLOG(NULL, "test_linking");
   session_service *service = session_service_create(linking_test_procedure,
       unlinking_test_procedure);
 

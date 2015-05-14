@@ -170,28 +170,28 @@ int test_broadcast_update_strategy(discovery_service *svc) {
 int main(int argc, char **argv) {
   get_broadcast_ip(&baddr);
 
-  JNX_LOG(NULL,"Test service creation.");
+  JNXLOG(NULL,"Test service creation.");
   run_discovery_service_test(test_service_creation);
 
-  JNX_LOG(NULL,"Test service cleanup.");
+  JNXLOG(NULL,"Test service cleanup.");
   run_discovery_service_test(test_service_cleanup);
 
-  JNX_LOG(NULL, "Test starting discovery service.");
+  JNXLOG(NULL, "Test starting discovery service.");
   run_discovery_service_test(test_starting_service);
 
-  JNX_LOG(NULL, "Test stopping discovery service.");
+  JNXLOG(NULL, "Test stopping discovery service.");
   run_discovery_service_test(test_stopping_service);
 
-  JNX_LOG(NULL, "Test restarting discovery service.");
+  JNXLOG(NULL, "Test restarting discovery service.");
   run_discovery_service_test(test_restarting_service);
 
-  JNX_LOG(NULL, "Test setting peer_update_interval global variable.");
+  JNXLOG(NULL, "Test setting peer_update_interval global variable.");
   run_discovery_service_test(test_setting_peer_update_interval);
 
-  JNX_LOG(NULL, "Test broadcast update strategy.");
+  JNXLOG(NULL, "Test broadcast update strategy.");
   run_discovery_service_test(test_broadcast_update_strategy);
 
-  JNX_LOG(NULL, "Test polling update strategy.");
+  JNXLOG(NULL, "Test polling update strategy.");
   run_discovery_service_test(test_polling_update_strategy);
   
   free(baddr);

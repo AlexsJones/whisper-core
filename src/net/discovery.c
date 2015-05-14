@@ -109,7 +109,7 @@ typedef struct sockaddr*(*address_mapping)(struct ifaddrs *);
 static void get_ip(char *buffer, address_mapping filter) {
   struct ifaddrs *ifap;
   if (0 != getifaddrs(&ifap)) {
-    JNX_LOG(0, "[ERROR] Couldn't get descriptions of network interfaces.");
+    JNXLOG(0, "[ERROR] Couldn't get descriptions of network interfaces.");
     exit(1);
   }
 
@@ -247,7 +247,7 @@ void discovery_receive_handler(const jnx_uint8 *j, jnx_size bytesread, void *con
     return;
   }
   else {
-    JNX_LOG(0, "[DISCOVERY] Received unknown command. Ignoring the packet.");
+    JNXLOG(0, "[DISCOVERY] Received unknown command. Ignoring the packet.");
   }
   return;
 }
@@ -296,12 +296,12 @@ void get_local_ip(char **local_ip) {
   printf("Getting broadcast IP\n");
   *local_ip = calloc(16, sizeof(char));
   get_ip(*local_ip, filter_local_ip_address);
-  JNX_LOG(0, "Local IP is %s", *local_ip); 
+  JNXLOG(0, "Local IP is %s", *local_ip); 
 }
 void get_broadcast_ip(char **broadcast_ip) {
   *broadcast_ip = calloc(16, sizeof(char));
   get_ip(*broadcast_ip, filter_broadcast_address);
-  JNX_LOG(0, "Broadcast IP is %s", *broadcast_ip); 
+  JNXLOG(0, "Broadcast IP is %s", *broadcast_ip); 
 }
 discovery_service* discovery_service_create(int port, unsigned int family,
     char *broadcast_group_address, peerstore *peers) {
@@ -344,7 +344,7 @@ int discovery_service_start(discovery_service *svc, discovery_strategy *strategy
   svc->isrunning = 1;
 
   if (0 != listen_for_discovery_packets(svc)) {
-    JNX_LOG(0, "[DISCOVERY] Couldn't start the discovery listener.\n");
+    JNXLOG(0, "[DISCOVERY] Couldn't start the discovery listener.\n");
     return ERR_DISCOVERY_START;
   }
 

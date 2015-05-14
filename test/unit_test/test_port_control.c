@@ -94,15 +94,15 @@ void test_port_increment() {
   port_control_service_destroy(&p);
 }
 int main(int argc, char **argv) {
-  JNX_LOG(NULL,"Test port control service");
+  JNXLOG(NULL,"Test port control service");
   test_single_port();
-  JNX_LOG(NULL,"Test port control scanning");
+  JNXLOG(NULL,"Test port control scanning");
   test_port_control_service_scan();
-  JNX_LOG(NULL,"Test port control scan next available");
+  JNXLOG(NULL,"Test port control scan next available");
   test_port_control_service_next_available();
-  JNX_LOG(NULL,"Test using ports sequentially");
+  JNXLOG(NULL,"Test using ports sequentially");
   test_port_use_sequential();
-  JNX_LOG(NULL,"Test port increment");
+  JNXLOG(NULL,"Test port increment");
   test_port_increment();
   return 0;
 }

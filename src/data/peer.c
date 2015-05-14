@@ -57,7 +57,7 @@ peer *ntopeer(void *in, size_t len) {
   Peer *msg;
   msg = peer__unpack(NULL, len, in);
   if (NULL == msg) {
-    JNX_LOG(NULL, "Error unpacking a peer message.");
+    JNXLOG(LDEBUG, "Error unpacking a peer message.");
     return NULL;
   }
 

@@ -28,17 +28,17 @@ session_state session_message_write(session *s,jnx_uint8 *message) {
     perror("send:");
     return SESSION_STATE_FAIL;
   }
-  JNX_LOG(0,"Send result => %d\n",send_result);
+  JNXLOG(0,"Send result => %d\n",send_result);
   return SESSION_STATE_OKAY;
 }
 jnx_int session_message_read(session *s, jnx_uint8 **omessage) {
   *omessage = NULL;
   if(!s->is_connected) {
-    JNX_LOG(0,"Session not connected, cannot read");
+    JNXLOG(0,"Session not connected, cannot read");
     return -1;
   }
   if(s->secure_socket == -1 ) {
-    JNX_LOG(0,"Session cannot read from a null socket");
+    JNXLOG(0,"Session cannot read from a null socket");
     return -1;
   }
   jnx_uint8 buffer[2048];

@@ -39,7 +39,7 @@ int listen_for_socket_fd(peer *remote_peer,session *ses) {
   hints.ai_socktype = SOCK_STREAM;
   hints.ai_flags = AI_PASSIVE;
 
-  JNX_LOG(0,"listen_for_socket_fd: getaddrinfo");
+  JNXLOG(0,"listen_for_socket_fd: getaddrinfo");
 
   JNXCHECK(getaddrinfo(NULL,ses->secure_comms_port,&hints,&res) == 0);
   p = res;
@@ -51,7 +51,7 @@ int listen_for_socket_fd(peer *remote_peer,session *ses) {
       perror("setsockopt");
       exit(1);
     }
-    JNX_LOG(0,"listen_for_socket_fd: bind");
+    JNXLOG(0,"listen_for_socket_fd: bind");
     if (bind(sock, p->ai_addr, p->ai_addrlen) == -1) {
       perror("server:");
       return -1;
@@ -60,10 +60,10 @@ int listen_for_socket_fd(peer *remote_peer,session *ses) {
     p = p->ai_next;
   }
   freeaddrinfo(res);
-  JNX_LOG(0,"listen_for_socket_fd: listen");
+  JNXLOG(0,"listen_for_socket_fd: listen");
   listen(sock,10);
   socklen_t addr_size = sizeof(their_addr);
-  JNX_LOG(0,"listen_for_socket_fd: accept");
+  JNXLOG(0,"listen_for_socket_fd: accept");
   int fd = accept(sock,(struct sockaddr*)&their_addr,&addr_size);
   if(fd < 0) {
     perror("accept:");
@@ -80,12 +80,12 @@ int connect_for_socket_fd(peer *remote_peer,session *ses) {
   hints.ai_family = AF_INET;
   hints.ai_socktype = SOCK_STREAM;
 
-  JNX_LOG(0,"connect_for_socket_fd: getaddrinfo");
+  JNXLOG(0,"connect_for_socket_fd: getaddrinfo");
   jnx_int32 rg = 0;
   if((rg = getaddrinfo(remote_peer->host_address,
           ses->secure_comms_port,&hints,&res)) != 0) {
 
-    JNX_LOG(DEFAULT_CONTEXT,"%s\n",gai_strerror(rg));
+    JNXLOG(LDEBUG,"%s\n",gai_strerror(rg));
     return -1;
   }
 
@@ -95,13 +95,13 @@ int connect_for_socket_fd(peer *remote_peer,session *ses) {
     return -1;
   }
   ses->is_connected = 1;
-  JNX_LOG(0,"connect_for_socket_fd: ses->is_connected connected!");
+  JNXLOG(0,"connect_for_socket_fd: ses->is_connected connected!");
   freeaddrinfo(res);
   return sock;
 }
 void secure_comms_end(session *s) {
   if(s->secure_socket) {
-    JNX_LOG(NULL,"Secure comms shutting down fd %d",s->secure_socket);
+    JNXLOG(LDEBUG,"Secure comms shutting down fd %d",s->secure_socket);
     if(shutdown(s->secure_socket,SHUT_RDWR) != 0) {
       perror("socket shutdown: ");
     }

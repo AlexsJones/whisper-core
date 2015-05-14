@@ -73,13 +73,13 @@ void test_peerstore_lookup_for_inactive_username() {
   peerstore_destroy(&ps);
 }
 int main() {
-  JNX_LOG(0, "test_peerstore_lookup_by_username");
+  JNXLOG(0, "test_peerstore_lookup_by_username");
   test_peerstore_lookup_by_username();
   
-  JNX_LOG(0, "test_peerstore_lookup_for_non_existant_username");
+  JNXLOG(0, "test_peerstore_lookup_for_non_existant_username");
   test_peerstore_lookup_for_non_existant_username();
   
-  JNX_LOG(0, "test_peerstore_lookup_for_inactive_username");
+  JNXLOG(0, "test_peerstore_lookup_for_inactive_username");
   test_peerstore_lookup_for_inactive_username();
 
   return 0;

@@ -123,7 +123,7 @@ session_state session_service_fetch_all_sessions(session_service *service,
     jnx_list **olist) {
   *olist = NULL;
   if(service->session_list->counter == 0) {
-    JNX_LOG(NULL,"Session list is empty");
+    JNXLOG(LDEBUG,"Session list is empty");
     return SESSION_STATE_NOT_FOUND;
   }
   jnx_node *h = service->session_list->head,
@@ -140,14 +140,14 @@ session_state session_service_fetch_all_sessions(session_service *service,
 session_state session_service_fetch_session(session_service *service,
     jnx_guid *g, session **osession) {
   if(!service) {
-    JNX_LOG(NULL,"Session service is null");
+    JNXLOG(LDEBUG,"Session service is null");
     return SESSION_STATE_NOT_FOUND;
   }
   if(service->session_list->counter == 0) {
     return SESSION_STATE_NOT_FOUND;
   }
   if(session_service_does_exist(service,g) == 0) {
-    JNX_LOG(NULL,"Session not found");
+    JNXLOG(LDEBUG,"Session not found");
     return SESSION_STATE_NOT_FOUND;
   }
   jnx_node *h = service->session_list->head,
@@ -216,7 +216,7 @@ session_state session_service_link_sessions(session_service *s,
   }
   osession->local_peer_guid = local_peer->guid;
   osession->remote_peer_guid = remote_peer->guid;
-  JNX_LOG(NULL,"Linking function from session service");
+  JNXLOG(LDEBUG,"Linking function from session service");
   int r =  s->linking_func(osession,session_type,linking_args);
   return r ? SESSION_STATE_FAIL : SESSION_STATE_OKAY;
 }
@@ -237,9 +237,9 @@ session_state session_service_unlink_sessions(session_service *s,
   JNXCHECK(is_guid_blank(&osession->local_peer_guid));
   JNXCHECK(is_guid_blank(&osession->remote_peer_guid));
 
-  JNX_LOG(NULL,"Unlinking function from session service");
+  JNXLOG(LDEBUG,"Unlinking function from session service");
   int r = s->unlinking_func(osession,session_type,linking_args);
-  JNX_LOG(NULL,"Disconnected session");
+  JNXLOG(LDEBUG,"Disconnected session");
   return r ? SESSION_STATE_FAIL : SESSION_STATE_OKAY;
 }
 jnx_int session_service_session_is_linked(session_service *s,\
@@ -247,7 +247,7 @@ jnx_int session_service_session_is_linked(session_service *s,\
   session *osession;
   session_state e = session_service_fetch_session(s,session_guid,&osession);
   if(e != SESSION_STATE_OKAY) {
-    JNX_LOG(NULL,"Could not retrieve session");
+    JNXLOG(LDEBUG,"Could not retrieve session");
     return 0;
   }
   int a = is_guid_blank(&osession->remote_peer_guid),

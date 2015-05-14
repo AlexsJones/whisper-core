@@ -40,7 +40,7 @@ RSA *asymmetrical_key_from_string(jnx_char *string, key_type type) {
 
       break;
     case PRIVATE:
-      JNX_LOG(NULL,"asymmetrical private key from string not supported!");
+      JNXLOG(LDEBUG,"asymmetrical private key from string not supported!");
   }
   BIO_free(key);
   return rsa;
@@ -100,7 +100,7 @@ jnx_char *asymmetrical_decrypt(RSA *keypair, jnx_uint8 *message, \
 }
 jnx_char *symmetrical_encrypt(jnx_uint8 *key,jnx_uint8 *msg, jnx_size size){
 #ifdef NOSYMMETRICALCRYPTO
-  JNX_LOG(NULL,"---------------------NOT USING CRYPTOGRAPHY----------------");
+  JNXLOG(LDEBUG,"---------------------NOT USING CRYPTOGRAPHY----------------");
   return strdup(msg);
 #endif
   jnx_char *res;
@@ -118,7 +118,7 @@ jnx_char *symmetrical_encrypt(jnx_uint8 *key,jnx_uint8 *msg, jnx_size size){
 }
 jnx_char *symmetrical_decrypt(jnx_uint8 *key,jnx_uint8 *msg, jnx_size size){
 #ifdef NOSYMMETRICALCRYPTO
-  JNX_LOG(NULL,"---------------------NOT USING CRYPTOGRAPHY----------------");
+  JNXLOG(LDEBUG,"---------------------NOT USING CRYPTOGRAPHY----------------");
   return strdup(msg);
 #endif
   jnx_char *res;

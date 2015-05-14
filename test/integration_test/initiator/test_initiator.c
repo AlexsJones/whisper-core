@@ -29,7 +29,7 @@ int linking_test_procedure(session *s,linked_session_type session_type,
     void *optargs) {
   if(session_type == E_AM_INITIATOR){
     JNXCHECK(session_type == E_AM_INITIATOR);
-    JNX_LOG(NULL,"Session hit linking procedure functor");
+    JNXLOG(NULL,"Session hit linking procedure functor");
     discovery_service *ds = (discovery_service*)optargs;
     /* Adding port control service */
 
@@ -53,7 +53,7 @@ int unlinking_test_procedure(session *s,linked_session_type session_type,
   return 0;
 }
 void test_initiator() {
-  JNX_LOG(NULL,"test_linking");
+  JNXLOG(NULL,"test_linking");
   session_service *service = session_service_create(linking_test_procedure,
       unlinking_test_procedure);
   session *os;

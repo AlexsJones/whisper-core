@@ -36,11 +36,11 @@ void test_rsa_encryption() {
   jnx_size olen,second_olen;
   jnx_char *encrypted_message = asymmetrical_encrypt(key,test_message,&olen);
 
-  JNX_LOG(NULL,"Encrypted RSA length %d >%s<\n",olen,encrypted_message);
+  JNXLOG(NULL,"Encrypted RSA length %d >%s<\n",olen,encrypted_message);
 
   jnx_char *decrypted_message = asymmetrical_decrypt(key,encrypted_message,olen,&second_olen);
 
-  JNX_LOG(NULL,"Decrypted message %d >%s<\n",second_olen,decrypted_message);
+  JNXLOG(NULL,"Decrypted message %d >%s<\n",second_olen,decrypted_message);
 
   JNXCHECK(strcmp(decrypted_message,test_message) == 0);
 }
@@ -50,11 +50,11 @@ void test_rsa_key() {
 
   jnx_char *keystring = asymmetrical_key_to_string(key,PUBLIC);
 
-  JNX_LOG(NULL,"Key \n%s",keystring);
+  JNXLOG(NULL,"Key \n%s",keystring);
   JNXCHECK(keystring);  
   jnx_char *keystringprivate = asymmetrical_key_to_string(key,PRIVATE);
 
-  JNX_LOG(NULL,"Key \n%s",keystringprivate);
+  JNXLOG(NULL,"Key \n%s",keystringprivate);
   JNXCHECK(keystringprivate);  
 
   free(keystring);
@@ -81,13 +81,13 @@ void test_des_encryption() {
   free(buffer);
 }
 int main(int argc, char **argv) {
-  JNX_LOG(NULL,"Test generate shared secret");
+  JNXLOG(NULL,"Test generate shared secret");
   test_secret_generate();
-  JNX_LOG(NULL,"Test RSA key");
+  JNXLOG(NULL,"Test RSA key");
   test_rsa_key();
-  JNX_LOG(NULL,"Test RSA encryption");
+  JNXLOG(NULL,"Test RSA encryption");
   test_rsa_encryption();
-  JNX_LOG(NULL,"Test DES encryption");
+  JNXLOG(NULL,"Test DES encryption");
   test_des_encryption();
   return 0;
 }
