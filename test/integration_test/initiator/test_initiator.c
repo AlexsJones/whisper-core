@@ -42,7 +42,7 @@ int linking_test_procedure(session *s,linked_session_type session_type,
     ac = auth_comms_create();
 
     ac->listener = jnx_socket_tcp_listener_create("9991",AF_INET,15);
-    auth_comms_initiator_start(ac,ds,ps,s);
+    auth_comms_initiator_start(ac,ds,ps,s,"Hello from the initiator!");
   }
   return 0;
 }
