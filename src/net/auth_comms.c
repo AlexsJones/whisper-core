@@ -84,7 +84,7 @@ static void listener_callback(const jnx_uint8 *payload,
 
       printf("Created a linked session with the local peer %s and remote peer %s\n",
           local_peer->user_name,remote_peer->user_name);
-      
+
       if(a->initiator_message) {
         JNX_LOG(NULL,"The incoming session says: %s\n",a->initiator_message);
         session_add_initiator_message(osession,a->initiator_message);
