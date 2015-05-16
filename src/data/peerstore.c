@@ -19,6 +19,7 @@
 #include <jnxc_headers/jnxhash.h>
 #include <jnxc_headers/jnxguid.h>
 #include "peerstore.h"
+#include "peer.h"
 
 #define PEERSTORE(x) ((jnx_hashmap *) x)
 #define NAMESTORE(x) ((jnx_hashmap *) x)
@@ -26,9 +27,11 @@
 static int is_peer_active(peerstore *ps, peer *p) {
   return ps->is_active_peer(ps->last_update, p);
 }
+
 static int always_active(time_t lut, peer *p) {
   return 1;
 }
+
 peerstore *peerstore_init(peer *local_peer, is_active_peer_t iap) {
   peerstore *store = malloc(sizeof(peerstore));
   store->local_peer = local_peer;
@@ -44,9 +47,11 @@ peerstore *peerstore_init(peer *local_peer, is_active_peer_t iap) {
   }
   return (peerstore *) store;
 }
+
 peer *peerstore_get_local_peer(peerstore *ps) {
   return ps->local_peer;
 }
+
 static void handle_peer_reconnection(peerstore *ps, peer *p) {
   char *guid_str = (char *) jnx_hash_get(NAMESTORE(ps->namestore), p->user_name);
   if (guid_str != NULL) {
@@ -63,6 +68,20 @@ static void handle_peer_reconnection(peerstore *ps, peer *p) {
     }
   }
 }
+
+static void ensure_username_unique(peerstore *ps, peer *p, char *guid_str) {
+  char *current_guid = jnx_hash_get(NAMESTORE(ps->namestore), p->user_name);
+  if (jnx_hash_get(NAMESTORE(ps->namestore), p->user_name) != NULL) {
+    char *unique_username;
+    unique_username = calloc(1 + 5 + strlen(p->user_name), sizeof(char));
+    strcpy(unique_username, p->user_name);
+    strcat(unique_username, "-");
+    strncat(unique_username, guid_str, 4);
+    free(p->user_name);
+    p->user_name = unique_username;
+  }
+}
+
 void peerstore_store_peer(peerstore *ps, peer *p) {
   jnx_thread_lock(ps->store_lock);
   handle_peer_reconnection(ps, p);
@@ -71,26 +90,34 @@ void peerstore_store_peer(peerstore *ps, peer *p) {
   jnx_guid_to_string(&p->guid, &guid_str);
   peer *old = jnx_hash_get(PEERSTORE(ps->peers), guid_str);
   if (old != NULL) {
-    memcpy(&old->guid, &p->guid, sizeof(jnx_guid));
-   
     free(old->host_address);
     old->host_address = calloc(1 + strlen(p->host_address), sizeof(char));
     strcpy(old->host_address, p->host_address);
-   
-    free(old->user_name);
-    old->user_name = calloc(1 + strlen(p->user_name), sizeof(char));
-    strcpy(old->user_name, p->user_name);
 
+    // compare with unique username - possibly 5 extra characters appended,
+    // namely a '-' and first for bytes of the peer GUID string
+    if (0 != strncmp(old->user_name, p->user_name, strlen(p->user_name))) {
+      // Username has changed, so replace it in the peer record stored in
+      // the peerstore, and also use it as the new key in the namestore.
+      jnx_hash_delete_value(NAMESTORE(ps->namestore), old->user_name);
+      free(old->user_name);
+      ensure_username_unique(ps, p, guid_str);
+      old->user_name = calloc(1 + strlen(p->user_name), sizeof(char));
+      strcpy(old->user_name, p->user_name);
+      jnx_hash_put(NAMESTORE(ps->namestore), p->user_name, guid_str);
+    }
     old->last_seen = p->last_seen;
 
     peer_free(&p);
   }
   else {
-    jnx_hash_put(PEERSTORE(ps->peers), guid_str, (void *) p);
+    ensure_username_unique(ps, p, guid_str);
     jnx_hash_put(NAMESTORE(ps->namestore), p->user_name, (void *) guid_str);
+    jnx_hash_put(PEERSTORE(ps->peers), guid_str, (void *) p);
   }
   jnx_thread_unlock(ps->store_lock);
 }
+
 void peerstore_destroy(peerstore **pps) {
   peerstore *ps = *pps;
   peer_free(&(ps->local_peer));
@@ -98,7 +125,7 @@ void peerstore_destroy(peerstore **pps) {
   jnx_hashmap *peers = PEERSTORE(ps->peers);
   jnx_hashmap *namestore = NAMESTORE(ps->namestore);
   const char **keys;
-  int num_keys = jnx_hash_get_keys(peers, &keys); 
+  int num_keys = jnx_hash_get_keys(peers, &keys);
   int i;
   for (i = 0; i < num_keys; i++) {
     peer *temp = jnx_hash_get(peers, *(keys + i));
@@ -110,6 +137,7 @@ void peerstore_destroy(peerstore **pps) {
   free(ps);
   *pps = NULL;
 }
+
 peer *peerstore_lookup(peerstore *ps, jnx_guid *guid) {
   JNXCHECK(ps->is_active_peer);
   jnx_thread_lock(ps->store_lock);
@@ -125,6 +153,7 @@ peer *peerstore_lookup(peerstore *ps, jnx_guid *guid) {
   jnx_thread_unlock(ps->store_lock);
   return p;
 }
+
 peer *peerstore_lookup_by_username(peerstore *ps, char *username) {
   JNXCHECK(ps->is_active_peer);
   jnx_thread_lock(ps->store_lock);
@@ -148,6 +177,7 @@ peer *peerstore_lookup_by_username(peerstore *ps, char *username) {
   jnx_thread_unlock(ps->store_lock);
   return p;
 }
+
 void peerstore_peer_no_longer_active(peerstore *ps, peer *p) {
   jnx_thread_lock(ps->store_lock);
   char *guid_str = jnx_hash_get(NAMESTORE(ps->namestore), p->user_name);
@@ -158,11 +188,12 @@ void peerstore_peer_no_longer_active(peerstore *ps, peer *p) {
   free(guid_str);
   jnx_thread_unlock(ps->store_lock);
 }
+
 int peerstore_get_active_guids(peerstore *ps, jnx_guid ***guids) {
   jnx_thread_lock(ps->store_lock);
   jnx_hashmap *peers = PEERSTORE(ps->peers);
   const char **keys;
-  int num_keys = jnx_hash_get_keys(peers, &keys); 
+  int num_keys = jnx_hash_get_keys(peers, &keys);
   int i, num_guids = 0;
   *guids = calloc(num_keys, sizeof(jnx_guid *));
   for (i = 0; i < num_keys; i++) {
@@ -170,11 +201,12 @@ int peerstore_get_active_guids(peerstore *ps, jnx_guid ***guids) {
     if (is_peer_active(ps, temp)) {
       (*guids)[num_guids] = &temp->guid;
       num_guids++;
-    }	
+    }
   }
   jnx_thread_unlock(ps->store_lock);
   return num_guids;
 }
+
 void peerstore_set_last_update_time(peerstore *ps, time_t last_update) {
   jnx_thread_lock(ps->store_lock);
   ps->last_update = last_update;
