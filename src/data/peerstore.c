@@ -70,6 +70,8 @@ static void handle_peer_reconnection(peerstore *ps, peer *p) {
 }
 
 static void ensure_username_unique(peerstore *ps, peer *p, char *guid_str) {
+  const char **keys;
+  int numkeys = jnx_hash_get_keys(NAMESTORE(ps->namestore), &keys);
   char *current_guid = jnx_hash_get(NAMESTORE(ps->namestore), p->user_name);
   if (jnx_hash_get(NAMESTORE(ps->namestore), p->user_name) != NULL) {
     char *unique_username;

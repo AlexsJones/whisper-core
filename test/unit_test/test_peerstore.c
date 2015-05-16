@@ -30,7 +30,7 @@ peer *local_test_peer() {
   for (i = 0; i < 16; i++) {
     guid.guid[i] = i;
   }
-  return peer_create(guid, "127.0.0.1", "LocalUser", 10);
+  return peer_create(guid, "127.0.0.1", "Local User", 10);
 }
 peer *other_test_peer() {
   jnx_guid guid;
@@ -38,7 +38,7 @@ peer *other_test_peer() {
   for (i = 0; i < 16; i++) {
     guid.guid[i] = 15;
   }
-  return peer_create(guid, "127.0.0.2", "OtherUser", 10);
+  return peer_create(guid, "127.0.0.2", "Another", 10);
 }
 peer *bob1() {
   jnx_guid guid;
@@ -65,8 +65,8 @@ void test_peerstore_lookup_by_username() {
   peerstore_store_peer(ps, local_test_peer());
   peerstore_store_peer(ps, other_test_peer());
 
-  peer *other = peerstore_lookup_by_username(ps, "OtherUser");
-  peer *local = peerstore_lookup_by_username(ps, "LocalUser");
+  peer *other = peerstore_lookup_by_username(ps, "Another");
+  peer *local = peerstore_lookup_by_username(ps, "Local User");
   
   int status = peers_compare(other, peerstore_get_local_peer(ps));
   JNXCHECK(status == PEERS_DIFFERENT);
