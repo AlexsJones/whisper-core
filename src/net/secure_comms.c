@@ -70,6 +70,7 @@ int listen_for_socket_fd(peer *remote_peer,session *ses) {
     return -1;
   }
   ses->is_connected = 1;
+  close(sock);
   return fd;
 }
 int connect_for_socket_fd(peer *remote_peer,session *ses) {
