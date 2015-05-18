@@ -41,6 +41,7 @@ typedef struct session {
   jnx_int is_connected;
   jnx_char *secure_comms_port;
   jnx_int secure_socket;
+  jnx_int secure_receiver_listen_socket;
 
   /* gui */
   void *gui_context;
