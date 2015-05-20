@@ -93,6 +93,7 @@ session_state session_service_create_session(session_service *service,
   s->receiver_public_key = NULL;
   s->shared_secret = NULL;
   s->secure_socket = -1;
+  s->secure_receiver_listen_socket = -1;
   s->gui_context = NULL;
   jnx_guid_create(&s->session_guid);
   generate_blank_guid(&s->local_peer_guid);
@@ -123,7 +124,6 @@ session_state session_service_fetch_all_sessions(session_service *service,
     jnx_list **olist) {
   *olist = NULL;
   if(service->session_list->counter == 0) {
-    JNXLOG(LDEBUG,"Session list is empty");
     return SESSION_STATE_NOT_FOUND;
   }
   jnx_node *h = service->session_list->head,
