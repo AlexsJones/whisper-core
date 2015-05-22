@@ -87,6 +87,8 @@ void test_secure_comms_setup_link() {
   session_service_destroy(&service);
 }
 int main(int argc, char **argv) {
+  JNXLOG_CREATE("../testlogger.conf");
   test_secure_comms_setup_link();
+  JNXLOG_DESTROY();
   return 0;
 }

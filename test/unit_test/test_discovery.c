@@ -170,6 +170,8 @@ int test_broadcast_update_strategy(discovery_service *svc) {
 int main(int argc, char **argv) {
   get_broadcast_ip(&baddr);
 
+  JNXLOG_CREATE("../testlogger.conf");
+  
   JNXLOG(NULL,"Test service creation.");
   run_discovery_service_test(test_service_creation);
 
@@ -195,5 +197,6 @@ int main(int argc, char **argv) {
   run_discovery_service_test(test_polling_update_strategy);
   
   free(baddr);
+  JNXLOG_DESTROY();
   return 0;
 }

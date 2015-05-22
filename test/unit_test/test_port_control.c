@@ -94,6 +94,7 @@ void test_port_increment() {
   port_control_service_destroy(&p);
 }
 int main(int argc, char **argv) {
+  JNXLOG_CREATE("../testlogger.conf");
   JNXLOG(NULL,"Test port control service");
   test_single_port();
   JNXLOG(NULL,"Test port control scanning");
@@ -104,6 +105,7 @@ int main(int argc, char **argv) {
   test_port_use_sequential();
   JNXLOG(NULL,"Test port increment");
   test_port_increment();
+  JNXLOG_DESTROY();
   return 0;
 }
 

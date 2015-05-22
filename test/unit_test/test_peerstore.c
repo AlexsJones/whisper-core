@@ -103,6 +103,7 @@ void test_peerstore_lookup_for_inactive_username() {
   peerstore_destroy(&ps);
 }
 int main() {
+  JNXLOG_CREATE("../testlogger.conf");
   JNXLOG(0, "test_peerstore_lookup_by_username");
   test_peerstore_lookup_by_username();
 
@@ -114,6 +115,6 @@ int main() {
   
   JNXLOG(0, "test_peerstore_lookup_for_inactive_username");
   test_peerstore_lookup_for_inactive_username();
-
+  JNXLOG_DESTROY();
   return 0;
 }

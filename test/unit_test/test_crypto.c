@@ -81,6 +81,7 @@ void test_des_encryption() {
   free(buffer);
 }
 int main(int argc, char **argv) {
+  JNXLOG_CREATE("../testlogger.conf");
   JNXLOG(NULL,"Test generate shared secret");
   test_secret_generate();
   JNXLOG(NULL,"Test RSA key");
@@ -89,5 +90,6 @@ int main(int argc, char **argv) {
   test_rsa_encryption();
   JNXLOG(NULL,"Test DES encryption");
   test_des_encryption();
+  JNXLOG_DESTROY();
   return 0;
 }
