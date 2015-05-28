@@ -118,6 +118,7 @@ start:
 }
 
 int main(int argc, char **argv) {
+  JNXLOG_CREATE("logger.conf");
   test_receiver();
   return 0;
 }
