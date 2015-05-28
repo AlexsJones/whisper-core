@@ -29,6 +29,31 @@ session_state session_message_write(session *s,jnx_uint8 *message) {
     return SESSION_STATE_FAIL;
   }
   JNXLOG(LDEBUG,"Send result => %d\n",send_result);
+  free(encrypted);
+
+  /* foriegn_session replication */
+  if(s->foriegn_sessions) {
+    jnx_node *head = s->foriegn_sessions->head,
+             *reset = s->foriegn_sessions->head;
+    while(head) {
+      session *current_foriegn_session = head->_data;
+      encrypted = symmetrical_encrypt(current_foriegn_session->shared_secret,
+          message,len);
+
+      if (0 > (send_result = send(current_foriegn_session->secure_socket,
+              encrypted,strlen(encrypted),0))) {
+        perror("send:");
+        JNXLOG(LWARN,"Failure to send on foriegn session");
+        head = head->next_node;
+        return SESSION_STATE_FAIL;
+      }
+      JNXLOG(LDEBUG,"foriegn_session send result => %d\n",send_result);
+      free(encrypted);
+      head = head->next_node;
+    }
+    head = reset;
+  } 
+  /* foriegn_session replication */
   return SESSION_STATE_OKAY;
 }
 jnx_int session_message_read(session *s, jnx_uint8 **omessage) {
@@ -96,4 +121,17 @@ void session_add_initiator_message(session *s, jnx_uint8 *message) {
   s->initiator_message = malloc(len * sizeof(jnx_char));
   bzero(s->initiator_message,len);
   memcpy(s->initiator_message,message,len);
+}
+void session_add_foreign_session(session *s, session *foriegn_session){
+  if(s->foriegn_sessions == NULL) {
+    s->foriegn_sessions = jnx_list_create();
+  }
+  jnx_list_add_ts(s->foriegn_sessions,foriegn_session);
+}
+void session_remove_foreign_sessions(session *s) {
+  if(s->foriegn_sessions == NULL) {
+    JNXLOG(LWARN,"session_remove_foreign_sessions: Nothing to remove");
+    return;
+  }
+  jnx_list_destroy(&s->foriegn_sessions);
 }

@@ -29,7 +29,6 @@ jnx_int secure_comms_is_socket_linked(jnx_int sock) {
   }
   return 0;
 }
-
 int listen_for_socket_fd(peer *remote_peer, session *ses) {
   jnx_int32 sock = socket(AF_INET, SOCK_STREAM, 0);
   jnx_int32 optval = 1;

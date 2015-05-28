@@ -20,7 +20,7 @@
 #include <jnxc_headers/jnxguid.h>
 #include <jnxc_headers/jnxqueue.h>
 #include <jnxc_headers/jnxsocket.h>
-
+#include <jnxc_headers/jnxlist.h>
 typedef enum session_state {
   SESSION_STATE_OKAY,
   SESSION_STATE_FAIL,
@@ -48,6 +48,8 @@ typedef struct session {
   jnx_uint8 *initiator_message;
   /* local only */
   RSA *keypair;
+  /* foriegn sessions that are shared with this session */
+  jnx_list *foriegn_sessions;
 }session;
 
 /*

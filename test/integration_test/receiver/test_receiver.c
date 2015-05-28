@@ -17,6 +17,7 @@
  */
 #include <stdlib.h>
 #include <jnxc_headers/jnxsocket.h>
+#include <jnxc_headers/jnxlog.h>
 #include <jnxc_headers/jnx_tcp_socket.h>
 #include "session_service.h"
 #include "auth_comms.h"
@@ -118,6 +119,7 @@ start:
 }
 
 int main(int argc, char **argv) {
+  JNXLOG_CREATE("logger.conf");
   test_receiver();
   return 0;
 }

@@ -18,6 +18,7 @@
 #include <stdlib.h>
 #include <jnxc_headers/jnxsocket.h>
 #include <jnxc_headers/jnxthread.h>
+#include <jnxc_headers/jnxlog.h>
 #include <jnxc_headers/jnx_tcp_socket.h>
 #include "session_service.h"
 #include "port_control.h"
@@ -109,6 +110,7 @@ void test_initiator() {
   JNXCHECK(session_service_session_is_linked(service,&os->session_guid) == 0);
 }
 int main(int argc, char **argv) {
+  JNXLOG_CREATE("logger.conf");
   test_initiator();
   return 0;
 }
