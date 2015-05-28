@@ -77,6 +77,30 @@ jnx_int session_message_read(session *s, jnx_uint8 **omessage) {
   }
   return bytes_read;
 }
+jnx_int session_message_read_foreign_sessions(session *s, 
+    jnx_list **omessagelist) {
+  int message_count = 0;
+  
+  if(s->foriegn_sessions) {
+    jnx_node *head = s->foriegn_sessions->head,
+             *reset = s->foriegn_sessions->head;
+    while(head) {
+      session *current_foriegn_session = head->_data;
+      jnx_uint8 *message;
+      jnx_int bytes_read = session_message_read(current_foriegn_session,&message);
+      if(bytes_read){
+      
+        foriegn_session_message *fsm = malloc(sizeof(foriegn_session_message));
+        fsm->message = message;
+        fsm->session_guid = current_foriegn_session->session_guid;
+        jnx_list_add(*omessagelist,fsm);
+        ++message_count;
+      }
+    }
+    head = reset;
+  }
+  return message_count;
+}
 session_state session_message_read_and_decrypt(session *s, 
     jnx_uint8 *message,jnx_uint8 **omessage) {
   jnx_size len = strlen(message);

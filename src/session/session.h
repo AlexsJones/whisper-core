@@ -52,6 +52,10 @@ typedef struct session {
   jnx_list *foriegn_sessions;
 }session;
 
+typedef struct foriegn_session_message {
+  jnx_guid session_guid;
+  jnx_uint8 *message;
+}foriegn_session_message;
 /*
  *@fn session_state session_message_write(sesssion *s, jnx_uint8 *message)
  *@brief writes a message that goes through the encryption layer to a remote session peer (if active)
@@ -68,6 +72,10 @@ session_state session_message_write(session *s,jnx_uint8 *message);
  *@return bytes read (-1 on failure)
  */
 jnx_int session_message_read(session *s, jnx_uint8 **omessage);
+
+
+
+jnx_int session_message_read_foreign_sessions(session *s, jnx_list **omessagelist);
 /*
  *@fn jnx_int session_is_active(session *s)
  *@brief this function is a quick way of determining if you can write to the remote session socket, usually polled after linking
