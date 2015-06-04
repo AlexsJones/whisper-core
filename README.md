@@ -31,6 +31,8 @@ The aim is to finish the kernel in C and bring it to other platforms with a vari
 
 The core acts as the framework for higher level programs to hook into.
 
+![Crypto](http://i.imgur.com/Q7Wrb4L.png)
+
 ![CoreStructure](http://i.imgur.com/0mUNLxm.png)
 
 ### Table of Contents
