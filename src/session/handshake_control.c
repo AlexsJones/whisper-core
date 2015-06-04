@@ -13,6 +13,7 @@
 #include "utils.h"
 #include "auth_initiator.pb-c.h"
 #include "auth_receiver.pb-c.h"
+#include "auth_joiner.pb-c.h"
 
 
 int handshake_did_receive_initiator_request(jnx_uint8 *obuffer,
@@ -32,7 +33,18 @@ int handshake_did_receive_receiver_request(jnx_uint8 *obuffer,
   *oobject = NULL;
   AuthReceiver *a = auth_receiver__unpack(NULL,bytes_read,obuffer);
   if(a == NULL) {
-    printf("Receiver request was null!.\n");
+    JNXLOG(LDEBUG,"Receiver request was null!.\n");
+    return 0;
+  }
+  *oobject = a;
+  return 1;
+}
+int handshake_did_receive_joiner_request(jnx_uint8 *obuffer,
+    jnx_size bytes_read,void **oobject) {
+  *oobject = NULL;
+  AuthJoiner *a = auth_joiner__unpack(NULL,bytes_read,obuffer);
+  if(a == NULL) {
+    JNXLOG(LDEBUG,"Joiner request was null!.\n");
     return 0;
   }
   *oobject = a;
@@ -54,7 +66,7 @@ int handshake_initiator_command_generate(session *ses,\
   free(local_guid_str);
   switch(state) {
     case CHALLENGE_PUBLIC_KEY:
-      printf("Generating initial challenge flags.\n");
+      JNXLOG(LDEBUG,"Generating initial challenge flags.\n");
       auth_parcel.is_requesting_public_key = 1;
       auth_parcel.is_requesting_finish = 0;
       if(initiator_message) {
@@ -66,16 +78,16 @@ int handshake_initiator_command_generate(session *ses,\
       }
       break;
     case CHALLENGE_FINISH:
-      printf("Generating finish request flags.\n");
+      JNXLOG(LDEBUG,"Generating finish request flags.\n");
       auth_parcel.is_requesting_public_key = 0;
       auth_parcel.is_requesting_finish = 1;
-      printf("Transmitting encrypted shared secret\n");
+      JNXLOG(LDEBUG,"Transmitting encrypted shared secret\n");
       JNXCHECK(shared_secret != NULL);
       jnx_size slen = strlen(shared_secret);
       auth_parcel.shared_secret = malloc(sizeof(char) * slen + 1);
       memcpy(auth_parcel.shared_secret,shared_secret,slen + 1);
       auth_parcel.shared_secret_len = secret_len;
-      printf("Setting shared secret len in proto to %d\n",
+      JNXLOG(LDEBUG,"Setting shared secret len in proto to %d\n",
           auth_parcel.shared_secret_len);
       break;
   }
@@ -126,12 +138,12 @@ int handshake_receiver_command_generate(session *ses, \
   free(local_guid_str);
   switch(state) {
     case RESPONSE_PUBLIC_KEY:
-      printf("Generating public key response\n");
+      JNXLOG(LDEBUG,"Generating public key response\n");
       auth_parcel.is_receiving_public_key = 1;
       auth_parcel.is_receiving_finish = 0;
       break;
     case RESPONSE_FINISH:
-      printf("Generating finish response\n");
+      JNXLOG(LDEBUG,"Generating finish response\n");
       auth_parcel.is_receiving_public_key = 0;
       auth_parcel.is_receiving_finish = 1;
       break;

@@ -70,7 +70,6 @@ peer *ntopeer(void *in, size_t len) {
 peer *peer_create(jnx_guid guid, char *host_address, char *user_name, jnx_uint32 discovery_interval) {
   JNXCHECK(host_address);
   peer *temp = malloc(sizeof(peer));
-
   memcpy(temp->guid.guid, guid.guid, 16);
   temp->host_address = malloc(1 + strlen(host_address));
   strcpy(temp->host_address, host_address);
