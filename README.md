@@ -35,7 +35,7 @@ The core acts as the framework for higher level programs to hook into.
 ![Crypto](http://i.imgur.com/Q7Wrb4L.png)
 
 ####Cryptography (Multisession)
-![CryptoMulti](http://i.imgur.com/ecfMnmd.png)
+![CryptoMulti](http://i.imgur.com/ZJt7UyY.png)
 ####Structure
 ![CoreStructure](http://i.imgur.com/0mUNLxm.png)
 
