@@ -39,7 +39,7 @@ auth_comms_service *auth_comms_create();
 void auth_comms_destroy(auth_comms_service **ac);
 /*
  * @fn auth_comms_listener_start(auth_comms_service *ac,
-    discovery_service *ds,session_service *ss,void *linking_args)
+ discovery_service *ds,session_service *ss,void *linking_args)
  * @brief starts a listener for auth_comms protobuf objects
  * @param ac is a pointer to initialised auth_comm_service
  * @param dc is a pointer to initialised discovery_service
@@ -65,6 +65,18 @@ void auth_comms_listener_start(auth_comms_service *ac,
 jnx_int auth_comms_initiator_start(auth_comms_service *ac, \
     discovery_service *ds, port_control_service *ps, 
     session *s,jnx_uint8 *initiator_message);
+
+/*
+ *@fn aut_comms_invite_start(auth_comms_service *ac,\
+ *session *s, discovery_service *ds, jnx_guid *invitee)
+ *@brief invites a peer on the network into an existing chat session
+ * @param ac is a pointer to initialised auth_comm_service
+ * @param s is a pointer to the current session
+ * @param dc is a pointer to initialised discovery_service
+ * @param invitee is the guid of the remote peer to invite into the session
+ */
+jnx_int auth_comms_invite_send(auth_comms_service *ac,
+    session *s, discovery_service *ds, jnx_guid *invitee);
 /*
  * @fn auth_comms_stop(auth_comms_service *ac,session *s)
  * @brief stops the current auth_comms session by closing sockets

@@ -36,6 +36,9 @@ int handshake_did_receive_receiver_request(jnx_uint8 *obuffer,
 
 int handshake_did_receive_joiner_request(jnx_uint8 *obuffer,
     jnx_size bytes_read,void **oobject);
+
+int handshake_did_receive_invite_request(jnx_uint8 *obuffer,
+    jnx_size bytes_read, void **oobject);
 /* Initiator request */
 int handshake_initiator_command_generate(session *ses,\
     handshake_initiator_state state, jnx_uint8 *shared_secret,jnx_size len,
@@ -60,6 +63,12 @@ int handshake_generate_public_key_response(session *ses,\
 int handshake_generate_finish_response(session *ses,\
     jnx_int abort,
     jnx_uint8 **onetbuffer);
+/* Invite request */
+int handshake_invite_command_generate(session *ses,
+    jnx_guid *invitee_guid, jnx_uint8 **onetbuffer);
+
+int handshake_generate_invite_request(session *ses,
+    jnx_guid *invitee_guid, jnx_uint8 **onetbuffer);
 /* Joiner request */
 int handshake_joiner_command_generate(session *ses, \
     handshake_joiner_state state, jnx_guid *session_guid,\
