@@ -32,6 +32,12 @@ typedef struct auth_comms_service {
  */
 auth_comms_service *auth_comms_create();
 /*
+ * @fn auth_comms_destroy(auth_comms_service **ac)
+ * @brief destroys the auth_comms_service
+ * @param ac is a double pointer to auth_comms_service
+ */
+void auth_comms_destroy(auth_comms_service **ac);
+/*
  * @fn auth_comms_listener_start(auth_comms_service *ac,
     discovery_service *ds,session_service *ss,void *linking_args)
  * @brief starts a listener for auth_comms protobuf objects
@@ -43,12 +49,6 @@ auth_comms_service *auth_comms_create();
  */
 void auth_comms_listener_start(auth_comms_service *ac,
     discovery_service *ds,session_service *ss,void *linking_args);
-/*
- * @fn auth_comms_destroy(auth_comms_service **ac)
- * @brief destroys the auth_comms_service
- * @param ac is a double pointer to auth_comms_service
- */
-void auth_comms_destroy(auth_comms_service **ac);
 /*
  * @fn auth_comms_initiator_start(auth_comms_service *ac, \
  *   discovery_service *ds, port_control_service *ps,
