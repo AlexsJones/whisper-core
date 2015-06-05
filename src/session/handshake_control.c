@@ -202,3 +202,17 @@ int handshake_generate_finish_response(session *ses,\
   return handshake_receiver_command_generate(ses,
       RESPONSE_FINISH,abort,onetbuffer);
 }
+int handshake_joiner_command_generate(session *ses, \
+    handshake_joiner_state state, jnx_guid *session_guid,\
+    jnx_uint8 **onetbuffer) {
+  
+
+
+
+
+}
+int handshake_generate_joiner_request(session *ses, \
+    jnx_guid *session_guid, jnx_uint8 **onetbuffer) {
+  return handshake_joiner_command_generate(ses, JOINER_JOIN, 
+      session_guid, onetbuffer);
+}

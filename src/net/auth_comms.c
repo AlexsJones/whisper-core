@@ -14,6 +14,7 @@
 #include "utils.h"
 #include "auth_initiator.pb-c.h"
 #include "auth_receiver.pb-c.h"
+#include "auth_joiner.pb-c.h"
 #include "handshake_control.h"
 #include "secure_comms.h"
 #define CHALLENGE_REQUEST_PUBLIC_KEY 1
@@ -51,7 +52,15 @@ static void listener_callback(const jnx_uint8 *payload,
   transport_options *t = (transport_options*)context;
   void *object;
   int abort_token = 0;
+  if(handshake_did_receive_joiner_request((jnx_char*)payload,bytes_read,&object)) {
+ 
+    AuthJoiner *j = (AuthJoiner*)object; 
 
+
+    auth_joiner__free_unpacked(j,NULL);
+    return;
+  }
+  object = NULL;
   if(handshake_did_receive_initiator_request((jnx_char*)payload,bytes_read,&object)) {
     AuthInitiator *a = (AuthInitiator*)object;
     /*

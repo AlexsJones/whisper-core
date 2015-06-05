@@ -18,6 +18,10 @@ typedef enum {
   CHALLENGE_FINISH
 }handshake_initiator_state;
 
+typedef enum {
+  JOINER_JOIN
+}handshake_joiner_state;
+
 typedef enum { 
   REPONSE_FAIL,
   RESPONSE_PUBLIC_KEY,
@@ -32,7 +36,7 @@ int handshake_did_receive_receiver_request(jnx_uint8 *obuffer,
 
 int handshake_did_receive_joiner_request(jnx_uint8 *obuffer,
     jnx_size bytes_read,void **oobject);
-
+/* Initiator request */
 int handshake_initiator_command_generate(session *ses,\
     handshake_initiator_state state, jnx_uint8 *shared_secret,jnx_size len,
     jnx_uint8 *initiator_message,
@@ -45,7 +49,7 @@ int handshake_generate_public_key_request(session *ses,\
 int handshake_generate_finish_request(session *ses,\
     jnx_uint8 *shared_secret,jnx_size secret_len,
     jnx_uint8 **onetbuffer);
-
+/* Receiver request */
 int handshake_receiver_command_generate(session *ses, \
     handshake_receiver_state state, jnx_int abort, jnx_uint8 **onetbuffer);
 
@@ -56,4 +60,11 @@ int handshake_generate_public_key_response(session *ses,\
 int handshake_generate_finish_response(session *ses,\
     jnx_int abort,
     jnx_uint8 **onetbuffer);
+/* Joiner request */
+int handshake_joiner_command_generate(session *ses, \
+    handshake_joiner_state state, jnx_guid *session_guid,\
+    jnx_uint8 **onetbuffer);
+
+int handshake_generate_joiner_request(session *ses, \
+  jnx_guid *session_guid, jnx_uint8 **onetbuffer);
 #endif /* !HANDSHAKE_CONTROL_H */
