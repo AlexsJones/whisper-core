@@ -53,7 +53,13 @@ static void listener_callback(const jnx_uint8 *payload,
   transport_options *t = (transport_options*)context;
   void *object;
   int abort_token = 0;
+  if(handshake_did_receive_invite_request((jnx_char*)payload,bytes_read,&object)) {
+    JNXLOG(LDEBUG,"handshake_generate_invite_request"); 
+  
+    return;
+  }
   if(handshake_did_receive_joiner_request((jnx_char*)payload,bytes_read,&object)) {
+    JNXLOG(LDEBUG,"handshake_receiver_joiner_request"); 
     AuthJoiner *j = (AuthJoiner*)object; 
     /*
      *Any joiner must specify a valid session that the current Peer is a part of
@@ -71,7 +77,6 @@ static void listener_callback(const jnx_uint8 *payload,
        *First you and I will need to handshake
        *
        */
-      
       
       
       }else {
@@ -336,10 +341,10 @@ jnx_int auth_comms_invite_send(auth_comms_service *ac,
 
   peer *remote_peer = peerstore_lookup(ds->peers,invitee);
 
-  jnx_uint8 *reply = send_data_await_reply(remote_peer->host_address,
+  send_data(remote_peer->host_address,
       DEFAULT_AUTH_COMMS_PORT,
       ac->listener->socket->addrfamily,
-      obuffer,bytes_read,&replysize);
+      obuffer,bytes_read);
   
   free(obuffer);
 

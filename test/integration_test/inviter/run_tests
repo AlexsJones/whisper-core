@@ -108,7 +108,7 @@ function run_single_test()
   done
 }
 
-pushd test/integration_test/initiator
+pushd test/integration_test/inviter
 ARGS=$2
 echo "Args => $ARGS"
 if [ -z "$1"  ]; then 
