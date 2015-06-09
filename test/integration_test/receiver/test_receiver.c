@@ -25,7 +25,10 @@
 
 static char *baddr = NULL;
 
+int accept_invite_callback(jnx_guid *session_guid) {
 
+  return 1;
+}
 int linking_test_procedure(session *s, linked_session_type session_type,
     void *optargs) {
   JNXLOG(NULL, "Linking now the receiver session..");
@@ -70,6 +73,7 @@ void test_receiver() {
 
   auth_comms_service *ac = auth_comms_create();
   ac->ar_callback = app_accept_reject;
+  ac->invitation_callback = accept_invite_callback;
   ac->listener = jnx_socket_tcp_listener_create("9991", AF_INET, 15);
   auth_comms_listener_start(ac, ds, service, NULL);
 

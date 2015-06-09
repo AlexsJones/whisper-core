@@ -59,13 +59,27 @@ static void listener_callback(const jnx_uint8 *payload,
     JNXLOG(LDEBUG,"Auth invite from %s to %s is that you?",
         i->session_guid,i->invitee_guid);
     
+    jnx_guid session_guid;
+    jnx_guid_from_string(i->session_guid,&session_guid);
+    
     peer *local_peer = peerstore_get_local_peer(t->ds->peers);
     jnx_char *local_peer_guid;
     jnx_guid_to_string(&(*local_peer).guid,&local_peer_guid);
     
     if(strcmp(local_peer_guid,i->invitee_guid) == 0) {
-      JNXLOG(LDEBUG,"Local peer matches invitee!"); 
+      JNXLOG(LDEBUG,"Local peer matches invitee!");
+  
+      jnx_int invite_token = t->ac->invitation_callback(&session_guid); 
+      
+      if(!invite_token)  {
+        JNXLOG(LWARN,"handshake_generate_invite_request has been rejected!"); 
+      }else {
+          /* The invite has been accepted */    
+        JNXLOG(LDEBUG,"Invite from %s has been accepted",i->session_guid);
+      }
     }
+
+    auth_invite__free_unpacked(i,NULL);
     free(local_peer_guid);
     return;
   }
@@ -88,7 +102,6 @@ static void listener_callback(const jnx_uint8 *payload,
        *First you and I will need to handshake
        *
        */
-      
       
       }else {
         JNXLOG(LWARN,"There was a problem requesting the session for the auth joiner");

@@ -44,7 +44,7 @@ int handshake_did_receive_invite_request(jnx_uint8 *obuffer,
   *oobject = NULL;
   AuthInvite *a = auth_invite__unpack(NULL,bytes_read,obuffer);
   if(a == NULL) {
-    JNXLOG(LDEBUG,"Receiver request was null!.\n");
+    JNXLOG(LDEBUG,"Invite request was null!.\n");
     return 0;
   }
   *oobject = a;

@@ -15,14 +15,17 @@
 #include <jnxc_headers/jnxthread.h>
 
 typedef int (*accept_reject_callback)(discovery_service *, 
-    jnx_guid *, 
-    jnx_guid *);
+    jnx_guid *initiator_guid, 
+    jnx_guid *session_guid);
+
+typedef int (*accept_reject_invitation_callback)(jnx_guid *session);
 
 typedef struct auth_comms_service {
   jnx_tcp_listener *listener;
   jnx_thread *listener_thread;
   jnx_tcp_listener_callback listener_callback;
   accept_reject_callback ar_callback;
+  accept_reject_invitation_callback invitation_callback;
 }auth_comms_service;
 
 /*
