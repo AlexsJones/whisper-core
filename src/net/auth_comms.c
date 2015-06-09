@@ -55,7 +55,18 @@ static void listener_callback(const jnx_uint8 *payload,
   int abort_token = 0;
   if(handshake_did_receive_invite_request((jnx_char*)payload,bytes_read,&object)) {
     JNXLOG(LDEBUG,"handshake_generate_invite_request"); 
-  
+    AuthInvite *i = (AuthInvite*)object;
+    JNXLOG(LDEBUG,"Auth invite from %s to %s is that you?",
+        i->session_guid,i->invitee_guid);
+    
+    peer *local_peer = peerstore_get_local_peer(t->ds->peers);
+    jnx_char *local_peer_guid;
+    jnx_guid_to_string(&(*local_peer).guid,&local_peer_guid);
+    
+    if(strcmp(local_peer_guid,i->invitee_guid) == 0) {
+      JNXLOG(LDEBUG,"Local peer matches invitee!"); 
+    }
+    free(local_peer_guid);
     return;
   }
   if(handshake_did_receive_joiner_request((jnx_char*)payload,bytes_read,&object)) {
