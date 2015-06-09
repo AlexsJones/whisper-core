@@ -99,7 +99,8 @@ void test_joiner() {
 
   /* here we have a fake session that does nothing, but lets tell remote peer 
    * about it */
-
+  
+  auth_comms_invite_send(ac,os,remote_peer);
 
 
   auth_comms_destroy(&ac);

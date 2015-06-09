@@ -330,18 +330,16 @@ jnx_int auth_comms_initiator_start(auth_comms_service *ac, \
   return 0;
 }
 jnx_int auth_comms_invite_send(auth_comms_service *ac,
-    session *s, discovery_service *ds, jnx_guid *invitee) {
+    session *s, peer *invitee) {
   JNXLOG(LDEBUG,"auth_comms_invite_send [Session guid] [Invitee]");
-  print_pair(&(*s).session_guid,invitee); 
+  print_pair(&(*s).session_guid,&(*invitee).guid); 
   JNXLOG(LDEBUG,"auth_comms_invite_send [Session guid] [Invitee]");
   jnx_uint8 *obuffer;
-  jnx_int bytes_read = handshake_generate_invite_request(s,invitee,
+  jnx_int bytes_read = handshake_generate_invite_request(s,&(*invitee).guid,
       &obuffer);
   jnx_size replysize;
 
-  peer *remote_peer = peerstore_lookup(ds->peers,invitee);
-
-  send_data(remote_peer->host_address,
+  send_data(invitee->host_address,
       DEFAULT_AUTH_COMMS_PORT,
       ac->listener->socket->addrfamily,
       obuffer,bytes_read);

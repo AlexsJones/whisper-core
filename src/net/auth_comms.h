@@ -72,11 +72,10 @@ jnx_int auth_comms_initiator_start(auth_comms_service *ac, \
  *@brief invites a peer on the network into an existing chat session
  * @param ac is a pointer to initialised auth_comm_service
  * @param s is a pointer to the current session
- * @param dc is a pointer to initialised discovery_service
- * @param invitee is the guid of the remote peer to invite into the session
+ * @param invitee is the remote peer to invite into the session
  */
 jnx_int auth_comms_invite_send(auth_comms_service *ac,
-    session *s, discovery_service *ds, jnx_guid *invitee);
+    session *s, peer *invitee);
 /*
  * @fn auth_comms_stop(auth_comms_service *ac,session *s)
  * @brief stops the current auth_comms session by closing sockets
