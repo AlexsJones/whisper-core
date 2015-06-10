@@ -61,6 +61,27 @@ int handshake_did_receive_joiner_request(jnx_uint8 *obuffer,
   *oobject = a;
   return 1;
 }
+handshake_request_type handshake_resolve_request_type(jnx_uint8 *obuffer,
+    jnx_size bytes_read, void **object) {
+  *object = NULL;
+  if(handshake_did_receive_initiator_request(obuffer,
+        bytes_read,object)) {
+    return REQUEST_TYPE_INITIATOR;
+  }
+  if(handshake_did_receive_receiver_request(obuffer,
+        bytes_read,object)) {
+    return REQUEST_TYPE_RECEIVER;
+  }
+  if(handshake_did_receive_invite_request(obuffer,
+        bytes_read,object)) {
+    return REQUEST_TYPE_INVITE;
+  }
+  if(handshake_did_receive_joiner_request(obuffer,
+        bytes_read,object)) {
+    return REQUEST_TYPE_JOINER;
+  } 
+  return REQUEST_TYPE_UNKNOWN;
+}
 int handshake_initiator_command_generate(session *ses,\
     handshake_initiator_state state,\
     jnx_uint8 *shared_secret,jnx_size secret_len,

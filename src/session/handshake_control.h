@@ -28,6 +28,18 @@ typedef enum {
   RESPONSE_FINISH
 }handshake_receiver_state;
 
+typedef enum {
+  REQUEST_TYPE_INITIATOR,
+  REQUEST_TYPE_RECEIVER,
+  REQUEST_TYPE_JOINER,
+  REQUEST_TYPE_INVITE,
+  REQUEST_TYPE_UNKNOWN
+}handshake_request_type;
+
+
+handshake_request_type handshake_resolve_request_type(jnx_uint8 *obuffer,
+    jnx_size bytes_read, void **object);
+
 int handshake_did_receive_initiator_request(jnx_uint8 *obuffer,
     jnx_size bytes_read,void **oobject);
 
