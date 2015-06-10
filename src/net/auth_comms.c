@@ -47,6 +47,16 @@ static jnx_uint8 *send_data_await_reply(jnx_char *hostname, jnx_char *port,
   jnx_socket_destroy(&sock);
   return reply;
 }
+static void internal_start_secure_comms_initiator(discovery_service *ds, session *s,
+    auth_comms_service *ac){
+        secure_comms_initiator_start(ds,s,ac->listener->socket->addrfamily);
+}
+static void internal_start_secure_comms_listener(discovery_service *ds,
+    session *s, auth_comms_service *ac) {
+      secure_comms_receiver_start(ds,s,
+          ac->listener->socket->addrfamily);
+
+}
 static void listener_callback(const jnx_uint8 *payload,
     jnx_size bytes_read, int connected_socket, void *context) {
 
@@ -58,25 +68,42 @@ static void listener_callback(const jnx_uint8 *payload,
     AuthInvite *i = (AuthInvite*)object;
     JNXLOG(LDEBUG,"Auth invite from %s to %s is that you?",
         i->session_guid,i->invitee_guid);
-    
+
     jnx_guid session_guid;
     jnx_guid_from_string(i->session_guid,&session_guid);
-    
+
     peer *local_peer = peerstore_get_local_peer(t->ds->peers);
     jnx_char *local_peer_guid;
     jnx_guid_to_string(&(*local_peer).guid,&local_peer_guid);
-    
+
     if(strcmp(local_peer_guid,i->invitee_guid) == 0) {
       JNXLOG(LDEBUG,"Local peer matches invitee!");
-  
-      jnx_int invite_token = t->ac->invitation_callback(&session_guid); 
-      
-      if(!invite_token)  {
-        JNXLOG(LWARN,"handshake_generate_invite_request has been rejected!"); 
-      }else {
+      JNXCHECK(t->ac->invitation_callback);
+
+      /* Are we already aware of the potential session locally? */
+      session *osession;
+      session_state e = session_service_fetch_session(t->ss,
+          &session_guid,&osession);
+      if(e != SESSION_STATE_OKAY) {
+
+        jnx_int invite_token = t->ac->invitation_callback(&session_guid); 
+
+        if(!invite_token)  {
+          JNXLOG(LWARN,"handshake_generate_invite_request has been rejected!"); 
+        }else {
           /* The invite has been accepted */    
-        JNXLOG(LDEBUG,"Invite from %s has been accepted",i->session_guid);
+          JNXLOG(LDEBUG,"Invite from %s has been accepted",i->session_guid);
+
+          /* Start auth join */
+          //TODO: I'll do this on the same listener thread which will cause a 
+          //temporary block
+          
+
+        }
+      }else {
+        JNXLOG(LWARN,"Session is already known - we don't need an invite");
       }
+
     }
 
     auth_invite__free_unpacked(i,NULL);
@@ -96,13 +123,13 @@ static void listener_callback(const jnx_uint8 *payload,
       session_state e = session_service_fetch_session(t->ss,&g,
           &osession);
       if(e == SESSION_STATE_OKAY) {
-      
-      /*
-       *Okay you want to join our chat.
-       *First you and I will need to handshake
-       *
-       */
-      
+
+        /*
+         *Okay you want to join our chat.
+         *First you and I will need to handshake
+         *
+         */
+
       }else {
         JNXLOG(LWARN,"There was a problem requesting the session for the auth joiner");
       }
@@ -114,6 +141,8 @@ static void listener_callback(const jnx_uint8 *payload,
   object = NULL;
   if(handshake_did_receive_initiator_request((jnx_char*)payload,bytes_read,&object)) {
     AuthInitiator *a = (AuthInitiator*)object;
+
+    JNXLOG(LDEBUG,"Received initiator request");
     /*
      *At this point the receiver does not have a session for PeerA/B
      *We'll need to insert one so the session reference is usable in the ongoing
@@ -124,7 +153,7 @@ static void listener_callback(const jnx_uint8 *payload,
       jnx_guid g, session_g;
       jnx_guid_from_string(a->initiator_guid,&g);
       jnx_guid_from_string(a->session_guid,&session_g);
-
+      JNXCHECK(t->ac->ar_callback);
       abort_token = t->ac->ar_callback(t->ds,&g,&session_g);
 
       printf("Did receive handshake request.\n");
@@ -215,8 +244,12 @@ static void listener_callback(const jnx_uint8 *payload,
       osession->is_connected = 1;
       printf("Handshake complete.\n");
       printf("Starting secure comms channel.\n");
-      secure_comms_receiver_start(t->ds,osession,
-          t->ac->listener->socket->addrfamily);
+
+
+      internal_start_secure_comms_listener(t->ds,
+          osession,t->ac);
+
+
       /* free data */
       jnx_encoder_destroy(&encoder);
       auth_initiator__free_unpacked(a,NULL);
@@ -233,7 +266,10 @@ static void *listener_bootstrap(void *args) {
   }
 }
 auth_comms_service *auth_comms_create() {
-  return malloc(sizeof(auth_comms_service));
+  auth_comms_service *ac = malloc(sizeof(auth_comms_service));
+  ac->ar_callback = NULL;
+  ac->invitation_callback = NULL;
+  return ac;
 }
 void auth_comms_listener_start(auth_comms_service *ac, discovery_service *ds,
     session_service *ss,void *linking_args) {
@@ -344,7 +380,8 @@ jnx_int auth_comms_initiator_start(auth_comms_service *ac, \
       if(ar->is_receiving_finish == 1 && ar->is_receiving_public_key == 0) {
         s->is_connected = 1;
         printf("Handshake complete.\n");
-        secure_comms_initiator_start(ds,s,ac->listener->socket->addrfamily);
+        internal_start_secure_comms_initiator(ds,s,
+            ac);
       }
       /* free data */
       free(replytwo);
@@ -367,7 +404,7 @@ jnx_int auth_comms_invite_send(auth_comms_service *ac,
       DEFAULT_AUTH_COMMS_PORT,
       ac->listener->socket->addrfamily,
       obuffer,bytes_read);
-  
+
   free(obuffer);
 
   return 0;
