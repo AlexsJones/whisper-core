@@ -175,9 +175,6 @@ static void internal_request_initiator(transport_options *t,
 static void internal_request_receiver(transport_options *t,
     const jnx_uint8 *payload,
     jnx_size bytes_read, int connected_socket, void *object,void *context) {
-
-
-
 }
 static void internal_request_invite(transport_options *t,
     const jnx_uint8 *payload,
