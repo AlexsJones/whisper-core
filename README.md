@@ -39,6 +39,9 @@ The core acts as the framework for higher level programs to hook into.
 ####Structure
 ![CoreStructure](http://i.imgur.com/0mUNLxm.png)
 
+####Code base
+![Codebase](http://i.imgur.com/D2BL4ZG.png)
+
 ### Table of Contents
   * [Installation](#installation)
   * [Additional Deps](#Deps)
