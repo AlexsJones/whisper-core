@@ -24,7 +24,7 @@
 #include "discovery.h"
 
 static char *baddr = NULL;
-
+static auth_comms_service *ac;
 int accept_invite_callback(jnx_guid *session_guid) {
 
   return 1;
@@ -44,7 +44,6 @@ int linking_test_procedure(session *s, linked_session_type session_type,
 int unlinking_test_procedure(session *s, linked_session_type session_type,
     void *optargs) {
 
-  auth_comms_service *ac = auth_comms_create();
   auth_comms_stop(ac,s);
   return 0;
 }
@@ -71,7 +70,7 @@ void test_receiver() {
 
   discovery_service_start(ds, BROADCAST_UPDATE_STRATEGY);
 
-  auth_comms_service *ac = auth_comms_create();
+  ac = auth_comms_create();
   ac->ar_callback = app_accept_reject;
   ac->invitation_callback = accept_invite_callback;
   ac->listener = jnx_socket_tcp_listener_create("9991", AF_INET, 15);

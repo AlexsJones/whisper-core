@@ -119,7 +119,9 @@ jnx_char *symmetrical_encrypt(jnx_uint8 *key,jnx_uint8 *msg, jnx_size size){
 jnx_char *symmetrical_decrypt(jnx_uint8 *key,jnx_uint8 *msg, jnx_size size){
 #ifdef NOSYMMETRICALCRYPTO
   JNXLOG(LDEBUG,"---------------------NOT USING CRYPTOGRAPHY----------------");
-  return strdup(msg);
+  jnx_char *out = strdup(msg);
+  JNXLOG(LDEBUG,"Decrypted message => %s",out);
+  return out;
 #endif
   jnx_char *res;
   DES_cblock key2;

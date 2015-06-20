@@ -9,6 +9,7 @@
 #define AUTH_COMMS_H
 #include "discovery.h"
 #include <jnxc_headers/jnx_tcp_socket.h>
+#include <jnxc_headers/jnxencoder.h>
 #include "session.h"
 #include "session_service.h"
 #include "port_control.h"
@@ -26,6 +27,7 @@ typedef struct auth_comms_service {
   jnx_tcp_listener_callback listener_callback;
   accept_reject_callback ar_callback;
   accept_reject_invitation_callback invitation_callback;
+  jnx_encoder *encoder;
 }auth_comms_service;
 
 /*

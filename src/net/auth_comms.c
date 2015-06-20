@@ -5,7 +5,6 @@
  * Distributed under terms of the MIT license.
  */
 #include <jnxc_headers/jnxlog.h>
-#include <jnxc_headers/jnxencoder.h>
 #include "auth_comms.h"
 #include <ifaddrs.h>
 #include <arpa/inet.h>
@@ -67,7 +66,7 @@ static void internal_request_initiator(transport_options *t,
    *comms
    */
   if(a->is_requesting_public_key && !a->is_requesting_finish){
-
+    JNXLOG(LDEBUG,"--------------Initial request---------------------------------");
     jnx_guid g, session_g;
     jnx_guid_from_string(a->initiator_guid,&g);
     jnx_guid_from_string(a->session_guid,&session_g);
@@ -119,6 +118,7 @@ static void internal_request_initiator(transport_options *t,
     return;
   }
   if(!a->is_requesting_public_key && a->is_requesting_finish){
+    JNXLOG(LDEBUG,"--------------Initial request part 2---------------------------------");
     printf("Did receive encrypted shared secret.\n"); 
     session *osession;
     jnx_guid g;
@@ -143,11 +143,15 @@ static void internal_request_initiator(transport_options *t,
      * the session */
     jnx_size olen;
     jnx_size decoded_len;
-    jnx_encoder *encoder = jnx_encoder_create();
     jnx_uint8 *decoded_secret = 
-      jnx_encoder_b64_decode(encoder,a->shared_secret,
+      jnx_encoder_b64_decode(t->ac->encoder,a->shared_secret,
           strlen(a->shared_secret),&decoded_len);
 
+#ifdef DEBUG
+    JNXLOG(LDEBUG,"The encoder decoded length is %d with raw secret %s",decoded_len,decoded_secret);
+    JNXCHECK(osession->keypair);
+    JNXLOG(LDEBUG,"The decoded but encrypted symmetrical secret is => %s of length %d",decoded_secret,decoded_len);
+#endif  
     jnx_char *decrypted_shared_secret = 
       asymmetrical_decrypt(osession->keypair,decoded_secret,
           decoded_len,
@@ -156,6 +160,11 @@ static void internal_request_initiator(transport_options *t,
 #ifdef DEBUG
     printf("DEBUG => shared secret:%s\n",decrypted_shared_secret);
     printf("DEBUG => secure_comms_port:%s\n",osession->secure_comms_port);
+
+    jnx_char *guid_to_str;
+    jnx_guid_to_string(&(*osession).session_guid,&guid_to_str);
+    printf("DEBUG => session guid:%s\n",guid_to_str);
+    free(guid_to_str);
 #endif
     session_add_shared_secret(osession,decrypted_shared_secret);
 
@@ -163,12 +172,10 @@ static void internal_request_initiator(transport_options *t,
     printf("Handshake complete.\n");
     printf("Starting secure comms channel.\n");
 
-
     internal_start_secure_comms_listener(t->ds,
         osession,t->ac);
 
     /* free data */
-    jnx_encoder_destroy(&encoder);
     auth_initiator__free_unpacked(a,NULL);
   }
 }
@@ -294,6 +301,7 @@ auth_comms_service *auth_comms_create() {
   auth_comms_service *ac = malloc(sizeof(auth_comms_service));
   ac->ar_callback = NULL;
   ac->invitation_callback = NULL;
+  ac->encoder = jnx_encoder_create();
   return ac;
 }
 void auth_comms_listener_start(auth_comms_service *ac, discovery_service *ds,
@@ -306,6 +314,7 @@ void auth_comms_listener_start(auth_comms_service *ac, discovery_service *ds,
   ac->listener_thread = jnx_thread_create(listener_bootstrap,ts);
 }
 void auth_comms_destroy(auth_comms_service **ac) {
+  jnx_encoder_destroy(&(*ac)->encoder);
   jnx_socket_tcp_listener_destroy(&(*ac)->listener);
 }
 jnx_int auth_comms_initiator_start(auth_comms_service *ac, \
@@ -369,8 +378,7 @@ jnx_int auth_comms_initiator_start(auth_comms_service *ac, \
         secret, &encrypted_secret_len);
 
     jnx_size encoded_len;
-    jnx_encoder *encoder = jnx_encoder_create();
-    jnx_uint8 *encoded_secret = jnx_encoder_b64_encode(encoder,
+    jnx_uint8 *encoded_secret = jnx_encoder_b64_encode(ac->encoder,
         encrypted_secret,encrypted_secret_len,
         &encoded_len);
     /*                                                            */
@@ -385,8 +393,6 @@ jnx_int auth_comms_initiator_start(auth_comms_service *ac, \
         ac->listener->socket->addrfamily,
         fbuffer,bytes_read,&replysizetwo);
 
-    /* free data */
-    jnx_encoder_destroy(&encoder);
     asymmetrical_destroy_key(remote_pub_keypair);
     free(encrypted_secret);
     free(encoded_secret);
