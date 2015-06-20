@@ -30,8 +30,6 @@ session_state session_message_write(session *s,jnx_uint8 *message) {
   }
   free(encrypted);
   JNXLOG(LDEBUG,"Send result => %d\n",send_result);
-  //TODO This is a bug fix should goto mainbranch !
-  free(encrypted);
 
   /* foriegn_session replication */
   if(s->foriegn_sessions) {
