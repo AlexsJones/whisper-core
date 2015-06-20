@@ -14,7 +14,6 @@
 #include "utils.h"
 #include "auth_initiator.pb-c.h"
 #include "auth_receiver.pb-c.h"
-#include "auth_joiner.pb-c.h"
 #include "handshake_control.h"
 #include "secure_comms.h"
 #define CHALLENGE_REQUEST_PUBLIC_KEY 1
@@ -52,36 +51,6 @@ static void listener_callback(const jnx_uint8 *payload,
   transport_options *t = (transport_options*)context;
   void *object;
   int abort_token = 0;
-  if(handshake_did_receive_joiner_request((jnx_char*)payload,bytes_read,&object)) {
-    AuthJoiner *j = (AuthJoiner*)object; 
-    /*
-     *Any joiner must specify a valid session that the current Peer is a part of
-     */
-    if(j->is_requesting_join) {
-      jnx_guid g;
-      jnx_guid_from_string(j->session_guid,&g);
-      session *osession;
-      session_state e = session_service_fetch_session(t->ss,&g,
-          &osession);
-      if(e == SESSION_STATE_OKAY) {
-      
-      /*
-       *Okay you want to join our chat.
-       *First you and I will need to handshake
-       *
-       */
-      
-      
-      
-      }else {
-        JNXLOG(LWARN,"There was a problem requesting the session for the auth joiner");
-      }
-    }
-
-    auth_joiner__free_unpacked(j,NULL);
-    return;
-  }
-  object = NULL;
   if(handshake_did_receive_initiator_request((jnx_char*)payload,bytes_read,&object)) {
     AuthInitiator *a = (AuthInitiator*)object;
     /*

@@ -13,7 +13,6 @@
 #include "utils.h"
 #include "auth_initiator.pb-c.h"
 #include "auth_receiver.pb-c.h"
-#include "auth_joiner.pb-c.h"
 
 
 int handshake_did_receive_initiator_request(jnx_uint8 *obuffer,
@@ -34,17 +33,6 @@ int handshake_did_receive_receiver_request(jnx_uint8 *obuffer,
   AuthReceiver *a = auth_receiver__unpack(NULL,bytes_read,obuffer);
   if(a == NULL) {
     JNXLOG(LDEBUG,"Receiver request was null!.\n");
-    return 0;
-  }
-  *oobject = a;
-  return 1;
-}
-int handshake_did_receive_joiner_request(jnx_uint8 *obuffer,
-    jnx_size bytes_read,void **oobject) {
-  *oobject = NULL;
-  AuthJoiner *a = auth_joiner__unpack(NULL,bytes_read,obuffer);
-  if(a == NULL) {
-    JNXLOG(LDEBUG,"Joiner request was null!.\n");
     return 0;
   }
   *oobject = a;
@@ -201,15 +189,4 @@ int handshake_generate_finish_response(session *ses,\
     jnx_uint8 **onetbuffer) {
   return handshake_receiver_command_generate(ses,
       RESPONSE_FINISH,abort,onetbuffer);
-}
-int handshake_joiner_command_generate(session *ses, \
-    handshake_joiner_state state, jnx_guid *session_guid,\
-    jnx_uint8 **onetbuffer) {
-  
-  return 0;
-}
-int handshake_generate_joiner_request(session *ses, \
-    jnx_guid *session_guid, jnx_uint8 **onetbuffer) {
-  return handshake_joiner_command_generate(ses, JOINER_JOIN, 
-      session_guid, onetbuffer);
 }
