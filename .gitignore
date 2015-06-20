@@ -1,4 +1,6 @@
 test/integration_test/initiator/test_initiator
+test/integration_test/connectivity/test_connectivity
+test/integration_test/joiner/test_joiner
 test/integration_test/receiver/test_receiver
 test/integration_test/inviter/test_inviter
 test/integration_test/connectivity//test_connectivity

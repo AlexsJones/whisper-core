@@ -125,7 +125,6 @@ static void internal_request_initiator(transport_options *t,
     jnx_guid_from_string(a->session_guid,&g);
     if(session_service_fetch_session(t->ss,
           &g,&osession) != SESSION_STATE_OKAY) {
-
       JNXLOG(LDEBUG,"An unknown session has attempted to initiate second stage\
           handshake");
       /* TODO: Log this attempt to access second stage handshake possible 

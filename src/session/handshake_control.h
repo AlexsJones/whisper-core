@@ -85,7 +85,4 @@ int handshake_generate_invite_request(session *ses,
 int handshake_joiner_command_generate(session *ses, \
     handshake_joiner_state state, jnx_guid *session_guid,\
     jnx_uint8 **onetbuffer);
-
-int handshake_generate_joiner_request(session *ses, \
-  jnx_guid *session_guid, jnx_uint8 **onetbuffer);
-#endif /* !HANDSHAKE_CONTROL_H */
+#endif
