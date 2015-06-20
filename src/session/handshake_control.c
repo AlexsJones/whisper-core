@@ -206,10 +206,7 @@ int handshake_joiner_command_generate(session *ses, \
     handshake_joiner_state state, jnx_guid *session_guid,\
     jnx_uint8 **onetbuffer) {
   
-
-
-
-
+  return 0;
 }
 int handshake_generate_joiner_request(session *ses, \
     jnx_guid *session_guid, jnx_uint8 **onetbuffer) {
