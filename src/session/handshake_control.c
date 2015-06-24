@@ -13,13 +13,14 @@
 #include "utils.h"
 #include "auth_initiator.pb-c.h"
 #include "auth_receiver.pb-c.h"
+#include "auth_joiner.pb-c.h"
+#include "auth_invite.pb-c.h"
 
 
 int handshake_did_receive_initiator_request(jnx_uint8 *obuffer,
     jnx_size bytes_read,
     void **oobject){
   *oobject = NULL;
-
   AuthInitiator *a = auth_initiator__unpack(NULL,bytes_read,obuffer);
   if(a == NULL) {
     return 0;
@@ -37,6 +38,49 @@ int handshake_did_receive_receiver_request(jnx_uint8 *obuffer,
   }
   *oobject = a;
   return 1;
+}
+int handshake_did_receive_invite_request(jnx_uint8 *obuffer,
+    jnx_size bytes_read, void **oobject) {
+  *oobject = NULL;
+  AuthInvite *a = auth_invite__unpack(NULL,bytes_read,obuffer);
+  if(a == NULL) {
+    JNXLOG(LDEBUG,"Invite request was null!.\n");
+    return 0;
+  }
+  *oobject = a;
+  return 1;
+}
+int handshake_did_receive_joiner_request(jnx_uint8 *obuffer,
+    jnx_size bytes_read,void **oobject) {
+  *oobject = NULL;
+  AuthJoiner *a = auth_joiner__unpack(NULL,bytes_read,obuffer);
+  if(a == NULL) {
+    JNXLOG(LDEBUG,"Joiner request was null!.\n");
+    return 0;
+  }
+  *oobject = a;
+  return 1;
+}
+handshake_request_type handshake_resolve_request_type(jnx_uint8 *obuffer,
+    jnx_size bytes_read, void **object) {
+  *object = NULL;
+  if(handshake_did_receive_initiator_request(obuffer,
+        bytes_read,object)) {
+    return REQUEST_TYPE_INITIATOR;
+  }
+  if(handshake_did_receive_receiver_request(obuffer,
+        bytes_read,object)) {
+    return REQUEST_TYPE_RECEIVER;
+  }
+  if(handshake_did_receive_invite_request(obuffer,
+        bytes_read,object)) {
+    return REQUEST_TYPE_INVITE;
+  }
+  if(handshake_did_receive_joiner_request(obuffer,
+        bytes_read,object)) {
+    return REQUEST_TYPE_JOINER;
+  } 
+  return REQUEST_TYPE_UNKNOWN;
 }
 int handshake_initiator_command_generate(session *ses,\
     handshake_initiator_state state,\
@@ -189,4 +233,53 @@ int handshake_generate_finish_response(session *ses,\
     jnx_uint8 **onetbuffer) {
   return handshake_receiver_command_generate(ses,
       RESPONSE_FINISH,abort,onetbuffer);
+}
+int handshake_invite_command_generate(session *ses,
+    jnx_guid *invitee_guid, jnx_uint8 **onetbuffer) {
+
+  AuthInvite auth_invite = AUTH_INVITE__INIT;
+  jnx_char *local_guid_str;
+  jnx_guid_to_string(&(*ses).local_peer_guid,&local_guid_str);
+  jnx_size len = strlen(local_guid_str);
+  /* inviter guid */
+  auth_invite.inviter_guid = malloc(sizeof(char) * len + 1);
+  memcpy(auth_invite.inviter_guid,local_guid_str,len + 1); 
+  free(local_guid_str);
+  /* session guid */
+  jnx_char *session_guid_str;
+  jnx_guid_to_string(&(*ses).session_guid,&session_guid_str);
+  len = strlen(session_guid_str);
+  auth_invite.session_guid = malloc(sizeof(char)* len + 1);
+  memcpy(auth_invite.session_guid,session_guid_str, len + 1);
+  free(session_guid_str);
+  /*invitee guid */
+  jnx_char *invitee_guid_str;
+  jnx_guid_to_string(invitee_guid,&invitee_guid_str);
+  len = strlen(invitee_guid_str);
+  auth_invite.invitee_guid = malloc(sizeof(char) * len + 1);
+  memcpy(auth_invite.invitee_guid,invitee_guid_str,len + 1);
+
+  jnx_int parcel_len = auth_invite__get_packed_size(&auth_invite);
+  jnx_uint8 *obuffer = malloc(parcel_len);
+  auth_invite__pack(&auth_invite,obuffer);
+
+  free(auth_invite.inviter_guid);
+
+  *onetbuffer = obuffer;
+  return parcel_len;
+}
+int handshake_generate_invite_request(session *ses,
+    jnx_guid *invitee_guid, jnx_uint8 **onetbuffer) {
+  return handshake_invite_command_generate(ses,
+      invitee_guid,onetbuffer);
+}
+int handshake_joiner_command_generate(session *ses, \
+    handshake_joiner_state state, jnx_guid *session_guid,\
+    jnx_uint8 **onetbuffer) {
+  return 0;
+}
+int handshake_generate_joiner_request(session *ses, \
+    jnx_guid *session_guid, jnx_uint8 **onetbuffer) {
+  return handshake_joiner_command_generate(ses, JOINER_JOIN, 
+      session_guid, onetbuffer);
 }

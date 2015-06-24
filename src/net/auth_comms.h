@@ -9,20 +9,25 @@
 #define AUTH_COMMS_H
 #include "discovery.h"
 #include <jnxc_headers/jnx_tcp_socket.h>
+#include <jnxc_headers/jnxencoder.h>
 #include "session.h"
 #include "session_service.h"
 #include "port_control.h"
 #include <jnxc_headers/jnxthread.h>
 
 typedef int (*accept_reject_callback)(discovery_service *, 
-    jnx_guid *, 
-    jnx_guid *);
+    jnx_guid *initiator_guid, 
+    jnx_guid *session_guid);
+
+typedef int (*accept_reject_invitation_callback)(jnx_guid *session);
 
 typedef struct auth_comms_service {
   jnx_tcp_listener *listener;
   jnx_thread *listener_thread;
   jnx_tcp_listener_callback listener_callback;
   accept_reject_callback ar_callback;
+  accept_reject_invitation_callback invitation_callback;
+  jnx_encoder *encoder;
 }auth_comms_service;
 
 /*
@@ -39,7 +44,7 @@ auth_comms_service *auth_comms_create();
 void auth_comms_destroy(auth_comms_service **ac);
 /*
  * @fn auth_comms_listener_start(auth_comms_service *ac,
-    discovery_service *ds,session_service *ss,void *linking_args)
+ discovery_service *ds,session_service *ss,void *linking_args)
  * @brief starts a listener for auth_comms protobuf objects
  * @param ac is a pointer to initialised auth_comm_service
  * @param dc is a pointer to initialised discovery_service
@@ -65,6 +70,17 @@ void auth_comms_listener_start(auth_comms_service *ac,
 jnx_int auth_comms_initiator_start(auth_comms_service *ac, \
     discovery_service *ds, port_control_service *ps, 
     session *s,jnx_uint8 *initiator_message);
+
+/*
+ *@fn aut_comms_invite_start(auth_comms_service *ac,\
+ *session *s, discovery_service *ds, jnx_guid *invitee)
+ *@brief invites a peer on the network into an existing chat session
+ * @param ac is a pointer to initialised auth_comm_service
+ * @param s is a pointer to the current session
+ * @param invitee is the remote peer to invite into the session
+ */
+jnx_int auth_comms_invite_send(auth_comms_service *ac,
+    session *s, peer *invitee);
 /*
  * @fn auth_comms_stop(auth_comms_service *ac,session *s)
  * @brief stops the current auth_comms session by closing sockets

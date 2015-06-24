@@ -43,21 +43,20 @@ int linking_test_procedure(session *s,linked_session_type session_type,
     ac = auth_comms_create();
 
     ac->listener = jnx_socket_tcp_listener_create("9991",AF_INET,15);
-    auth_comms_initiator_start(ac,ds,ps,s,"Hello from the initiator!");
+  
+    /* Do nothing the session is fake */
   }
   return 0;
 }
 int unlinking_test_procedure(session *s,linked_session_type session_type,
     void *optargs) {
 
-  auth_comms_stop(ac,s);
   return 0;
 }
 void test_joiner() {
   JNXLOG(NULL,"test_joiner");
   session_service *service = session_service_create(linking_test_procedure,
       unlinking_test_procedure);
-  session *os;
   peerstore *store = peerstore_init(local_peer_for_user("initiator_bob",10), 0);
 
   get_broadcast_ip(&baddr);
@@ -85,6 +84,26 @@ void test_joiner() {
     }
   }
 
+  /* create a fake session to invite the remote peer too */
+  session *os;
+  session_state e = session_service_create_session(service,&os);
+ 
+  jnx_guid h;
+  
+  jnx_guid_create(&h);
+
+  peer *fake_peer = peer_create(h,"111.112.113.114","FakeJoe",0);
+
+  session_service_link_sessions(service,E_AM_INITIATOR,
+      ds,&(*os).session_guid,local,remote_peer);
+
+  /* here we have a fake session that does nothing, but lets tell remote peer 
+   * about it */
+  
+  auth_comms_invite_send(ac,os,remote_peer);
+
+
+  auth_comms_destroy(&ac);
 
 }
 int main(int argc, char **argv) {

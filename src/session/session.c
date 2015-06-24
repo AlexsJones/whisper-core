@@ -28,7 +28,6 @@ session_state session_message_write(session *s,jnx_uint8 *message) {
     perror("send:");
     return SESSION_STATE_FAIL;
   }
-  free(encrypted);
   JNXLOG(LDEBUG,"Send result => %d\n",send_result);
 
   /* foriegn_session replication */
