@@ -136,7 +136,8 @@ jnx_int secure_comms_start(secure_comms_endpoint e, discovery_service *ds,
 
     case SC_INITIATOR:
       printf("About to initiate connection to remote secure_comms_port.\n");
-      sleep(3);
+      sleep(5);
+      printf("Slept for 5\n");
       s->secure_socket = connect_for_socket_fd(remote_peer, s);
       printf("Secure socket fd: %d\n", s->secure_socket);
       break;
