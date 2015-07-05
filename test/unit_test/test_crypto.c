@@ -84,7 +84,7 @@ void test_des_encryption() {
   free(buffer);
 
 }
-void test_rigorous_encryption() {
+void test_multilevel_encryption() {
 
   const jnx_char *string ="Test string";
   jnx_size string_size = strlen(string);
@@ -123,7 +123,6 @@ void test_rigorous_encryption() {
   JNXLOG(LDEBUG,"test string => %s",string);
 
   JNXCHECK(strcmp(decrypted_symmetrical_message,string) == 0);
-
 }
 int main(int argc, char **argv) {
   JNXLOG_CREATE("../testlogger.conf");
@@ -135,8 +134,8 @@ int main(int argc, char **argv) {
   test_rsa_encryption();
   JNXLOG(LDEBUG,"Test DES encryption");
   test_des_encryption();
-  JNXLOG(LDEBUG,"Test Rigorous encryption");
-  test_rigorous_encryption();
+  JNXLOG(LDEBUG,"Test multilevel encryption");
+  test_multilevel_encryption();
   sleep(1);
   JNXLOG_DESTROY();
   return 0;
