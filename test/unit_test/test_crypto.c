@@ -84,6 +84,14 @@ void test_des_encryption() {
   free(buffer);
 
 }
+static void print_hex(jnx_int size, jnx_char *ar) {
+  
+  jnx_int i;
+  for(i=0;i<size; ++i) {
+    printf("%02X",ar[i]);
+  }
+  printf("\n");
+}
 void test_multilevel_encryption() {
 
   const jnx_char *string ="Test string";
@@ -94,38 +102,50 @@ void test_multilevel_encryption() {
   jnx_size s = generate_shared_secret(&sbuffer);
   
   JNXLOG(LDEBUG,"Generated shared secret");
+  print_hex(s,sbuffer);
+  JNXLOG(LDEBUG,"------------------------");
 
   jnx_char *encrypted_string = symmetrical_encrypt(sbuffer,
       string,string_size);
   
   JNXLOG(LDEBUG,"Encrypted symmetrically");
+  print_hex(string_size,encrypted_string);
+  JNXLOG(LDEBUG,"------------------------");
 
   RSA *keypair = asymmetrical_generate_key(2048);
 
   jnx_size encrypted_olen;
+
   jnx_char *encrypted_message = asymmetrical_encrypt(keypair,encrypted_string,
       &encrypted_olen);
 
   JNXLOG(LDEBUG,"Encrypted Asymmetrically");
+  print_hex(strlen(encrypted_string),encrypted_string);
+  JNXLOG(LDEBUG,"------------------------");
+  
   /*decrypted_message*/
   jnx_size decrypted_olen;
   jnx_char *decrypted_message = asymmetrical_decrypt(keypair,encrypted_message,
       encrypted_olen,&decrypted_olen);
 
   JNXLOG(LDEBUG,"Decrypted Asymmetrically");
+  print_hex(decrypted_olen,decrypted_message);
+  JNXLOG(LDEBUG,"------------------------");
 
   jnx_char *decrypted_symmetrical_message =symmetrical_decrypt(sbuffer,decrypted_message,
       decrypted_olen);
 
-  JNXLOG(LDEBUG,"decrypted_symmetrical_message => %s",
-      decrypted_symmetrical_message);
-
+  JNXLOG(LDEBUG,"decrypted_symmetrical_message");
+  print_hex(decrypted_olen,decrypted_symmetrical_message);
+  JNXLOG(LDEBUG,"------------------------");
+  
   JNXLOG(LDEBUG,"test string => %s",string);
 
   JNXCHECK(strcmp(decrypted_symmetrical_message,string) == 0);
 }
 int main(int argc, char **argv) {
   JNXLOG_CREATE("../testlogger.conf");
+ 
   JNXLOG(LDEBUG,"Test generate shared secret");
   test_secret_generate();
   JNXLOG(LDEBUG,"Test RSA key");
