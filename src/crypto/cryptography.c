@@ -137,16 +137,23 @@ jnx_char *symmetrical_decrypt(jnx_uint8 *key,jnx_uint8 *msg, jnx_size size){
   return res;
 }
 jnx_size generate_shared_secret(jnx_uint8 **buffer) {
+  jnx_char alphabet[] = {
+    'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O',
+    'P','Q','R','S','T','U','V','W','X','Y','Z',
+    'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o',
+    'p','q','r','s','t','u','v','w','x','y','z','1','2','3','4','5','6','7',
+    '8','9','0'};
 
-  DES_cblock key;
-  DES_cblock seed = { 0xFE, 0xFC, 0xBA, 0x98, 0x76, 0x54, 0x32, 0x10 };
-  DES_key_schedule keysched;
-  RAND_seed(seed,sizeof(DES_cblock));
-  DES_random_key(&key);
-  jnx_int size = sizeof(DES_cblock);
-  *buffer = calloc(size + 1,sizeof(jnx_uint8));
-  bzero(*buffer,size + 1);
-  memcpy(*buffer,key,size);
-  return size;
+  jnx_uint8 charbuf[sizeof(jnx_uint8)* 8];
+  jnx_int j;
+  srand(time(0));
+  
+  for(j=0;j<8; ++j) {
+    charbuf[j] = alphabet[rand() % 62];
+  }
+  *buffer = calloc(8,sizeof(jnx_char));
+  bzero(*buffer,8);
+  memcpy(*buffer,charbuf,8);
+  return 8;
 } 
 #pragma clang diagnostic pop

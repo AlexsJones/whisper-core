@@ -27,7 +27,7 @@
 #include <jnxc_headers/jnxcheck.h>
 #include <jnxc_headers/jnxlog.h>
 
-static char *baddr = NULL;
+static char *baddr = LDEBUG;
 
 void update_time_checks(discovery_service *svc) {
   time_t last_update_time = get_last_update_time(svc);
@@ -94,12 +94,12 @@ void run_discovery_service_test(discovery_test test) {
 
 // *** Tests ***
 int test_service_creation(discovery_service *svc) {
-  JNXCHECK(svc != NULL);
+  JNXCHECK(svc != LDEBUG);
   JNXCHECK(svc->port == 1234);
   JNXCHECK(svc->family == AF_INET);
   JNXCHECK(svc->isrunning == 0);
-  JNXCHECK(svc->sock_send == NULL);
-  JNXCHECK(svc->udp_listener == NULL);
+  JNXCHECK(svc->sock_send == LDEBUG);
+  JNXCHECK(svc->udp_listener == LDEBUG);
   return CLEANUP;
 }
 int test_service_cleanup(discovery_service *svc) {
@@ -132,7 +132,7 @@ int test_starting_service(discovery_service *svc) {
 int test_stopping_service(discovery_service *svc) {
   test_starting_service(svc);
   discovery_service_stop(svc);
-  JNXCHECK(svc->udp_listener == NULL);
+  JNXCHECK(svc->udp_listener == LDEBUG);
   JNXCHECK(svc->sock_send == 0);
   JNXCHECK(svc->isrunning == 0);
   list_message_received = 0;
@@ -168,32 +168,32 @@ int test_broadcast_update_strategy(discovery_service *svc) {
   return CLEANUP;
 }
 int main(int argc, char **argv) {
-  get_broadcast_ip(&baddr);
-
   JNXLOG_CREATE("../testlogger.conf");
   
-  JNXLOG(NULL,"Test service creation.");
+  get_broadcast_ip(&baddr);
+
+  JNXLOG(LDEBUG,"Test service creation.");
   run_discovery_service_test(test_service_creation);
 
-  JNXLOG(NULL,"Test service cleanup.");
+  JNXLOG(LDEBUG,"Test service cleanup.");
   run_discovery_service_test(test_service_cleanup);
 
-  JNXLOG(NULL, "Test starting discovery service.");
+  JNXLOG(LDEBUG, "Test starting discovery service.");
   run_discovery_service_test(test_starting_service);
 
-  JNXLOG(NULL, "Test stopping discovery service.");
+  JNXLOG(LDEBUG, "Test stopping discovery service.");
   run_discovery_service_test(test_stopping_service);
 
-  JNXLOG(NULL, "Test restarting discovery service.");
+  JNXLOG(LDEBUG, "Test restarting discovery service.");
   run_discovery_service_test(test_restarting_service);
 
-  JNXLOG(NULL, "Test setting peer_update_interval global variable.");
+  JNXLOG(LDEBUG, "Test setting peer_update_interval global variable.");
   run_discovery_service_test(test_setting_peer_update_interval);
 
-  JNXLOG(NULL, "Test broadcast update strategy.");
+  JNXLOG(LDEBUG, "Test broadcast update strategy.");
   run_discovery_service_test(test_broadcast_update_strategy);
 
-  JNXLOG(NULL, "Test polling update strategy.");
+  JNXLOG(LDEBUG, "Test polling update strategy.");
   run_discovery_service_test(test_polling_update_strategy);
   
   free(baddr);
