@@ -147,14 +147,13 @@ jnx_size generate_shared_secret(jnx_uint8 **buffer) {
   jnx_uint8 charbuf[sizeof(jnx_uint8)* 8];
   jnx_int j;
   srand(time(0));
+  
   for(j=0;j<8; ++j) {
     charbuf[j] = alphabet[rand() % 62];
   }
-  jnx_int size = strlen(charbuf);
-  *buffer = calloc(size + 1,sizeof(jnx_char));
-  bzero(*buffer,size + 1);
-  memcpy(*buffer,charbuf,size);
-
-  return size;
+  *buffer = calloc(8,sizeof(jnx_char));
+  bzero(*buffer,8);
+  memcpy(*buffer,charbuf,8);
+  return 8;
 } 
 #pragma clang diagnostic pop
