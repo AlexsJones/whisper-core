@@ -85,7 +85,7 @@ void test_des_encryption() {
 
 }
 static void print_hex(jnx_int size, jnx_char *ar) {
-  
+
   jnx_int i;
   for(i=0;i<size; ++i) {
     printf("%02X",ar[i]);
@@ -100,14 +100,14 @@ void test_multilevel_encryption() {
   jnx_uint8 *sbuffer;
   jnx_encoder *e = jnx_encoder_create();
   jnx_size s = generate_shared_secret(&sbuffer);
-  
+
   JNXLOG(LDEBUG,"Generated shared secret");
   print_hex(s,sbuffer);
   JNXLOG(LDEBUG,"------------------------");
 
   jnx_char *encrypted_string = symmetrical_encrypt(sbuffer,
       string,string_size);
-  
+
   JNXLOG(LDEBUG,"Encrypted symmetrically");
   print_hex(string_size,encrypted_string);
   JNXLOG(LDEBUG,"------------------------");
@@ -122,7 +122,7 @@ void test_multilevel_encryption() {
   JNXLOG(LDEBUG,"Encrypted Asymmetrically");
   print_hex(strlen(encrypted_string),encrypted_string);
   JNXLOG(LDEBUG,"------------------------");
-  
+
   /*decrypted_message*/
   jnx_size decrypted_olen;
   jnx_char *decrypted_message = asymmetrical_decrypt(keypair,encrypted_message,
@@ -138,14 +138,14 @@ void test_multilevel_encryption() {
   JNXLOG(LDEBUG,"decrypted_symmetrical_message");
   print_hex(decrypted_olen,decrypted_symmetrical_message);
   JNXLOG(LDEBUG,"------------------------");
-  
+
   JNXLOG(LDEBUG,"test string => %s",string);
 
   JNXCHECK(strcmp(decrypted_symmetrical_message,string) == 0);
 }
 int main(int argc, char **argv) {
   JNXLOG_CREATE("../testlogger.conf");
- 
+
   JNXLOG(LDEBUG,"Test generate shared secret");
   test_secret_generate();
   JNXLOG(LDEBUG,"Test RSA key");
@@ -155,7 +155,12 @@ int main(int argc, char **argv) {
   JNXLOG(LDEBUG,"Test DES encryption");
   test_des_encryption();
   JNXLOG(LDEBUG,"Test multilevel encryption");
-  test_multilevel_encryption();
+  int i;
+  for(i=0;i<50;++i){
+    JNXLOG(LDEBUG,"Test count %d",i);
+    test_multilevel_encryption();
+    JNXLOG(LDEBUG,"------------------------");
+  }
   sleep(1);
   JNXLOG_DESTROY();
   return 0;
