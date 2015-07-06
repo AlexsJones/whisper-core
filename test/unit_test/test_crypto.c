@@ -135,7 +135,7 @@ void test_multilevel_encryption() {
   jnx_char *decrypted_symmetrical_message =symmetrical_decrypt(sbuffer,decrypted_message,
       decrypted_olen);
 
-  JNXLOG(LDEBUG,"decrypted_symmetrical_message");
+  JNXLOG(LDEBUG,"decrypted_symmetrical_message => %s", decrypted_symmetrical_message);
   print_hex(decrypted_olen,decrypted_symmetrical_message);
   JNXLOG(LDEBUG,"------------------------");
 
