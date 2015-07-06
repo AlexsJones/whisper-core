@@ -97,9 +97,9 @@ void test_multilevel_encryption() {
   const jnx_char *string ="Test string";
   jnx_size string_size = strlen(string);
 
-  jnx_uint8 *sbuffer;
+  const jnx_uint8 *sbuffer = "ABCDEFGH";
+  jnx_size s = strlen(sbuffer);
   jnx_encoder *e = jnx_encoder_create();
-  jnx_size s = generate_shared_secret(&sbuffer);
 
   JNXLOG(LDEBUG,"Generated shared secret of length %d",s);
   print_hex(s,sbuffer);
@@ -156,7 +156,7 @@ int main(int argc, char **argv) {
   test_des_encryption();
   JNXLOG(LDEBUG,"Test multilevel encryption");
   int i;
-  for(i=0;i<50;++i){
+  for(i=0;i<150;++i){
     JNXLOG(LDEBUG,"Test count %d",i);
     test_multilevel_encryption();
     JNXLOG(LDEBUG,"------------------------");
