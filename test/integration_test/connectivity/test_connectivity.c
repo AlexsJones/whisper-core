@@ -25,6 +25,7 @@
 #include "auth_comms.h"
 #include "discovery.h"
 static char *baddr = NULL;
+static char *interface = NULL;
 static auth_comms_service *ac = NULL;
 int linking_test_procedure(session *s,linked_session_type session_type,
     void *optargs) {
@@ -64,7 +65,7 @@ void test_connectivity() {
   jnx_guid h;
   jnx_guid_create(&h);
 
-  peerstore *store = peerstore_init(local_peer_for_user("initiator_bob",10), 0);
+  peerstore *store = peerstore_init(local_peer_for_user("initiator_bob",10, interface), 0);
 
   get_broadcast_ip(&baddr);
   printf("%s\n", baddr);
@@ -91,6 +92,10 @@ void test_connectivity() {
   }
 }
 int main(int argc, char **argv) {
+  if (argc > 1) {
+    inteface = argc[1];
+    puts("using interface %s", interface);
+  }
   JNXLOG_CREATE("logger.conf");
   test_connectivity();
   return 0;
