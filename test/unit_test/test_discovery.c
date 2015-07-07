@@ -31,24 +31,21 @@ static char *baddr = LDEBUG;
 
 void test_local_and_broadcast_ip() {
   char *local, *broadcast;
-
   get_local_ip(&local, NULL);
   get_broadcast_ip(&broadcast, NULL);
   printf("local=%s, broadcast=%s\n", local, broadcast);
-  free(local);
-  free(broadcast);
 
   get_local_ip(&local, "vnic0");
   get_broadcast_ip(&broadcast, "vnic0");
   printf("interface (vnic0) local=%s, broadcast=%s\n", local, broadcast);
-  free(local);
-  free(broadcast);
 
   get_local_ip(&local, "lo0");
   get_broadcast_ip(&broadcast, "lo0");
-  printf("interface (vnic0) local=%s, broadcast=%s\n", local, broadcast);
-  free(local);
-  free(broadcast);
+  printf("interface (lo0) local=%s, broadcast=%s\n", local, broadcast);
+
+  get_local_ip(&local, "bob");
+  get_broadcast_ip(&broadcast, "bob");
+  printf("interface (bob) local=%s, broadcast=%s\n", local, broadcast);
 }
 void update_time_checks(discovery_service *svc) {
   time_t last_update_time = get_last_update_time(svc);
