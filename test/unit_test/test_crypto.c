@@ -101,16 +101,8 @@ void test_multilevel_encryption() {
   jnx_size s = strlen(sbuffer);
   jnx_encoder *e = jnx_encoder_create();
 
-  JNXLOG(LDEBUG,"Generated shared secret of length %d",s);
-  print_hex(s,sbuffer);
-  JNXLOG(LDEBUG,"------------------------");
-
   jnx_char *encrypted_string = symmetrical_encrypt(sbuffer,
       string,string_size);
-
-  JNXLOG(LDEBUG,"Encrypted symmetrically with size %d",strlen(encrypted_string));
-  print_hex(string_size,encrypted_string);
-  JNXLOG(LDEBUG,"------------------------");
 
   RSA *keypair = asymmetrical_generate_key(2048);
 
@@ -119,29 +111,19 @@ void test_multilevel_encryption() {
   jnx_char *encrypted_message = asymmetrical_encrypt(keypair,encrypted_string,
       &encrypted_olen);
 
-  JNXLOG(LDEBUG,"Encrypted Asymmetrically with length %d",encrypted_olen);
-  print_hex(strlen(encrypted_string),encrypted_string);
-  JNXLOG(LDEBUG,"------------------------");
-
   /*decrypted_message*/
   jnx_size decrypted_olen;
   jnx_char *decrypted_message = asymmetrical_decrypt(keypair,encrypted_message,
       encrypted_olen,&decrypted_olen);
 
-  JNXLOG(LDEBUG,"Decrypted Asymmetrically with length %d", decrypted_olen);
-  print_hex(decrypted_olen,decrypted_message);
-  JNXLOG(LDEBUG,"------------------------");
-
   jnx_char *decrypted_symmetrical_message =symmetrical_decrypt(sbuffer,decrypted_message,
       decrypted_olen);
 
-  JNXLOG(LDEBUG,"decrypted_symmetrical_message => %s", decrypted_symmetrical_message);
-  print_hex(decrypted_olen,decrypted_symmetrical_message);
-  JNXLOG(LDEBUG,"------------------------");
-
-  JNXLOG(LDEBUG,"test string => %s",string);
-
   JNXCHECK(strcmp(decrypted_symmetrical_message,string) == 0);
+
+  free(encrypted_message);
+  free(decrypted_message);
+  asymmetrical_destroy_key(keypair);
 }
 int main(int argc, char **argv) {
   JNXLOG_CREATE("../testlogger.conf");
@@ -157,9 +139,7 @@ int main(int argc, char **argv) {
   JNXLOG(LDEBUG,"Test multilevel encryption");
   int i;
   for(i=0;i<150;++i){
-    JNXLOG(LDEBUG,"Test count %d",i);
     test_multilevel_encryption();
-    JNXLOG(LDEBUG,"------------------------");
   }
   sleep(1);
   JNXLOG_DESTROY();
