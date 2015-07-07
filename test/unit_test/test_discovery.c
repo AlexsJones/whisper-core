@@ -29,6 +29,24 @@
 
 static char *baddr = LDEBUG;
 
+void test_local_and_broadcast_ip() {
+  char *local, *broadcast;
+  get_local_ip(&local, NULL);
+  get_broadcast_ip(&broadcast, NULL);
+  printf("local=%s, broadcast=%s\n", local, broadcast);
+
+  get_local_ip(&local, "vnic0");
+  get_broadcast_ip(&broadcast, "vnic0");
+  printf("interface (vnic0) local=%s, broadcast=%s\n", local, broadcast);
+
+  get_local_ip(&local, "lo0");
+  get_broadcast_ip(&broadcast, "lo0");
+  printf("interface (lo0) local=%s, broadcast=%s\n", local, broadcast);
+
+  get_local_ip(&local, "bob");
+  get_broadcast_ip(&broadcast, "bob");
+  printf("interface (bob) local=%s, broadcast=%s\n", local, broadcast);
+}
 void update_time_checks(discovery_service *svc) {
   time_t last_update_time = get_last_update_time(svc);
   int i;
@@ -169,8 +187,10 @@ int test_broadcast_update_strategy(discovery_service *svc) {
 }
 int main(int argc, char **argv) {
   JNXLOG_CREATE("../testlogger.conf");
-  
-  get_broadcast_ip(&baddr);
+
+  test_local_and_broadcast_ip();
+
+  get_broadcast_ip(&baddr, NULL);
 
   JNXLOG(LDEBUG,"Test service creation.");
   run_discovery_service_test(test_service_creation);

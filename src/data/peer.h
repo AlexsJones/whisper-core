@@ -43,7 +43,7 @@ void peer_free(peer **p);
 
 peer *peer_create(jnx_guid guid, char *host_address, char *user_name, jnx_uint32 discovery_interval);
 
-peer *local_peer_for_user(char *username, jnx_uint32 discovery_interval);
+peer *local_peer_for_user(char *username, jnx_uint32 discovery_interval, char *interface);
 
 peer_compare_status peers_compare(peer *p1, peer *p2);
 
