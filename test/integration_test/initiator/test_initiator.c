@@ -67,7 +67,7 @@ void test_initiator() {
 
   peerstore *store = peerstore_init(local_peer_for_user("initiator_bob",10,interface), 0);
 
-  get_broadcast_ip(&baddr);
+  get_broadcast_ip(&baddr,interface);
   printf("%s\n", baddr);
   discovery_service *ds = discovery_service_create(1234, AF_INET, baddr, store);
 
@@ -112,8 +112,8 @@ void test_initiator() {
 }
 int main(int argc, char **argv) {
   if (argc > 1) {
-    interface = argc[1];
-    puts("using interface %s", interface);
+    interface = argv[1];
+    printf("using interface %s", interface);
   }
   JNXLOG_CREATE("logger.conf");
   test_initiator();

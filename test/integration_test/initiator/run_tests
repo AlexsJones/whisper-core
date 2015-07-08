@@ -43,7 +43,7 @@ function test_against_file()
 {
   file=$1
   echo "Compiling $file"
-  `$COMPILER $file ../../../src/util/*.c ../../../src/data/*.c ../../../src/net/*.c ../../../src/session/*.c ../../../src/integrity/*.c ../../../src/crypto/*.c -I../../../src/crypto -I../../../src/data -I../../../src/err -I../../../src/integrity -I../../../src/net -I../../../src/session -I../../../src/util -o ${file:0:${#file}-2} -pthread -w -rdynamic -lcrypto -lssl -ljnxc -lprotobuf-c -g -DDEBUG`
+  `$COMPILER $file ../../../src/util/*.c ../../../src/data/*.c ../../../src/net/*.c ../../../src/session/*.c ../../../src/integrity/*.c ../../../src/crypto/*.c -I../../../src/crypto -I../../../src/data -I../../../src/err -I../../../src/integrity -I../../../src/net -I../../../src/session -I../../../src/util -o ${file:0:${#file}-2} -pthread -w -rdynamic -lcrypto -lssl -ljnxc -lprotobuf-c -g`
   out=$?
   if [ ! $out -eq 0 ]; then
     echo "Compile failed!"
@@ -59,7 +59,8 @@ function test_against_file()
       $TESTCOMPILER --args $current
     fi
   else
-    ./$current
+    echo ">>>>> $2"
+    ./$current $2
   fi
   out=$?
   if [ ! $out -eq 0 ]; then
@@ -86,35 +87,11 @@ function run_full_suite()
       rm $current
     fi
     echo "Running next test for --> ${file}"
-    test_against_file $file
+    test_against_file $file $1
   done;
 }
 
-function run_single_test()
-{
-  filelist=`ls *.c`
-  for file in $filelist; do
-    if [ "$file" == "$1"  ]; then
-      echo "found match"
-
-      current=${file:0:${#file}-2}
-
-      if [ -e $current ]
-      then
-        rm $current
-      fi
-      test_against_file $file  
-    fi
-  done
-}
-
 pushd test/integration_test/initiator
-ARGS=$2
-echo "Args => $ARGS"
-if [ -z "$1"  ]; then 
-  run_full_suite
-else
-  run_single_test $1
-fi
+run_full_suite $1
 popd
 exit 0
