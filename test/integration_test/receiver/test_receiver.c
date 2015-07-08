@@ -124,7 +124,7 @@ start:
 
 int main(int argc, char **argv) {
   if (argc > 1) {
-    inteface = argc[1];
+    interface = argc[1];
     puts("using interface %s", interface);
   }
   JNXLOG_CREATE("logger.conf");
