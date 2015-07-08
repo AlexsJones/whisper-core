@@ -38,8 +38,6 @@ typedef struct {
   jnx_thread *listening_thread;  
   time_t last_updated; // synchronised
   jnx_thread_mutex *update_time_lock;
-
-
 } discovery_service;
 
 typedef jnx_int32 (discovery_strategy)(discovery_service *);
@@ -53,8 +51,8 @@ extern int peer_update_interval; // seconds
 #define POLLING_UPDATE_STRATEGY polling_update_strategy
 #define BROADCAST_UPDATE_STRATEGY broadcast_update_strategy
 
-void get_local_ip(char **local_ip_buffer);
-void get_broadcast_ip(char **broadcast_ip_buffer);
+void get_local_ip(char **local_ip_buffer, char *interface);
+void get_broadcast_ip(char **broadcast_ip_buffer, char *interface);
 
 #define DEFAULT_BROADCAST_PORT 8704
 
