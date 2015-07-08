@@ -24,7 +24,6 @@
 #include "discovery.h"
 
 static char *baddr = NULL;
-static char *interface = NULL;
 static auth_comms_service *ac;
 int accept_invite_callback(jnx_guid *session_guid) {
 
@@ -63,7 +62,7 @@ void test_receiver() {
   jnx_guid h;
   jnx_guid_create(&h);
 
-  peerstore *store = peerstore_init(local_peer_for_user("receiver_bob", 10,interface), 0);
+  peerstore *store = peerstore_init(local_peer_for_user("receiver_bob", 10), 0);
 
   get_broadcast_ip(&baddr);
 
@@ -123,10 +122,6 @@ start:
 }
 
 int main(int argc, char **argv) {
-  if (argc > 1) {
-    inteface = argc[1];
-    puts("using interface %s", interface);
-  }
   JNXLOG_CREATE("logger.conf");
   test_receiver();
   return 0;
