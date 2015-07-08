@@ -13,7 +13,7 @@
  *         Author:  Dragan Glumac (draganglumac), dragan.glumac@gmail.com
  *   Organization:  
  *
- * =====================================================================================
+ 2* =====================================================================================
  */
 #include <stdlib.h>
 #include <sys/socket.h>
@@ -36,7 +36,7 @@ typedef struct {
 } discovery_data;
 
 // Private and helper functions
-static char *port_to_string(discovery_service *svc) {
+static char* port_to_string(discovery_service *svc) {
   char *tmp = calloc(6, sizeof(char));
   snprintf(tmp, 6, "%d", svc->port);
   return tmp;
@@ -49,7 +49,6 @@ static void safely_update_last_update_time(discovery_service *svc) {
   jnx_thread_unlock(svc->update_time_lock);
 }
 
-#ifdef DEBUG
 static void debug_packet(discovery_service *svc, char *packet_type) {
   char *guid_str;
   jnx_guid_to_string(&peerstore_get_local_peer(svc->peers)->guid, &guid_str);
@@ -59,8 +58,6 @@ static void debug_packet(discovery_service *svc, char *packet_type) {
       peerstore_get_local_peer(svc->peers)->host_address, 
       peerstore_get_local_peer(svc->peers)->user_name);
 }
-#endif
-
 static void send_peer_packet(discovery_service *svc) {
   void *buffer;
   size_t len = peerton(peerstore_get_local_peer(svc->peers), &buffer);
@@ -77,7 +74,6 @@ static void send_peer_packet(discovery_service *svc) {
   debug_packet(svc, "PEER");
 #endif
 }
-
 static void send_stop_packet(discovery_service *svc) {
   void *buffer;
   size_t len = peerton(peerstore_get_local_peer(svc->peers), &buffer);
@@ -90,12 +86,10 @@ static void send_stop_packet(discovery_service *svc) {
   debug_packet(svc, "STOP");
 #endif
 }
-
 static void handle_peer(discovery_service *svc, jnx_uint8 *payload, jnx_size bytesread) {
   peer *p = ntopeer(payload, bytesread);
-  peerstore_store_peer(svc->peers, p);
+  peerstore_store_peer(svc->peers, p);	
 }
-
 static jnx_int32 handle_stop(discovery_service *svc, jnx_uint8 *payload, jnx_size bytesread) {
   peer *p = ntopeer(payload, bytesread);
   if (PEERS_EQUIVALENT
@@ -109,11 +103,10 @@ static jnx_int32 handle_stop(discovery_service *svc, jnx_uint8 *payload, jnx_siz
     return 0;
   }
 }
-
 // IP filtering function - say for filtering broadcast address, or local IP etc.
-typedef struct sockaddr *(*address_mapping)(struct ifaddrs *);
+typedef struct sockaddr*(*address_mapping)(struct ifaddrs *);
 
-static void get_ip(char *buffer, address_mapping filter, char *interface) {
+static void get_ip(char *buffer, address_mapping filter) {
   struct ifaddrs *ifap;
   if (0 != getifaddrs(&ifap)) {
     JNXLOG(0, "[ERROR] Couldn't get descriptions of network interfaces.");
@@ -124,10 +117,6 @@ static void get_ip(char *buffer, address_mapping filter, char *interface) {
   while (0 != current) {
     struct sockaddr *ip = current->ifa_addr;
     if (ip != NULL) {
-      if (interface != NULL && strcmp(current->ifa_name, interface) != 0) {
-        current = current->ifa_next;
-        continue;
-      }
       JNXCHECK(ip);
       JNXCHECK(ip->sa_family);
 
@@ -150,7 +139,6 @@ static void get_ip(char *buffer, address_mapping filter, char *interface) {
 
   freeifaddrs(ifap);
 }
-
 // Broadcast address IPv4
 static struct sockaddr *filter_broadcast_address(struct ifaddrs *addr) {
   struct sockaddr *ip = addr->ifa_addr;
@@ -158,7 +146,6 @@ static struct sockaddr *filter_broadcast_address(struct ifaddrs *addr) {
   ((struct sockaddr_in *) ip)->sin_addr.s_addr |= ~(((struct sockaddr_in *) netmask)->sin_addr.s_addr);
   return ip;
 }
-
 // Local IP address IPv4
 static struct sockaddr *filter_local_ip_address(struct ifaddrs *addr) {
   struct sockaddr *ip = addr->ifa_addr;
@@ -171,7 +158,6 @@ int peer_update_interval = 10;
 int is_active_peer_ask_once(time_t last_update_time, peer *p) {
   return 1;
 }
-
 int is_active_peer_periodic_update(time_t last_update_time, peer *p) {
   if (p->last_seen >= last_update_time - 2 * p->discovery_interval) {
     return 1;
@@ -182,8 +168,8 @@ int is_active_peer_periodic_update(time_t last_update_time, peer *p) {
 jnx_int32 send_discovery_request(discovery_service *svc) {
   char *tmp = "LIST";
   char *port = port_to_string(svc);
-  jnx_socket_udp_broadcast_send(svc->sock_send,
-                                svc->broadcast_group_address, port, (jnx_uint8 *) tmp, 5);
+  jnx_socket_udp_broadcast_send(svc->sock_send, 
+      svc->broadcast_group_address, port, (jnx_uint8 *) tmp, 5);	
   return 0;
 }
 
@@ -193,14 +179,14 @@ void *polling_update_loop(void *data) {
   // do not happen more frequently than peer_update_interval on average.
   // 
   // This means that whichever node sends LIST packet last, all of the
-  // discovery services on the network will synchronise to that time. Since
+  // discovery services on the network will synhronise to that time. Since
   // every time a LIST packet is received the service sends local peer packet,
   // we update the last_update time in send_peer_packet function. This way
-  // we ensure that regardless of which service sends the LIST packets, all
+  // we ensure that regradless of which service sends the LIST packets, all
   // services update the last_updated time, i.e. synchronise on that packet.
   //
   // The only time we may get a time shorter than peer_update_interval between
-  // updates is when a new discovery service joins the broadcast group.
+  // updates is when a new discovery service joins the broadcast group..
   int old_cancel_state;
   pthread_setcancelstate(PTHREAD_CANCEL_ASYNCHRONOUS, &old_cancel_state);
   discovery_service *svc = (discovery_service *) data;
@@ -217,7 +203,6 @@ void *polling_update_loop(void *data) {
   }
   return NULL;
 }
-
 jnx_int32 polling_update_strategy(discovery_service *svc) {
   svc->update_thread = jnx_thread_create(polling_update_loop, (void *) svc);
   return 0;
@@ -239,7 +224,6 @@ void *broadcast_update_loop(void *data) {
   }
   return NULL;
 }
-
 jnx_int32 broadcast_update_strategy(discovery_service *svc) {
   svc->update_thread = jnx_thread_create(broadcast_update_loop, (void *) svc);
   return 0;
@@ -250,7 +234,7 @@ jnx_int32 broadcast_update_strategy(discovery_service *svc) {
 void discovery_receive_handler(const jnx_uint8 *j, jnx_size bytesread, void *context) {
   discovery_service *svc = (discovery_service *) context;
   char command[5];
-  char *payload = (char *) j;
+  char *payload = (char*)j;
   memset(command, 0, 5);
   memcpy(command, payload, 4);
   if (0 == strcmp(command, "LIST")) {
@@ -267,31 +251,27 @@ void discovery_receive_handler(const jnx_uint8 *j, jnx_size bytesread, void *con
   }
   return;
 }
-
 static void ensure_listening_on_port(int port) {
   // Until we find a smarter strategy just sleep a little
   sleep(1);
 }
-
-static void *discovery_loop(void *data) {
+static void *discovery_loop(void* data) {
   //  int old_cancel_state;
   //  pthread_setcancelstate(PTHREAD_CANCEL_ASYNCHRONOUS, &old_cancel_state);
-  discovery_service *svc = (discovery_service *) data;
+  discovery_service *svc = (discovery_service*) data;
   char *port = port_to_string(svc);
-  while (svc->isrunning) {
-    jnx_socket_udp_listener_tick(svc->udp_listener, svc->receive_callback,
-                                 data);
+  while(svc->isrunning){
+    jnx_socket_udp_listener_tick(svc->udp_listener,svc->receive_callback,
+        data);
   }
   free(port);
   return 0;
 }
-
 static jnx_int32 listen_for_discovery_packets(discovery_service *svc) {
-  svc->listening_thread = jnx_thread_create(discovery_loop, (void *) svc);
+  svc->listening_thread = jnx_thread_create(discovery_loop, (void*) svc);
   ensure_listening_on_port(svc->port);
   return 0;
 }
-
 void cancel_thread(jnx_thread **thr) {
   jnx_thread *temp = *thr;
   pthread_cancel(temp->system_thread);
@@ -312,29 +292,19 @@ void cancel_thread(jnx_thread **thr) {
    }
    */
 // Public interface functions
-void get_local_ip(char **local_ip, char *interface) {
+void get_local_ip(char **local_ip) {
   printf("Getting broadcast IP\n");
   *local_ip = calloc(16, sizeof(char));
-  get_ip(*local_ip, filter_local_ip_address, interface);
-  JNXLOG(0, "Local IP is %s", *local_ip);
+  get_ip(*local_ip, filter_local_ip_address);
+  JNXLOG(0, "Local IP is %s", *local_ip); 
 }
-
-void get_broadcast_ip(char **broadcast_ip, char *interface) {
+void get_broadcast_ip(char **broadcast_ip) {
   *broadcast_ip = calloc(16, sizeof(char));
-  get_ip(*broadcast_ip, filter_broadcast_address, interface);
-  JNXLOG(0, "Broadcast IP is %s", *broadcast_ip);
+  get_ip(*broadcast_ip, filter_broadcast_address);
+  JNXLOG(0, "Broadcast IP is %s", *broadcast_ip); 
 }
-
-void get_local_ip_for_interface(char **local_ip, char *interface) {
-
-}
-
-void get_broadcast_ip_for_interface(char **broadcast_ip, char *interface) {
-
-}
-
-discovery_service *discovery_service_create(int port, unsigned int family,
-                                            char *broadcast_group_address, peerstore *peers) {
+discovery_service* discovery_service_create(int port, unsigned int family,
+    char *broadcast_group_address, peerstore *peers) {
   discovery_service *svc = calloc(1, sizeof(discovery_service));
   svc->port = port;
   svc->family = family;
@@ -345,10 +315,9 @@ discovery_service *discovery_service_create(int port, unsigned int family,
   svc->update_thread = NULL;
   svc->listening_thread = NULL;
   svc->last_updated = time(0);
-  svc->update_time_lock = jnx_thread_mutex_create();
+  svc->update_time_lock = jnx_thread_mutex_create();	
   return svc;
 }
-
 void initiate_discovery(discovery_service *svc) {
   send_peer_packet(svc);
   int i;
@@ -360,7 +329,6 @@ void initiate_discovery(discovery_service *svc) {
   }
   printf("\n");
 }
-
 int discovery_service_start(discovery_service *svc, discovery_strategy *strategy) {
   JNXCHECK(svc);
 
@@ -393,7 +361,6 @@ int discovery_service_start(discovery_service *svc, discovery_strategy *strategy
 
   return 0;
 }
-
 int discovery_service_stop(discovery_service *svc) {
   JNXCHECK(svc);
   svc->isrunning = 0;
@@ -403,11 +370,10 @@ int discovery_service_stop(discovery_service *svc) {
   send_stop_packet(svc);
   pthread_join(svc->listening_thread->system_thread, NULL);
 
-  jnx_socket_destroy(&svc->sock_send);
+  jnx_socket_destroy(&(svc->sock_send));
   jnx_socket_udp_listener_destroy(&svc->udp_listener);
   return 0;
 }
-
 void discovery_service_cleanup(discovery_service **ppsvc) {
   discovery_service *svc = *ppsvc;
   JNXCHECK(svc);
@@ -419,14 +385,12 @@ void discovery_service_cleanup(discovery_service **ppsvc) {
   free(svc);
   *ppsvc = 0;
 }
-
 time_t get_last_update_time(discovery_service *svc) {
   jnx_thread_lock(svc->update_time_lock);
   time_t last_update = svc->last_updated;
   jnx_thread_unlock(svc->update_time_lock);
   return last_update;
 }
-
 void discovery_notify_peers_of_shutdown(discovery_service *svc) {
   send_stop_packet(svc);
 }

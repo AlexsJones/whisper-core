@@ -89,10 +89,10 @@ void peer_free(peer **p) {
   free(temp);
   *p = NULL;
 }
-peer *local_peer_for_user(char *user, jnx_uint32 discovery_interval, char *interface) {
+peer *local_peer_for_user(char *user, jnx_uint32 discovery_interval) {
 	peer *p = calloc(1, sizeof(peer));
 	jnx_guid_create(&p->guid);
-	get_local_ip(&p->host_address, interface);
+	get_local_ip(&p->host_address);
 	p->user_name = user;
   p->discovery_interval = discovery_interval;
 	return p;
