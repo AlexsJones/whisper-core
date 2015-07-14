@@ -238,6 +238,8 @@ static void internal_request_invite(transport_options *t,
         auth_comms_initiator_start(t->ac,
             t->ds,t->ps,osession,
             "Let's handshake");
+
+        /* Handshake complete */
       }
     }else {
       JNXLOG(LWARN,"Session is already known - we don't need an invite");
