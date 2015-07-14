@@ -24,6 +24,7 @@ typedef struct transport_options {
   discovery_service *ds;
   session_service *ss;
   auth_comms_service *ac;
+  port_control_service *ps;
   void *linking_args;
 }transport_options;
 /* Listener Thread */
@@ -218,8 +219,25 @@ static void internal_request_invite(transport_options *t,
         /* Start auth join */
         //TODO: I'll do this on the same listener thread which will cause a 
         //temporary block
+        
+        //Session is null at this point
+        e = session_service_create_shared_session(t->ss,
+           i->session_guid, &osession);
+      
+        jnx_guid remote_peer_guid;
+        jnx_guid_from_string(i->inviter_guid,&remote_peer_guid);
 
+        peer *remote_peer = peerstore_lookup(t->ds->peers,
+            &remote_peer_guid);
 
+        session_service_link_sessions(t->ss,0,
+        t->linking_args,&session_guid, local_peer, remote_peer);
+
+        JNXCHECK(e == SESSION_STATE_OKAY);
+
+        auth_comms_initiator_start(t->ac,
+            t->ds,t->ps,osession,
+            "Let's handshake");
       }
     }else {
       JNXLOG(LWARN,"Session is already known - we don't need an invite");
@@ -304,11 +322,14 @@ auth_comms_service *auth_comms_create() {
   return ac;
 }
 void auth_comms_listener_start(auth_comms_service *ac, discovery_service *ds,
-    session_service *ss,void *linking_args) {
+    session_service *ss,
+    port_control_service *ps, 
+    void *linking_args) {
   transport_options *ts = malloc(sizeof(transport_options));
   ts->ac = ac;
   ts->ds = ds;
   ts->ss = ss;
+  ts->ps = ps;
   ts->linking_args = linking_args;
   ac->listener_thread = jnx_thread_create(listener_bootstrap,ts);
 }

@@ -49,6 +49,8 @@ function test_against_file()
     echo "Compile failed!"
     exit 1
   fi
+ 
+  
   if [ "$ARGS" == "DEBUG" ]; then
     echo "Using debugger..."
     if hash lldb 2>/dev/null; then
