@@ -217,11 +217,11 @@ static void internal_request_invite(transport_options *t,
         JNXLOG(LDEBUG,"Invite from %s has been accepted",i->session_guid);
 
         /* Start auth join */
-        
+
         //Session is null at this point
         e = session_service_create_shared_session(t->ss,
-           i->session_guid, &osession);
-      
+            i->session_guid, &osession);
+
         jnx_guid remote_peer_guid;
         jnx_guid_from_string(i->inviter_guid,&remote_peer_guid);
 
@@ -229,7 +229,7 @@ static void internal_request_invite(transport_options *t,
             &remote_peer_guid);
 
         session_service_link_sessions(t->ss,0,
-        t->linking_args,&session_guid, local_peer, remote_peer);
+            t->linking_args,&session_guid, local_peer, remote_peer);
 
         JNXCHECK(e == SESSION_STATE_OKAY);
 
@@ -245,20 +245,20 @@ static void internal_request_invite(transport_options *t,
             i->session_guid,encrypted_len);
         jnx_size encoded_len;
         jnx_uint8 *encoded_secret = jnx_encoder_b64_encode(t->ac->encoder,
-        encrypted,encrypted_len,
-        &encoded_len); 
-    jnx_uint8 *outbuffer;
+            encrypted,encrypted_len,
+            &encoded_len); 
+        jnx_uint8 *outbuffer;
 
-    int l = handshake_joiner_command_generate(osession,
-       JOINER_JOIN,encoded_secret,&outbuffer);     
+        int l = handshake_joiner_command_generate(osession,
+            JOINER_JOIN,encoded_secret,&outbuffer);     
 
-      send_data(remote_peer->host_address, DEFAULT_AUTH_COMMS_PORT,
-         t->ac->listener->socket->addrfamily,outbuffer,
-         l);
+        send_data(remote_peer->host_address, DEFAULT_AUTH_COMMS_PORT,
+            t->ac->listener->socket->addrfamily,outbuffer,
+            l);
 
-      free(outbuffer);
-      free(encrypted);
-      free(encoded_secret);
+        free(outbuffer);
+        free(encrypted);
+        free(encoded_secret);
 
       }
     }else {
@@ -272,19 +272,14 @@ static void internal_request_joiner(transport_options *t,
     const jnx_uint8 *payload,
     jnx_size bytes_read, int connected_socket, void *object, void *context) {
   AuthJoiner *j = (AuthJoiner*)object; 
-  
-    jnx_guid g;
-    jnx_guid_from_string(j->session_guid,&g);
-    session *osession;
-    session_state e = session_service_fetch_session(t->ss,&g,
-        &osession);
+
+  jnx_guid g;
+  jnx_guid_from_string(j->session_guid,&g);
+  session *osession;
+  session_state e = session_service_fetch_session(t->ss,&g,
+      &osession);
 
   if(e == SESSION_STATE_OKAY) {
-    
-  }else {
-    JNXLOG(LERROR,"Error occured retrieving joiner session!");
-  }
-
     jnx_size olen;
     jnx_size decoded_len;
     jnx_uint8 *decoded_secret = 
@@ -298,31 +293,11 @@ static void internal_request_joiner(transport_options *t,
 
     free(decoded_secret);
     free(decrypted_message);
-  //The joiner will carry an 
-  //that works more for validation that the handshake has completed, but will stop network attacks from pretending to be the joiner
-  
-  /*
-   *Any joiner must specify a valid session that the current Peer is a part of
-  if(j->is_requesting_join) {
-    jnx_guid g;
-    jnx_guid_from_string(j->session_guid,&g);
-    session *osession;
-    session_state e = session_service_fetch_session(t->ss,&g,
-        &osession);
-    if(e == SESSION_STATE_OKAY) {
-
-       *Okay you want to join our chat.
-       *First you and I will need to handshake
-       *
-
-    }else {
-      JNXLOG(LWARN,"There was a problem requesting the session for the auth joiner");
-    }
+  }else {
+    JNXLOG(LERROR,"Error occured retrieving joiner session!");
   }
 
-       */
   auth_joiner__free_unpacked(j,NULL);
-
 }
 static void listener_callback(const jnx_uint8 *payload,
     jnx_size bytes_read, int connected_socket, void *context) {
