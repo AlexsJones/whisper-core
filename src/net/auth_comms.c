@@ -240,6 +240,15 @@ static void internal_request_invite(transport_options *t,
             "Let's handshake");
 
         /* Handshake complete */
+
+        /* let's sqwack a joiner message with t
+         * he secret key from our session? */
+      jnx_uint8 *outbuffer;
+    int l = handshake_joiner_command_generate(osession,
+       JOINER_JOIN,&session_guid,&outbuffer);     
+
+
+        
       }
     }else {
       JNXLOG(LWARN,"Session is already known - we don't need an invite");

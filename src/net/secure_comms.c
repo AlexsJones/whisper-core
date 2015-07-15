@@ -121,13 +121,13 @@ jnx_int secure_comms_start(secure_comms_endpoint e, discovery_service *ds,
                            session *s, jnx_unsigned_int addr_family) {
   JNXCHECK(s);
   JNXCHECK(s->is_connected);
-  printf("Starting secure comms on %s.\n", s->secure_comms_port);
+  JNXLOG(LDEBUG,"Starting secure comms on %s.\n", s->secure_comms_port);
 
   peer *local_peer = peerstore_get_local_peer(ds->peers);
   JNXCHECK(local_peer);
   peer *remote_peer = peerstore_lookup(ds->peers, &(*s).remote_peer_guid);
   JNXCHECK(remote_peer);
-  printf("Starting a tunnel to %s\n", remote_peer->host_address);
+  JNXLOG(LDEBUG,"Starting a tunnel to %s\n", remote_peer->host_address);
 
 
   JNXCHECK(s->secure_socket == -1);
@@ -135,17 +135,17 @@ jnx_int secure_comms_start(secure_comms_endpoint e, discovery_service *ds,
   switch (e) {
 
     case SC_INITIATOR:
-      printf("About to initiate connection to remote secure_comms_port.\n");
+      JNXLOG(LDEBUG,"About to initiate connection to remote secure_comms_port.\n");
       sleep(5);
-      printf("Slept for 5\n");
+      JNXLOG(LDEBUG,"Slept for 5\n");
       s->secure_socket = connect_for_socket_fd(remote_peer, s);
-      printf("Secure socket fd: %d\n", s->secure_socket);
+      JNXLOG(LDEBUG,"Secure socket fd: %d\n", s->secure_socket);
       break;
 
     case SC_RECEIVER:
-      printf("Setting up recevier.\n");
+      JNXLOG(LDEBUG,"Setting up recevier.\n");
       s->secure_socket = listen_for_socket_fd(remote_peer, s);
-      printf("Secure socket fd: %d\n", s->secure_socket);
+      JNXLOG(LDEBUG,"Secure socket fd: %d\n", s->secure_socket);
       break;
   }
 
