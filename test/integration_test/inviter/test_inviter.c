@@ -69,13 +69,16 @@ void test_receiver() {
 
   discovery_service *ds = discovery_service_create(1234, AF_INET, baddr, store);
 
+  port_control_service *ps = port_control_service_create(9042,12002,1);
+
+
   discovery_service_start(ds, BROADCAST_UPDATE_STRATEGY);
 
   ac = auth_comms_create();
   ac->ar_callback = app_accept_reject;
   ac->invitation_callback = accept_invite_callback;
   ac->listener = jnx_socket_tcp_listener_create("9991", AF_INET, 15);
-  auth_comms_listener_start(ac, ds, service, NULL);
+  auth_comms_listener_start(ac, ds, service, ps,NULL);
 
 
   int remote_peers = 0;
