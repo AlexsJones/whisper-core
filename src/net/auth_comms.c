@@ -242,18 +242,26 @@ static void internal_request_invite(transport_options *t,
         /* Handshake complete */
 
         /* now we encrypt, encode and send back the session_guid via the joiner request */
-
         jnx_size encrypted_len = strlen(i->session_guid);
-        jnx_char *encrypted = symmetrical_encrypt(osession->shared_secret,i->session_guid,encrypted_len);
+        jnx_char *encrypted = symmetrical_encrypt(osession->shared_secret,
+            i->session_guid,encrypted_len);
         jnx_size encoded_len;
         jnx_uint8 *encoded_secret = jnx_encoder_b64_encode(t->ac->encoder,
         encrypted,encrypted_len,
         &encoded_len); 
     jnx_uint8 *outbuffer;
+
     int l = handshake_joiner_command_generate(osession,
        JOINER_JOIN,encoded_secret,&outbuffer);     
 
-        
+      send_data(remote_peer->host_address, DEFAULT_AUTH_COMMS_PORT,
+         t->ac->listener->socket->addrfamily,outbuffer,
+         l);
+
+      free(outbuffer);
+      free(encrypted);
+      free(encoded_secret);
+
       }
     }else {
       JNXLOG(LWARN,"Session is already known - we don't need an invite");
