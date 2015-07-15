@@ -274,12 +274,12 @@ int handshake_generate_invite_request(session *ses,
       invitee_guid,onetbuffer);
 }
 int handshake_joiner_command_generate(session *ses, \
-    handshake_joiner_state state, jnx_guid *session_guid,\
+    handshake_joiner_state state, jnx_uint8 *encrypted_session_guid,\
     jnx_uint8 **onetbuffer) {
   return 0;
 }
 int handshake_generate_joiner_request(session *ses, \
-    jnx_guid *session_guid, jnx_uint8 **onetbuffer) {
+    jnx_uint8 *encrypted_session_guid, jnx_uint8 **onetbuffer) {
   return handshake_joiner_command_generate(ses, JOINER_JOIN, 
-      session_guid, onetbuffer);
+      encrypted_session_guid, onetbuffer);
 }

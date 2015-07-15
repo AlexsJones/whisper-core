@@ -241,12 +241,17 @@ static void internal_request_invite(transport_options *t,
 
         /* Handshake complete */
 
-        /* let's sqwack a joiner message with t
-         * he secret key from our session? */
-      jnx_uint8 *outbuffer;
-    int l = handshake_joiner_command_generate(osession,
-       JOINER_JOIN,&session_guid,&outbuffer);     
+        /* now we encrypt, encode and send back the session_guid via the joiner request */
 
+        jnx_size encrypted_len = strlen(i->session_guid);
+        jnx_char *encrypted = symmetrical_encrypt(osession->shared_secret,i->session_guid,encrypted_len);
+        jnx_size encoded_len;
+        jnx_uint8 *encoded_secret = jnx_encoder_b64_encode(t->ac->encoder,
+        encrypted,encrypted_len,
+        &encoded_len); 
+    jnx_uint8 *outbuffer;
+    int l = handshake_joiner_command_generate(osession,
+       JOINER_JOIN,encoded_secret,&outbuffer);     
 
         
       }
@@ -261,9 +266,12 @@ static void internal_request_joiner(transport_options *t,
     const jnx_uint8 *payload,
     jnx_size bytes_read, int connected_socket, void *object, void *context) {
   AuthJoiner *j = (AuthJoiner*)object; 
+  
+  //The joiner will carry an 
+  //that works more for validation that the handshake has completed, but will stop network attacks from pretending to be the joiner
+  
   /*
    *Any joiner must specify a valid session that the current Peer is a part of
-   */
   if(j->is_requesting_join) {
     jnx_guid g;
     jnx_guid_from_string(j->session_guid,&g);
@@ -272,17 +280,16 @@ static void internal_request_joiner(transport_options *t,
         &osession);
     if(e == SESSION_STATE_OKAY) {
 
-      /*
        *Okay you want to join our chat.
        *First you and I will need to handshake
        *
-       */
 
     }else {
       JNXLOG(LWARN,"There was a problem requesting the session for the auth joiner");
     }
   }
 
+       */
   auth_joiner__free_unpacked(j,NULL);
 
 }
