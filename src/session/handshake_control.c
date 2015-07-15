@@ -274,24 +274,32 @@ int handshake_generate_invite_request(session *ses,
       invitee_guid,onetbuffer);
 }
 int handshake_joiner_command_generate(session *ses, \
-    handshake_joiner_state state, jnx_uint8 *encrypted_session_guid,\
+    handshake_joiner_state state, jnx_uint8 *encrypted_joiner_guid,\
     jnx_uint8 **onetbuffer) {
 
-  jnx_size len = strlen(encrypted_session_guid);
+  jnx_size len = strlen(encrypted_joiner_guid);
   AuthJoiner auth_joiner = AUTH_JOINER__INIT;  
-  auth_joiner.encrypted_session_guid = malloc(sizeof(char) * len + 1);  
-  memcpy(auth_joiner.encrypted_session_guid,encrypted_session_guid,len +1);
-  auth_joiner.is_requesting_join = 1;
+  /* session guid */
+  jnx_char *session_guid_str;
+  jnx_guid_to_string(&(*ses).session_guid,&session_guid_str);
+  len = strlen(session_guid_str);
+  auth_joiner.session_guid = malloc(sizeof(char)* len + 1);
+  memcpy(auth_joiner.session_guid,session_guid_str, len + 1);
+  free(session_guid_str);
+  /* encrypted joiner guid */
+  auth_joiner.encrypted_joiner_guid = malloc(sizeof(char) * len + 1);  
+  memcpy(auth_joiner.encrypted_joiner_guid,encrypted_joiner_guid,len +1);
   jnx_int parcel_len = auth_joiner__get_packed_size(&auth_joiner);
   jnx_uint8 *obuffer = malloc(parcel_len);
   auth_joiner__pack(&auth_joiner,obuffer);
-
+  /* requesting join */
+  auth_joiner.is_requesting_join = 1;
   *onetbuffer = obuffer;
 
   return parcel_len;
 }
 int handshake_generate_joiner_request(session *ses, \
-    jnx_uint8 *encrypted_session_guid, jnx_uint8 **onetbuffer) {
+    jnx_uint8 *encrypted_joiner_guid, jnx_uint8 **onetbuffer) {
   return handshake_joiner_command_generate(ses, JOINER_JOIN, 
-      encrypted_session_guid, onetbuffer);
+      encrypted_joiner_guid, onetbuffer);
 }

@@ -217,8 +217,6 @@ static void internal_request_invite(transport_options *t,
         JNXLOG(LDEBUG,"Invite from %s has been accepted",i->session_guid);
 
         /* Start auth join */
-        //TODO: I'll do this on the same listener thread which will cause a 
-        //temporary block
         
         //Session is null at this point
         e = session_service_create_shared_session(t->ss,
@@ -242,7 +240,7 @@ static void internal_request_invite(transport_options *t,
         /* Handshake complete */
 
         /* now we encrypt, encode and send back the session_guid via the joiner request */
-        jnx_size encrypted_len = strlen(i->session_guid);
+        jnx_size encrypted_len = strlen(local_peer_guid);
         jnx_char *encrypted = symmetrical_encrypt(osession->shared_secret,
             i->session_guid,encrypted_len);
         jnx_size encoded_len;
@@ -275,6 +273,31 @@ static void internal_request_joiner(transport_options *t,
     jnx_size bytes_read, int connected_socket, void *object, void *context) {
   AuthJoiner *j = (AuthJoiner*)object; 
   
+    jnx_guid g;
+    jnx_guid_from_string(j->session_guid,&g);
+    session *osession;
+    session_state e = session_service_fetch_session(t->ss,&g,
+        &osession);
+
+  if(e == SESSION_STATE_OKAY) {
+    
+  }else {
+    JNXLOG(LERROR,"Error occured retrieving joiner session!");
+  }
+
+    jnx_size olen;
+    jnx_size decoded_len;
+    jnx_uint8 *decoded_secret = 
+      jnx_encoder_b64_decode(t->ac->encoder,j->encrypted_joiner_guid,
+          strlen(j->encrypted_joiner_guid),&decoded_len);
+
+    jnx_char *decrypted_message = symmetrical_decrypt(osession->shared_secret,
+        decoded_secret,decoded_len);
+
+    JNXLOG(LDEBUG,"Received joiner request that correct decrypted to => %s",decrypted_message);
+
+    free(decoded_secret);
+    free(decrypted_message);
   //The joiner will carry an 
   //that works more for validation that the handshake has completed, but will stop network attacks from pretending to be the joiner
   
