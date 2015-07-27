@@ -1,15 +1,15 @@
 /*
- * =====================================================================================
+ * =============================================================================
  *
  *       Filename:  discovery_strategy.h
  *
- *    Description:  Struct and accompanying functions that define the API for discovery
- *                  implementations.
+ *    Description:  Structure and accompanying functions that define the API for
+ *                  discovery implementations.
  *
- *                  whisper-core comes with pre-canned strategies for discovering peers
- *                  on the LAN and across the LAN boundaries, but users can implement
- *                  their own as shared libraries and specify them to be loaded as plugins
- *                  at run time.
+ *                  whisper-core comes with default strategies for discovering
+ *                  peers on the LAN and across the LAN boundaries, but users
+ *                  can implement their own as shared libraries and specify
+ *                  them to be loaded as plugins at run time.
  *
  *        Version:  1.0
  *        Created:  26/07/2015 08:50:06
@@ -19,7 +19,7 @@
  *         Author:  Dragan Glumac (DG), 
  *   Organization:  
  *
- * =====================================================================================
+ * =============================================================================
  */
 
 #ifndef __DISCOVERY_STRATEGY_H__
@@ -84,7 +84,9 @@ typedef char *(*my_address_t)(void);
  * If you're implementing your own discovery strategy, the discovery service
  * will expect to find an initialisation function with the following signature:
  *
- *     discovery_service *discovery_strategy_init(void);
+ * \code{.c}
+ *   discovery_strategy *discovery_strategy_init(void);
+ * \endcode
  *
  * This function is the ideal place to assign the function pointers of the
  * discovery_service struct to the corresponding implementation routines.
@@ -92,10 +94,9 @@ typedef char *(*my_address_t)(void);
  * NOTE: If you're overriding the default struct discovery_strategy with
  * an extended one, then you must:
  *
- *   1) lay out the first 5 fields of your struct with exactly the same
- *   names and in exactly the same order as discovery_service struct, and
- *
- *   2) all extra fields should come after the discovery_service fields.
+ *   (1) lay out the first 5 fields of your struct with exactly the same
+ *       names and in exactly the same order as discovery_service struct, and
+ *   (2) all extra fields should come after the discovery_service fields.
  *
  * The discovery_service will call start_discovery as part of its startup
  * routine, and it will call stop_discovery as part of its stop and
@@ -106,6 +107,11 @@ typedef char *(*my_address_t)(void);
  *
  * is_active_peer is called at various times, but always in a read-only
  * fashion so it does not need to be thread-safe.
+ *
+ * get_my_address is expected to return a string representation of network
+ * address for the local machine, but as seen by the other peers. So when you
+ * are implementing a strategy that crosses LAN boundaries you will probably
+ * want to return an IP address that is visible to the outside world.
  */
 typedef struct {
   // discovery service which uses this strategy
