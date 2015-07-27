@@ -27,14 +27,14 @@
 #include "peer.h"
 #include "discovery.h"
 
-typedef jnx_int32 (*start_callback)(discovery_service *);
-typedef jnx_int32 (*stop_callback)(void);
-typedef jnx_int32 (*active_peer_callback)(peer *);
+typedef jnx_int32 (*start_t)(discovery_service *);
+typedef jnx_int32 (*stop_t)(void);
+typedef jnx_int32 (*active_peer_t)(peer *);
 
 typedef struct {
-  start_callback start;
-  stop_callback stop;
-  active_peer_callback is_active_peer;
+  start_t start;
+  stop_t stop;
+  active_peer_t is_active_peer;
 
 } discovery_strategy;
 
