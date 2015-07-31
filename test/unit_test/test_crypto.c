@@ -37,11 +37,7 @@ void test_rsa_encryption() {
   jnx_size olen,second_olen;
   jnx_char *encrypted_message = asymmetrical_encrypt(key,test_message,&olen);
 
-  JNXLOG(LDEBUG,"Encrypted RSA length %d >%s<\n",olen,encrypted_message);
-
   jnx_char *decrypted_message = asymmetrical_decrypt(key,encrypted_message,olen,&second_olen);
-
-  JNXLOG(LDEBUG,"Decrypted message %d >%s<\n",second_olen,decrypted_message);
 
   JNXCHECK(strcmp(decrypted_message,test_message) == 0);
 }
