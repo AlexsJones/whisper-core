@@ -55,8 +55,8 @@ function test_against_file()
       echo "Running command => $TESTCOMPILER -f $current -o run -o exit"
       $TESTCOMPILER -f $current -o run -o exit
     else
-      echo "Running command => $TESTCOMPILER --args $current"
-      $TESTCOMPILER --args $current
+      echo "Running command => $TESTCOMPILER --args $current $2"
+      $TESTCOMPILER --args $current $2
     fi
   else
     echo ">>>>> $2"
