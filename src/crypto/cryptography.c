@@ -66,14 +66,15 @@ jnx_char *asymmetrical_key_to_string(RSA *keypair,key_type type) {
 }
 jnx_char *asymmetrical_encrypt(RSA *keypair, jnx_uint8 *message, jnx_size \
     *out_len) {
-
-    jnx_char *encrypted_message;
+  jnx_char *encrypted_message;
 #ifdef NOASYMMETRICALCRYPTO
-    encrypted_message = strdup(message);
-    *out_len = strlen(encrypted_message);
-    return encrypted_message;
+  JNXLOG(LDEBUG,"---------------------NOT USING ASYMMETRICAL CRYPTOGRAPHY----------------");
+  encrypted_message = strdup(message);
+  *out_len = strlen(encrypted_message);
+  JNXLOG(LDEBUG,"decrypted_message (asymmetrical) => [%s]",encrypted_message);
+  return encrypted_message;
 #endif
-  
+
   encrypted_message = malloc(RSA_size(keypair));
   bzero(encrypted_message, RSA_size(keypair));
   char *err = malloc(30);
@@ -82,7 +83,7 @@ jnx_char *asymmetrical_encrypt(RSA *keypair, jnx_uint8 *message, jnx_size \
           encrypted_message, keypair, RSA_PKCS1_OAEP_PADDING)) == -1) {
     ERR_load_crypto_strings();
     ERR_error_string(ERR_get_error(),err);
-    printf("%s\n",err);
+    JNXLOG(LERROR,"===================> %s\n",err);
     free(err);
     return NULL;
   }
@@ -91,12 +92,13 @@ jnx_char *asymmetrical_encrypt(RSA *keypair, jnx_uint8 *message, jnx_size \
 }
 jnx_char *asymmetrical_decrypt(RSA *keypair, jnx_uint8 *message, \
     jnx_size in_len, jnx_size *out_len) {
-
-    jnx_char *decrypted_message;
+  jnx_char *decrypted_message;
 #ifdef NOASYMMETRICALCRYPTO
-    decrypted_message = strdup(message);
-    *out_len = strlen(decrypted_message);
-    return decrypted_message;
+  JNXLOG(LDEBUG,"---------------------NOT USING ASYMMETRICAL CRYPTOGRAPHY----------------");
+  decrypted_message = strdup(message);
+  *out_len = strlen(decrypted_message);
+  JNXLOG(LDEBUG,"decrypted_message (asymmetrical) => [%s]",decrypted_message);
+  return decrypted_message;
 #endif
 
   decrypted_message = malloc(RSA_size(keypair));
@@ -116,7 +118,7 @@ jnx_char *asymmetrical_decrypt(RSA *keypair, jnx_uint8 *message, \
 }
 jnx_char *symmetrical_encrypt(jnx_uint8 *key,jnx_uint8 *msg, jnx_size size){
 #ifdef NOSYMMETRICALCRYPTO
-  JNXLOG(LDEBUG,"---------------------NOT USING CRYPTOGRAPHY----------------");
+  JNXLOG(LDEBUG,"---------------------NOT USING SYMMETRICAL CRYPTOGRAPHY----------------");
   return strdup(msg);
 #endif
   jnx_char *res;
@@ -134,7 +136,7 @@ jnx_char *symmetrical_encrypt(jnx_uint8 *key,jnx_uint8 *msg, jnx_size size){
 }
 jnx_char *symmetrical_decrypt(jnx_uint8 *key,jnx_uint8 *msg, jnx_size size){
 #ifdef NOSYMMETRICALCRYPTO
-  JNXLOG(LDEBUG,"---------------------NOT USING CRYPTOGRAPHY----------------");
+  JNXLOG(LDEBUG,"---------------------NOT USING SYMMETRICAL CRYPTOGRAPHY----------------");
   jnx_char *out = strdup(msg);
   JNXLOG(LDEBUG,"Decrypted message => %s",out);
   return out;
@@ -159,11 +161,10 @@ jnx_size generate_shared_secret(jnx_uint8 **buffer) {
     'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o',
     'p','q','r','s','t','u','v','w','x','y','z','1','2','3','4','5','6','7',
     '8','9','0'};
-
   jnx_uint8 charbuf[sizeof(jnx_uint8)* 8];
   jnx_int j;
   srand(time(0));
-  
+
   for(j=0;j<8; ++j) {
     charbuf[j] = alphabet[rand() % 62];
   }
