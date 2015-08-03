@@ -50,16 +50,14 @@ function test_against_file()
     exit 1
   fi
  
-  
-ARGS="DEBUG"
   if [ "$ARGS" == "DEBUG" ]; then
     echo "Using debugger..."
     if hash lldb 2>/dev/null; then
       echo "Running command => $TESTCOMPILER -f $current -o run -o exit"
-      $TESTCOMPILER -f $current -o run -o exit
+      $TESTCOMPILER -f $current $2 -o run -o exit
     else
       echo "Running command => $TESTCOMPILER --args $current"
-      $TESTCOMPILER --args $current
+      $TESTCOMPILER --args $current $2
     fi
   else
     echo ">>>>> $2"

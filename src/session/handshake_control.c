@@ -33,7 +33,6 @@ int handshake_did_receive_receiver_request(jnx_uint8 *obuffer,
   *oobject = NULL;
   AuthReceiver *a = auth_receiver__unpack(NULL,bytes_read,obuffer);
   if(a == NULL) {
-    JNXLOG(LDEBUG,"Receiver request was null!.\n");
     return 0;
   }
   *oobject = a;
@@ -44,7 +43,6 @@ int handshake_did_receive_invite_request(jnx_uint8 *obuffer,
   *oobject = NULL;
   AuthInvite *a = auth_invite__unpack(NULL,bytes_read,obuffer);
   if(a == NULL) {
-    JNXLOG(LDEBUG,"Invite request was null!.\n");
     return 0;
   }
   *oobject = a;
@@ -55,7 +53,6 @@ int handshake_did_receive_joiner_request(jnx_uint8 *obuffer,
   *oobject = NULL;
   AuthJoiner *a = auth_joiner__unpack(NULL,bytes_read,obuffer);
   if(a == NULL) {
-    JNXLOG(LDEBUG,"Joiner request was null!.\n");
     return 0;
   }
   *oobject = a;
