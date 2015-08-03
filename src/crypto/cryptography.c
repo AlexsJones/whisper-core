@@ -71,7 +71,7 @@ jnx_char *asymmetrical_encrypt(RSA *keypair, jnx_uint8 *message, jnx_size \
   JNXLOG(LDEBUG,"---------------------NOT USING ASYMMETRICAL CRYPTOGRAPHY----------------");
   encrypted_message = strdup(message);
   *out_len = strlen(encrypted_message);
-  JNXLOG(LDEBUG,"decrypted_message (asymmetrical) => [%s]",encrypted_message);
+  JNXLOG(LDEBUG,"encrypted_message (asymmetrical) => [%s]",encrypted_message);
   return encrypted_message;
 #endif
 
