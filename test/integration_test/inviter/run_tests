@@ -49,19 +49,8 @@ function test_against_file()
     echo "Compile failed!"
     exit 1
   fi
-  if [ "$ARGS" == "DEBUG" ]; then
-    echo "Using debugger..."
-    if hash lldb 2>/dev/null; then
       echo "Running command => $TESTCOMPILER -f $current -o run -o exit"
       $TESTCOMPILER -f $current -o run -o exit
-    else
-      echo "Running command => $TESTCOMPILER --args $current"
-      $TESTCOMPILER --args $current
-    fi
-  else
-    echo ">>>>> $2"
-    ./$current $2
-  fi
   out=$?
   if [ ! $out -eq 0 ]; then
     echo_red "Test failed"

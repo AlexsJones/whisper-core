@@ -143,9 +143,14 @@ static void internal_request_initiator(transport_options *t,
      * the session */
     jnx_size olen;
     jnx_size decoded_len;
+#ifdef NOB64ENCODING
+  jnx_uint8 *decoded_secret = a->shared_secret;
+  decoded_len = strlen(a->shared_secret);
+#else
     jnx_uint8 *decoded_secret = 
       jnx_encoder_b64_decode(t->ac->encoder,a->shared_secret,
           strlen(a->shared_secret),&decoded_len);
+#endif
 
 #ifdef DEBUG
     JNXLOG(LDEBUG,"The encoder decoded length is %d with raw secret %s",decoded_len,decoded_secret);
@@ -244,11 +249,18 @@ static void internal_request_invite(transport_options *t,
         jnx_char *encrypted = symmetrical_encrypt(osession->shared_secret,
             i->session_guid,encrypted_len);
         jnx_size encoded_len;
+
+#ifdef NOB64ENCODING
+      jnx_uint8 *encoded_secret = encrypted;
+      encoded_len = encrypted_len;
+#else
+
         jnx_uint8 *encoded_secret = jnx_encoder_b64_encode(t->ac->encoder,
             encrypted,encrypted_len,
             &encoded_len); 
-        jnx_uint8 *outbuffer;
 
+#endif
+        jnx_uint8 *outbuffer;
         int l = handshake_joiner_command_generate(osession,
             JOINER_JOIN,encoded_secret,&outbuffer);     
 
@@ -258,8 +270,11 @@ static void internal_request_invite(transport_options *t,
 
         free(outbuffer);
         free(encrypted);
-        free(encoded_secret);
+#ifdef NOB64ENCODING
 
+#else
+        free(encoded_secret);
+#endif
       }
     }else {
       JNXLOG(LWARN,"Session is already known - we don't need an invite");
@@ -282,9 +297,12 @@ static void internal_request_joiner(transport_options *t,
   if(e == SESSION_STATE_OKAY) {
     jnx_size olen;
     jnx_size decoded_len;
+
+    //TODO: IS THIS RIGHT? SHOULD IT BE DECODING THE JOINER GUID???
     jnx_uint8 *decoded_secret = 
       jnx_encoder_b64_decode(t->ac->encoder,j->encrypted_joiner_guid,
           strlen(j->encrypted_joiner_guid),&decoded_len);
+
 
     jnx_char *decrypted_message = symmetrical_decrypt(osession->shared_secret,
         decoded_secret,decoded_len);
@@ -422,9 +440,15 @@ jnx_int auth_comms_initiator_start(auth_comms_service *ac, \
         secret, &encrypted_secret_len);
 
     jnx_size encoded_len;
+#ifdef NOB64ENCODING
+    encoded_len = encrypted_secret_len;
+    encoded_secret = encrypted_secret;
+#else
     jnx_uint8 *encoded_secret = jnx_encoder_b64_encode(ac->encoder,
         encrypted_secret,encrypted_secret_len,
         &encoded_len);
+#endif
+
     /*                                                            */
 
     jnx_uint8 *fbuffer;
@@ -438,8 +462,11 @@ jnx_int auth_comms_initiator_start(auth_comms_service *ac, \
         fbuffer,bytes_read,&replysizetwo);
 
     asymmetrical_destroy_key(remote_pub_keypair);
-    free(encrypted_secret);
+    
+#ifndef NOB64ENCODING
     free(encoded_secret);
+#endif
+    free(encrypted_secret);
     free(reply);
     free(secret);
     free(fbuffer);
