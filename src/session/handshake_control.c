@@ -113,10 +113,11 @@ int handshake_initiator_command_generate(session *ses,\
       JNXLOG(LDEBUG,"Generating finish request flags.\n");
       auth_parcel.is_requesting_public_key = 0;
       auth_parcel.is_requesting_finish = 1;
-      JNXLOG(LDEBUG,"Transmitting encrypted shared secret\n");
 
       auth_parcel.shared_secret.len = secret_len;
       auth_parcel.shared_secret.data = malloc(sizeof(char) * auth_parcel.shared_secret.len);
+
+      JNXLOG(LDEBUG,"Transmitting encrypted shared secret with size %zu\n",auth_parcel.shared_secret.len);
 
       jnx_int i;
       for(i=0;i<auth_parcel.shared_secret.len;++i) {

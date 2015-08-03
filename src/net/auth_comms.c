@@ -132,6 +132,8 @@ static void internal_request_initiator(transport_options *t,
       return;
     } 
 
+    JNXLOG(LWARN,"a->shared_secret.data => %zu",a->shared_secret.len);
+    
     jnx_uint8 *onetbuffer;
     int bytes = handshake_generate_finish_response(osession,abort_token,
         &onetbuffer);
