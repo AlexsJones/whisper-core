@@ -53,7 +53,7 @@ int handshake_did_receive_invite_request(jnx_uint8 *obuffer,
     jnx_size bytes_read, void **oobject);
 /* Initiator request */
 int handshake_initiator_command_generate(session *ses,\
-    handshake_initiator_state state, jnx_uint8 *shared_secret,jnx_size len,
+    handshake_initiator_state state, jnx_uint8 *shared_secret, jnx_size len,
     jnx_uint8 *initiator_message,
     jnx_uint8 **onetbuffer);
 
