@@ -79,7 +79,7 @@ jnx_char *asymmetrical_encrypt(RSA *keypair, jnx_uint8 *message, jnx_size \
   bzero(encrypted_message, RSA_size(keypair));
   char *err = malloc(30);
 
-  if((*out_len = RSA_public_encrypt(strlen(message) + 1, message,
+  if((*out_len = RSA_public_encrypt(strlen(message), message,
           encrypted_message, keypair, RSA_PKCS1_OAEP_PADDING)) == -1) {
     ERR_load_crypto_strings();
     ERR_error_string(ERR_get_error(),err);
