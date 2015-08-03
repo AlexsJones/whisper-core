@@ -66,7 +66,15 @@ jnx_char *asymmetrical_key_to_string(RSA *keypair,key_type type) {
 }
 jnx_char *asymmetrical_encrypt(RSA *keypair, jnx_uint8 *message, jnx_size \
     *out_len) {
-  jnx_char *encrypted_message = malloc(RSA_size(keypair));
+
+    jnx_char *encrypted_message;
+#ifdef NOASYMMETRICALCRYPTO
+    encrypted_message = strdup(message);
+    *out_len = strlen(encrypted_message);
+    return encrypted_message;
+#endif
+  
+  encrypted_message = malloc(RSA_size(keypair));
   bzero(encrypted_message, RSA_size(keypair));
   char *err = malloc(30);
 
@@ -83,7 +91,15 @@ jnx_char *asymmetrical_encrypt(RSA *keypair, jnx_uint8 *message, jnx_size \
 }
 jnx_char *asymmetrical_decrypt(RSA *keypair, jnx_uint8 *message, \
     jnx_size in_len, jnx_size *out_len) {
-  jnx_char *decrypted_message = malloc(RSA_size(keypair));
+
+    jnx_char *decrypted_message;
+#ifdef NOASYMMETRICALCRYPTO
+    decrypted_message = strdup(message);
+    *out_len = strlen(decrypted_message);
+    return decrypted_message;
+#endif
+
+  decrypted_message = malloc(RSA_size(keypair));
   bzero(decrypted_message, RSA_size(keypair));
   char *err = malloc(120);
 
