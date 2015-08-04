@@ -2,7 +2,7 @@
  *     File Name           :     test/unit_test/test_protobuf.c
  *     Created By          :     tibbar
  *     Creation Date       :     [2015-08-04 11:59]
- *     Last Modified       :     [2015-08-04 12:11]
+ *     Last Modified       :     [2015-08-04 13:52]
  *     Description         :      
  **********************************************************************************/
 #include "auth_comms.h"
@@ -24,26 +24,33 @@ void test_auth_initiator() {
   /* fake initiator guid */
   jnx_size len = strlen("Fake Guid");
   auth_parcel.initiator_guid = malloc(sizeof(char) * len + 1);
-  memcpy(auth_parcel.initiator_guid,"Fake Guid",len);
+  memcpy(auth_parcel.initiator_guid,"Fake Guid",len+1);
   /* bool flags */
   auth_parcel.is_requesting_public_key = 1;
   auth_parcel.is_requesting_finish = 0;
   /*Fake shared secret */
   jnx_uint8 *shared_secret = "BinaryData";
   jnx_size secret_len = strlen("BinaryData");  
-  auth_parcel.shared_secret.len = secret_len;
-  auth_parcel.shared_secret.data = malloc(sizeof(char) * 
-      auth_parcel.shared_secret.len);
+
+  ProtobufCBinaryData binaryData;
+  binaryData.len = 10;
+  binaryData.data = malloc(sizeof(char) * binaryData.len);
+
+  printf("Binary Data length %d", binaryData.len);
 
   jnx_int i;
-  for(i=0;i<auth_parcel.shared_secret.len;++i) {
-    auth_parcel.shared_secret.data[i] = shared_secret[i];
+  for(i=0;i<binaryData.len;++i) {
+    binaryData.data[i] = shared_secret[i];
   }
+  auth_parcel.shared_secret = binaryData;
+  
+  auth_parcel.has_shared_secret = 1;
+
   /* public key */
   jnx_char *pub_key_str = "Fak public key";
   jnx_size pub_len = strlen(pub_key_str);
-  auth_parcel.initiator_public_key = malloc(sizeof(char*) * pub_len);
-  memcpy(auth_parcel.initiator_public_key,pub_key_str,pub_len);
+  auth_parcel.initiator_public_key = malloc(sizeof(char*) * pub_len +1);
+  memcpy(auth_parcel.initiator_public_key,pub_key_str,pub_len+1);
 
   /*session guid */
   jnx_char *session_guid_str = "Fake session guid str";
@@ -75,14 +82,16 @@ void test_auth_initiator() {
 
   JNXCHECK(strcmp(au->secure_comms_port,auth_parcel.secure_comms_port) == 0);
 
-  JNXCHECK(au->shared_secret.len == auth_parcel.shared_secret.len);
-
+  ProtobufCBinaryData d = au->shared_secret;
+  
+  JNXLOG(LDEBUG,"Shared secret value  => %s", d.data);
 }
 
 int main(int argc, char **argv) {
   JNXLOG_CREATE("../testlogger.conf");
   JNXLOG(LDEBUG,"Testing protobuf packing on initiator");  
-  test_auth_initiator();  
+  test_auth_initiator(); 
+  sleep(1);
   JNXLOG_DESTROY();
   return 0;
 }
