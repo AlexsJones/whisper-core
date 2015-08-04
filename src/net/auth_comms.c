@@ -233,19 +233,10 @@ static void internal_request_invite(transport_options *t,
             i->session_guid,encrypted_len);
         jnx_size encoded_len;
 
-#ifdef NOB64ENCODING
-      jnx_uint8 *encoded_secret = encrypted;
-      encoded_len = encrypted_len;
-#else
-
-        jnx_uint8 *encoded_secret = jnx_encoder_b64_encode(t->ac->encoder,
-            encrypted,encrypted_len,
-            &encoded_len); 
-
-#endif
         jnx_uint8 *outbuffer;
         int l = handshake_joiner_command_generate(osession,
-            JOINER_JOIN,encoded_secret,&outbuffer);     
+            JOINER_JOIN,encrypted,encrypted_len,
+            &outbuffer);     
 
         send_data(remote_peer->host_address, DEFAULT_AUTH_COMMS_PORT,
             t->ac->listener->socket->addrfamily,outbuffer,
@@ -253,11 +244,6 @@ static void internal_request_invite(transport_options *t,
 
         free(outbuffer);
         free(encrypted);
-#ifdef NOB64ENCODING
-
-#else
-        free(encoded_secret);
-#endif
       }
     }else {
       JNXLOG(LWARN,"Session is already known - we don't need an invite");

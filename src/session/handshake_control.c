@@ -279,9 +279,9 @@ int handshake_generate_invite_request(session *ses,
 }
 int handshake_joiner_command_generate(session *ses, \
     handshake_joiner_state state, jnx_uint8 *encrypted_joiner_guid,\
+    jnx_size len,
     jnx_uint8 **onetbuffer) {
 
-  jnx_size len = strlen(encrypted_joiner_guid);
   AuthJoiner auth_joiner = AUTH_JOINER__INIT;  
   /* session guid */
   jnx_char *session_guid_str;
@@ -303,7 +303,8 @@ int handshake_joiner_command_generate(session *ses, \
   return parcel_len;
 }
 int handshake_generate_joiner_request(session *ses, \
-    jnx_uint8 *encrypted_joiner_guid, jnx_uint8 **onetbuffer) {
+    jnx_uint8 *encrypted_joiner_guid, 
+    jnx_size len,jnx_uint8 **onetbuffer) {
   return handshake_joiner_command_generate(ses, JOINER_JOIN, 
-      encrypted_joiner_guid, onetbuffer);
+      encrypted_joiner_guid, len, onetbuffer);
 }
