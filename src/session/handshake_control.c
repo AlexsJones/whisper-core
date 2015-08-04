@@ -124,6 +124,8 @@ int handshake_initiator_command_generate(session *ses,\
           auth_parcel.shared_secret.data[i] = shared_secret[i];
       }
 
+      auth_parcel.has_shared_secret = 1;
+
       JNXLOG(LDEBUG,"Setting shared secret len in proto to %zu\n",
           auth_parcel.shared_secret.len);
       break;
