@@ -391,19 +391,22 @@ jnx_int auth_comms_initiator_start(auth_comms_service *ac, \
     RSA *remote_pub_keypair = 
       asymmetrical_key_from_string(r->receiver_public_key,PUBLIC);
 
+    JNXLOG(LDEBUG,"Initiator: Generated RSA key");
     jnx_size encrypted_secret_len;
     jnx_char *encrypted_secret = asymmetrical_encrypt(remote_pub_keypair,
         secret, &encrypted_secret_len);
     jnx_uint8 *fbuffer;
+    JNXLOG(LDEBUG,"Initiator: Encrypted secret");
+
     bytes_read = handshake_generate_finish_request(s,encrypted_secret,
         encrypted_secret_len,&fbuffer);
-
+    JNXLOG(LDEBUG,"Initiator: Generated finish request");
     jnx_size replysizetwo;
     jnx_uint8 *replytwo = send_data_await_reply(remote_peer->host_address,
         DEFAULT_AUTH_COMMS_PORT, 
         ac->listener->socket->addrfamily,
         fbuffer,bytes_read,&replysizetwo);
-
+    JNXLOG(LDEBUG,"Initiator, Send data await reply");
     asymmetrical_destroy_key(remote_pub_keypair);
     free(encrypted_secret);
     free(reply);
