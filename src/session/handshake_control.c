@@ -94,7 +94,7 @@ int handshake_initiator_command_generate(session *ses,\
 
   AuthInitiator auth_parcel = AUTH_INITIATOR__INIT;
   auth_parcel.initiator_guid = malloc(sizeof(char) * len + 1);
-  memcpy(auth_parcel.initiator_guid,local_guid_str,len + 1); 
+  memcpy(auth_parcel.initiator_guid,local_guid_str,len); 
   free(local_guid_str);
   switch(state) {
     case CHALLENGE_PUBLIC_KEY:
