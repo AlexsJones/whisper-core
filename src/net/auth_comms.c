@@ -228,10 +228,10 @@ static void internal_request_invite(transport_options *t,
         /* Handshake complete */
 
         /* now we encrypt, encode and send back the session_guid via the joiner request */
-        jnx_size encrypted_len = strlen(local_peer_guid);
+        jnx_size encrypted_len = strlen(i->session_guid);
+
         jnx_char *encrypted = symmetrical_encrypt(osession->shared_secret,
             i->session_guid,encrypted_len);
-        jnx_size encoded_len;
 
         jnx_uint8 *outbuffer;
         int l = handshake_joiner_command_generate(osession,
@@ -266,12 +266,9 @@ static void internal_request_joiner(transport_options *t,
   if(e == SESSION_STATE_OKAY) {
     jnx_size olen;
 
-    jnx_char *decrypted_message = symmetrical_decrypt(osession->shared_secret,
-        j->encrypted_joiner_guid.data,j->encrypted_joiner_guid.len);
 
-    JNXLOG(LDEBUG,"Received joiner request that correct decrypted to => %s",decrypted_message);
+    JNXLOG(LDEBUG,"Received joiner request!");
 
-    free(decrypted_message);
   }else {
     JNXLOG(LERROR,"Error occured retrieving joiner session!");
   }
