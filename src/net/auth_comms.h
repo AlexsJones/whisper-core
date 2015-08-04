@@ -53,7 +53,7 @@ void auth_comms_destroy(auth_comms_service **ac);
  * receiver linking process
  */
 void auth_comms_listener_start(auth_comms_service *ac,
-    discovery_service *ds,session_service *ss,void *linking_args);
+    discovery_service *ds,session_service *ss,port_control_service *ps, void *linking_args);
 /*
  * @fn auth_comms_initiator_start(auth_comms_service *ac, \
  *   discovery_service *ds, port_control_service *ps,

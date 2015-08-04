@@ -41,7 +41,7 @@ function echo_green()
 
 function test_against_file()
 {
-  file=$1
+   file=$1
   echo "Compiling $file"
   `$COMPILER $file ../../../src/util/*.c ../../../src/data/*.c ../../../src/net/*.c ../../../src/session/*.c ../../../src/integrity/*.c ../../../src/crypto/*.c -I../../../src/crypto -I../../../src/data -I../../../src/err -I../../../src/integrity -I../../../src/net -I../../../src/session -I../../../src/util -o ${file:0:${#file}-2} -pthread -w -rdynamic -lcrypto -lssl -ljnxc -lprotobuf-c -g`
   out=$?
@@ -49,14 +49,15 @@ function test_against_file()
     echo "Compile failed!"
     exit 1
   fi
+ 
   if [ "$ARGS" == "DEBUG" ]; then
     echo "Using debugger..."
     if hash lldb 2>/dev/null; then
       echo "Running command => $TESTCOMPILER -f $current -o run -o exit"
-      $TESTCOMPILER -f $current -o run -o exit
+      $TESTCOMPILER -f $current $2 -o run -o exit
     else
       echo "Running command => $TESTCOMPILER --args $current"
-      $TESTCOMPILER --args $current
+      $TESTCOMPILER --args $current $2
     fi
   else
     echo ">>>>> $2"
@@ -71,6 +72,7 @@ function test_against_file()
     echo_green "Test passed"
     rm $current
   fi
+
 }
 
 function run_full_suite()
