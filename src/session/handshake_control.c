@@ -291,8 +291,15 @@ int handshake_joiner_command_generate(session *ses, \
   memcpy(auth_joiner.session_guid,session_guid_str, len + 1);
   free(session_guid_str);
   /* encrypted joiner guid */
-  auth_joiner.encrypted_joiner_guid = malloc(sizeof(char) * len + 1);  
-  memcpy(auth_joiner.encrypted_joiner_guid,encrypted_joiner_guid,len +1);
+  
+  auth_joiner.encrypted_joiner_guid.len = len;
+  auth_joiner.encrypted_joiner_guid.data = malloc(sizeof(char) * len +1);  
+  
+  jnx_int i;
+  for(i=0;i<auth_joiner.encrypted_joiner_guid.len; ++i) {
+    auth_joiner.encrypted_joiner_guid.data[i] = encrypted_joiner_guid[i];
+  }
+  
   jnx_int parcel_len = auth_joiner__get_packed_size(&auth_joiner);
   jnx_uint8 *obuffer = malloc(parcel_len);
   auth_joiner__pack(&auth_joiner,obuffer);

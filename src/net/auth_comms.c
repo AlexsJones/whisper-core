@@ -265,20 +265,12 @@ static void internal_request_joiner(transport_options *t,
 
   if(e == SESSION_STATE_OKAY) {
     jnx_size olen;
-    jnx_size decoded_len;
-
-    //TODO: IS THIS RIGHT? SHOULD IT BE DECODING THE JOINER GUID???
-    jnx_uint8 *decoded_secret = 
-      jnx_encoder_b64_decode(t->ac->encoder,j->encrypted_joiner_guid,
-          strlen(j->encrypted_joiner_guid),&decoded_len);
-
 
     jnx_char *decrypted_message = symmetrical_decrypt(osession->shared_secret,
-        decoded_secret,decoded_len);
+        j->encrypted_joiner_guid.data,j->encrypted_joiner_guid.len);
 
     JNXLOG(LDEBUG,"Received joiner request that correct decrypted to => %s",decrypted_message);
 
-    free(decoded_secret);
     free(decrypted_message);
   }else {
     JNXLOG(LERROR,"Error occured retrieving joiner session!");

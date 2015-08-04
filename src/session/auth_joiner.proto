@@ -1,5 +1,5 @@
 message auth_joiner {
   required string session_guid=1;
-  required string encrypted_joiner_guid=2;
+  required bytes encrypted_joiner_guid=2;
   required int32 is_requesting_join=3;
 }
