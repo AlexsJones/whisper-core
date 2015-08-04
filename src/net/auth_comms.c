@@ -132,28 +132,18 @@ static void internal_request_initiator(transport_options *t,
       return;
     } 
 
+    JNXLOG(LWARN,"a->shared_secret.data => %zu",a->shared_secret.len);
+    
     jnx_uint8 *onetbuffer;
     int bytes = handshake_generate_finish_response(osession,abort_token,
         &onetbuffer);
     write(connected_socket,onetbuffer,bytes);
     free(onetbuffer);    
 
-    /* The last thing to do is to decrypt the shared secret and store it in
-     * the session */
     jnx_size olen;
-    jnx_size decoded_len;
-    jnx_uint8 *decoded_secret = 
-      jnx_encoder_b64_decode(t->ac->encoder,a->shared_secret,
-          strlen(a->shared_secret),&decoded_len);
-
-#ifdef DEBUG
-    JNXLOG(LDEBUG,"The encoder decoded length is %d with raw secret %s",decoded_len,decoded_secret);
-    JNXCHECK(osession->keypair);
-    JNXLOG(LDEBUG,"The decoded but encrypted symmetrical secret is => %s of length %d",decoded_secret,decoded_len);
-#endif  
     jnx_char *decrypted_shared_secret = 
-      asymmetrical_decrypt(osession->keypair,decoded_secret,
-          decoded_len,
+      asymmetrical_decrypt(osession->keypair,a->shared_secret.data,
+          a->shared_secret.len,
           &olen);
     //DEBUG ONLY
 #ifdef DEBUG
@@ -300,7 +290,6 @@ auth_comms_service *auth_comms_create() {
   auth_comms_service *ac = malloc(sizeof(auth_comms_service));
   ac->ar_callback = NULL;
   ac->invitation_callback = NULL;
-  ac->encoder = jnx_encoder_create();
   return ac;
 }
 void auth_comms_listener_start(auth_comms_service *ac, discovery_service *ds,
@@ -313,7 +302,6 @@ void auth_comms_listener_start(auth_comms_service *ac, discovery_service *ds,
   ac->listener_thread = jnx_thread_create(listener_bootstrap,ts);
 }
 void auth_comms_destroy(auth_comms_service **ac) {
-  jnx_encoder_destroy(&(*ac)->encoder);
   jnx_socket_tcp_listener_destroy(&(*ac)->listener);
 }
 jnx_int auth_comms_initiator_start(auth_comms_service *ac, \
@@ -368,7 +356,7 @@ jnx_int auth_comms_initiator_start(auth_comms_service *ac, \
     session_add_receiver_public_key(s,r->receiver_public_key);
     session_add_shared_secret(s,secret);
 
-    /* Lets encrypt and encode that secret before we send it back */
+    /* Lets encrypt that secret before we send it back */
     RSA *remote_pub_keypair = 
       asymmetrical_key_from_string(r->receiver_public_key,PUBLIC);
 
@@ -376,15 +364,10 @@ jnx_int auth_comms_initiator_start(auth_comms_service *ac, \
     jnx_char *encrypted_secret = asymmetrical_encrypt(remote_pub_keypair,
         secret, &encrypted_secret_len);
 
-    jnx_size encoded_len;
-    jnx_uint8 *encoded_secret = jnx_encoder_b64_encode(ac->encoder,
-        encrypted_secret,encrypted_secret_len,
-        &encoded_len);
-    /*                                                            */
 
     jnx_uint8 *fbuffer;
-    bytes_read = handshake_generate_finish_request(s,encoded_secret,
-        encoded_len,&fbuffer);
+    bytes_read = handshake_generate_finish_request(s,encrypted_secret,
+        encrypted_secret_len,&fbuffer);
 
     jnx_size replysizetwo;
     jnx_uint8 *replytwo = send_data_await_reply(remote_peer->host_address,
@@ -394,7 +377,6 @@ jnx_int auth_comms_initiator_start(auth_comms_service *ac, \
 
     asymmetrical_destroy_key(remote_pub_keypair);
     free(encrypted_secret);
-    free(encoded_secret);
     free(reply);
     free(secret);
     free(fbuffer);

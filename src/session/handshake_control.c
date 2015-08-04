@@ -113,14 +113,19 @@ int handshake_initiator_command_generate(session *ses,\
       JNXLOG(LDEBUG,"Generating finish request flags.\n");
       auth_parcel.is_requesting_public_key = 0;
       auth_parcel.is_requesting_finish = 1;
-      JNXLOG(LDEBUG,"Transmitting encrypted shared secret\n");
-      JNXCHECK(shared_secret != NULL);
-      jnx_size slen = strlen(shared_secret);
-      auth_parcel.shared_secret = malloc(sizeof(char) * slen + 1);
-      memcpy(auth_parcel.shared_secret,shared_secret,slen + 1);
-      auth_parcel.shared_secret_len = secret_len;
-      JNXLOG(LDEBUG,"Setting shared secret len in proto to %d\n",
-          auth_parcel.shared_secret_len);
+
+      auth_parcel.shared_secret.len = secret_len;
+      auth_parcel.shared_secret.data = malloc(sizeof(char) * auth_parcel.shared_secret.len);
+
+      JNXLOG(LDEBUG,"Transmitting encrypted shared secret with size %zu\n",auth_parcel.shared_secret.len);
+
+      jnx_int i;
+      for(i=0;i<auth_parcel.shared_secret.len;++i) {
+          auth_parcel.shared_secret.data[i] = shared_secret[i];
+      }
+
+      JNXLOG(LDEBUG,"Setting shared secret len in proto to %zu\n",
+          auth_parcel.shared_secret.len);
       break;
   }
 
