@@ -24,6 +24,7 @@ typedef struct transport_options {
   discovery_service *ds;
   session_service *ss;
   auth_comms_service *ac;
+  port_control_service *ps;
   void *linking_args;
 }transport_options;
 /* Listener Thread */
@@ -204,10 +205,45 @@ static void internal_request_invite(transport_options *t,
         JNXLOG(LDEBUG,"Invite from %s has been accepted",i->session_guid);
 
         /* Start auth join */
-        //TODO: I'll do this on the same listener thread which will cause a 
-        //temporary block
 
+        //Session is null at this point
+        e = session_service_create_shared_session(t->ss,
+            i->session_guid, &osession);
 
+        jnx_guid remote_peer_guid;
+        jnx_guid_from_string(i->inviter_guid,&remote_peer_guid);
+
+        peer *remote_peer = peerstore_lookup(t->ds->peers,
+            &remote_peer_guid);
+
+        session_service_link_sessions(t->ss,0,
+            t->linking_args,&session_guid, local_peer, remote_peer);
+
+        JNXCHECK(e == SESSION_STATE_OKAY);
+
+        auth_comms_initiator_start(t->ac,
+            t->ds,t->ps,osession,
+            "Let's handshake");
+
+        /* Handshake complete */
+
+        /* now we encrypt, encode and send back the session_guid via the joiner request */
+        jnx_size encrypted_len = strlen(i->session_guid);
+
+        jnx_char *encrypted = symmetrical_encrypt(osession->shared_secret,
+            i->session_guid,encrypted_len);
+
+        jnx_uint8 *outbuffer;
+        int l = handshake_joiner_command_generate(osession,
+            JOINER_JOIN,encrypted,encrypted_len,
+            &outbuffer);     
+
+        send_data(remote_peer->host_address, DEFAULT_AUTH_COMMS_PORT,
+            t->ac->listener->socket->addrfamily,outbuffer,
+            l);
+
+        free(outbuffer);
+        free(encrypted);
       }
     }else {
       JNXLOG(LWARN,"Session is already known - we don't need an invite");
@@ -220,30 +256,24 @@ static void internal_request_joiner(transport_options *t,
     const jnx_uint8 *payload,
     jnx_size bytes_read, int connected_socket, void *object, void *context) {
   AuthJoiner *j = (AuthJoiner*)object; 
-  /*
-   *Any joiner must specify a valid session that the current Peer is a part of
-   */
-  if(j->is_requesting_join) {
-    jnx_guid g;
-    jnx_guid_from_string(j->session_guid,&g);
-    session *osession;
-    session_state e = session_service_fetch_session(t->ss,&g,
-        &osession);
-    if(e == SESSION_STATE_OKAY) {
 
-      /*
-       *Okay you want to join our chat.
-       *First you and I will need to handshake
-       *
-       */
+  jnx_guid g;
+  jnx_guid_from_string(j->session_guid,&g);
+  session *osession;
+  session_state e = session_service_fetch_session(t->ss,&g,
+      &osession);
 
-    }else {
-      JNXLOG(LWARN,"There was a problem requesting the session for the auth joiner");
-    }
+  if(e == SESSION_STATE_OKAY) {
+    jnx_size olen;
+
+
+    JNXLOG(LDEBUG,"Received joiner request!");
+
+  }else {
+    JNXLOG(LERROR,"Error occured retrieving joiner session!");
   }
 
   auth_joiner__free_unpacked(j,NULL);
-
 }
 static void listener_callback(const jnx_uint8 *payload,
     jnx_size bytes_read, int connected_socket, void *context) {
@@ -291,11 +321,14 @@ auth_comms_service *auth_comms_create() {
   return ac;
 }
 void auth_comms_listener_start(auth_comms_service *ac, discovery_service *ds,
-    session_service *ss,void *linking_args) {
+    session_service *ss,
+    port_control_service *ps, 
+    void *linking_args) {
   transport_options *ts = malloc(sizeof(transport_options));
   ts->ac = ac;
   ts->ds = ds;
   ts->ss = ss;
+  ts->ps = ps;
   ts->linking_args = linking_args;
   ac->listener_thread = jnx_thread_create(listener_bootstrap,ts);
 }
@@ -358,21 +391,22 @@ jnx_int auth_comms_initiator_start(auth_comms_service *ac, \
     RSA *remote_pub_keypair = 
       asymmetrical_key_from_string(r->receiver_public_key,PUBLIC);
 
+    JNXLOG(LDEBUG,"Initiator: Generated RSA key");
     jnx_size encrypted_secret_len;
     jnx_char *encrypted_secret = asymmetrical_encrypt(remote_pub_keypair,
         secret, &encrypted_secret_len);
-
-
     jnx_uint8 *fbuffer;
+    JNXLOG(LDEBUG,"Initiator: Encrypted secret");
+
     bytes_read = handshake_generate_finish_request(s,encrypted_secret,
         encrypted_secret_len,&fbuffer);
-
+    JNXLOG(LDEBUG,"Initiator: Generated finish request");
     jnx_size replysizetwo;
     jnx_uint8 *replytwo = send_data_await_reply(remote_peer->host_address,
         DEFAULT_AUTH_COMMS_PORT, 
         ac->listener->socket->addrfamily,
         fbuffer,bytes_read,&replysizetwo);
-
+    JNXLOG(LDEBUG,"Initiator, Send data await reply");
     asymmetrical_destroy_key(remote_pub_keypair);
     free(encrypted_secret);
     free(reply);

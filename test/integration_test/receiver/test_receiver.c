@@ -75,7 +75,10 @@ void test_receiver() {
   ac->ar_callback = app_accept_reject;
   ac->invitation_callback = accept_invite_callback;
   ac->listener = jnx_socket_tcp_listener_create("9991", AF_INET, 15);
-  auth_comms_listener_start(ac, ds, service, NULL);
+
+  port_control_service *ps = port_control_service_create(9012,11049,1); 
+  
+  auth_comms_listener_start(ac, ds, service,ps, NULL);
 
 start:
   while (1) {
