@@ -281,10 +281,18 @@ static void internal_request_joiner(transport_options *t,
      * challenge their shared symmetrical key matches the one we generated in the 
      * handshake */
   
-    //TODO: Send over a less stupid encrypted thing
     jnx_char *decrypted = symmetrical_decrypt(osession->shared_secret,
-        j->encrypted_joiner_guid.data,j->encrypted_joiner_guid.len);
+        j->encrypted_joiner_guid.data,j->encrypted_joiner_guid.len -1);
    
+    jnx_guid dg;
+    jnx_guid_from_string(decrypted,&dg);
+
+    free(decrypted);
+
+    jnx_guid_state s = jnx_guid_compare(&g,&dg);
+
+    JNXCHECK(e == JNX_GUID_STATE_SUCCESS);
+
     JNXLOG(LDEBUG,"Decrypted the joiner guid %s",decrypted);
 
   }else {
