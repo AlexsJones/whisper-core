@@ -171,6 +171,10 @@ static void internal_request_receiver(transport_options *t,
     const jnx_uint8 *payload,
     jnx_size bytes_read, int connected_socket, void *object,void *context) {
 }
+/*
+ *This handler is called when an incoming invitation to join a shared session is
+ *received. The joiner command is sent in response.
+ */
 static void internal_request_invite(transport_options *t,
     const jnx_uint8 *payload,
     jnx_size bytes_read, int connected_socket, void *object, void *context) {
@@ -252,6 +256,10 @@ static void internal_request_invite(transport_options *t,
   auth_invite__free_unpacked(i,NULL);
   free(local_peer_guid);
 }
+/*
+ *This is the response of an invitee, he will communicate with the original peer
+ *and organise handshaking before calling this handler
+ */
 static void internal_request_joiner(transport_options *t,
     const jnx_uint8 *payload,
     jnx_size bytes_read, int connected_socket, void *object, void *context) {
@@ -266,8 +274,18 @@ static void internal_request_joiner(transport_options *t,
   if(e == SESSION_STATE_OKAY) {
     jnx_size olen;
 
-
     JNXLOG(LDEBUG,"Received joiner request!");
+
+    /* At this point we've confirmed we have a matched sessoin guid which means
+     * the joiner is aware of our session list, but not much more, we need to
+     * challenge their shared symmetrical key matches the one we generated in the 
+     * handshake */
+  
+    //TODO: Send over a less stupid encrypted thing
+    jnx_char *decrypted = symmetrical_decrypt(osession->shared_secret,
+        j->encrypted_joiner_guid.data,j->encrypted_joiner_guid.len);
+   
+    JNXLOG(LDEBUG,"Decrypted the joiner guid %s",decrypted);
 
   }else {
     JNXLOG(LERROR,"Error occured retrieving joiner session!");
