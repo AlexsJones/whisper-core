@@ -280,10 +280,10 @@ static void internal_request_joiner(transport_options *t,
      * the joiner is aware of our session list, but not much more, we need to
      * challenge their shared symmetrical key matches the one we generated in the 
      * handshake */
-  
+
     jnx_char *decrypted = symmetrical_decrypt(osession->shared_secret,
         j->encrypted_joiner_guid.data,j->encrypted_joiner_guid.len -1);
-   
+
     jnx_guid dg;
     jnx_guid_from_string(decrypted,&dg);
 
@@ -291,10 +291,14 @@ static void internal_request_joiner(transport_options *t,
 
     jnx_guid_state s = jnx_guid_compare(&g,&dg);
 
-    JNXCHECK(e == JNX_GUID_STATE_SUCCESS);
-
     JNXLOG(LDEBUG,"Decrypted the joiner guid %s",decrypted);
+    if(e == JNX_GUID_STATE_SUCCESS){
+      JNXLOG(LDEBUG,"Successfully matched the decrypted session guid"); 
+    
+      /* Transmit the session joiner to other members of the shared session */
 
+
+    }
   }else {
     JNXLOG(LERROR,"Error occured retrieving joiner session!");
   }
