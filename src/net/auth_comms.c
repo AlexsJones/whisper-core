@@ -178,14 +178,17 @@ static void internal_request_receiver(transport_options *t,
 static void internal_request_invite(transport_options *t,
     const jnx_uint8 *payload,
     jnx_size bytes_read, int connected_socket, void *object, void *context) {
+
   JNXLOG(LDEBUG,"handshake_generate_invite_request"); 
   AuthInvite *i = (AuthInvite*)object;
-  JNXLOG(LDEBUG,"Auth invite from %s to %s is that you?",
-      i->session_guid,i->invitee_guid);
-
   jnx_guid session_guid;
   jnx_guid_from_string(i->session_guid,&session_guid);
 
+  /*
+   *session_guid = the guid of the session we're invited too
+   *inviter_guid = our response peer
+   *invitee_guid = our guid
+   */
   peer *local_peer = peerstore_get_local_peer(t->ds->peers);
   jnx_char *local_peer_guid;
   jnx_guid_to_string(&(*local_peer).guid,&local_peer_guid);
@@ -194,64 +197,46 @@ static void internal_request_invite(transport_options *t,
     JNXLOG(LDEBUG,"Local peer matches invitee!");
     JNXCHECK(t->ac->invitation_callback);
 
-    /* Are we already aware of the potential session locally? */
+    //Here we create a new session between Peer B and C
+    //We do not reference the joining session at all yet
+
     session *osession;
-    session_state e = session_service_fetch_session(t->ss,
-        &session_guid,&osession);
-    if(e != SESSION_STATE_OKAY) {
+    session_state e = session_service_create_session(t->ss,
+        &osession);
 
-      jnx_int invite_token = t->ac->invitation_callback(&session_guid); 
+    jnx_guid remote_peer_guid;
+    jnx_guid_from_string(i->inviter_guid,&remote_peer_guid);
 
-      if(!invite_token)  {
-        JNXLOG(LWARN,"handshake_generate_invite_request has been rejected!"); 
-      }else {
-        /* The invite has been accepted */    
-        JNXLOG(LDEBUG,"Invite from %s has been accepted",i->session_guid);
+    peer *remote_peer = peerstore_lookup(t->ds->peers,
+        &remote_peer_guid);
 
-        /* Start auth join */
+    session_service_link_sessions(t->ss,0,
+        t->linking_args,&session_guid, local_peer, remote_peer);
 
-        //Session is null at this point
-        e = session_service_create_shared_session(t->ss,
-            i->session_guid, &osession);
+    auth_comms_initiator_start(t->ac,
+        t->ds,t->ps,osession,
+        "Let's handshake");
 
-        jnx_guid remote_peer_guid;
-        jnx_guid_from_string(i->inviter_guid,&remote_peer_guid);
+    //This is the remote session guid we want to join
+    jnx_size encrypted_len = strlen(i->session_guid);
 
-        peer *remote_peer = peerstore_lookup(t->ds->peers,
-            &remote_peer_guid);
+    //We're encrypting it against our own independant session with Peer B
+    jnx_char *encrypted = symmetrical_encrypt(osession->shared_secret,
+        i->session_guid,encrypted_len);
 
-        session_service_link_sessions(t->ss,0,
-            t->linking_args,&session_guid, local_peer, remote_peer);
+    jnx_uint8 *outbuffer;
+    int l = handshake_joiner_command_generate(osession,
+        JOINER_JOIN,encrypted,encrypted_len,
+        &outbuffer);     
 
-        JNXCHECK(e == SESSION_STATE_OKAY);
+    send_data(remote_peer->host_address, DEFAULT_AUTH_COMMS_PORT,
+        t->ac->listener->socket->addrfamily,outbuffer,
+        l);
 
-        auth_comms_initiator_start(t->ac,
-            t->ds,t->ps,osession,
-            "Let's handshake");
-
-        /* Handshake complete */
-
-        /* now we encrypt, encode and send back the session_guid via the joiner request */
-        jnx_size encrypted_len = strlen(i->session_guid);
-
-        jnx_char *encrypted = symmetrical_encrypt(osession->shared_secret,
-            i->session_guid,encrypted_len);
-
-        jnx_uint8 *outbuffer;
-        int l = handshake_joiner_command_generate(osession,
-            JOINER_JOIN,encrypted,encrypted_len,
-            &outbuffer);     
-
-        send_data(remote_peer->host_address, DEFAULT_AUTH_COMMS_PORT,
-            t->ac->listener->socket->addrfamily,outbuffer,
-            l);
-
-        free(outbuffer);
-        free(encrypted);
-      }
-    }else {
-      JNXLOG(LWARN,"Session is already known - we don't need an invite");
-    }
+    free(outbuffer);
+    free(encrypted);
+  }else {
+    JNXLOG(LWARN,"Session is already known - we don't need an invite");
   }
   auth_invite__free_unpacked(i,NULL);
   free(local_peer_guid);
@@ -265,44 +250,74 @@ static void internal_request_joiner(transport_options *t,
     jnx_size bytes_read, int connected_socket, void *object, void *context) {
   AuthJoiner *j = (AuthJoiner*)object; 
 
-  jnx_guid g;
-  jnx_guid_from_string(j->session_guid,&g);
-  session *osession;
-  session_state e = session_service_fetch_session(t->ss,&g,
-      &osession);
+     jnx_guid g;
+     jnx_guid_from_string(j->session_guid,&g);
+     session *osession;
+     session_state e = session_service_fetch_session(t->ss,&g,
+     &osession);
 
-  if(e == SESSION_STATE_OKAY) {
-    jnx_size olen;
+     if(e == SESSION_STATE_OKAY) {
+     jnx_size olen;
 
-    JNXLOG(LDEBUG,"Received joiner request!");
+     JNXLOG(LDEBUG,"Received joiner request!");
 
-    /* At this point we've confirmed we have a matched sessoin guid which means
-     * the joiner is aware of our session list, but not much more, we need to
-     * challenge their shared symmetrical key matches the one we generated in the 
-     * handshake */
+     jnx_char *decrypted = symmetrical_decrypt(osession->shared_secret,
+     j->encrypted_joiner_guid.data,j->encrypted_joiner_guid.len -1);
 
-    jnx_char *decrypted = symmetrical_decrypt(osession->shared_secret,
-        j->encrypted_joiner_guid.data,j->encrypted_joiner_guid.len -1);
+     jnx_guid dg;
+     jnx_guid_from_string(decrypted,&dg);
 
-    jnx_guid dg;
-    jnx_guid_from_string(decrypted,&dg);
+     JNXLOG(LDEBUG,"The session of guid %s is asking to join session %s",
+         j->session_guid,decrypted);
+     
+     free(decrypted);
+     }
+     
+  /* At this point we've confirmed we have a matched sessoin guid which means
+   * the joiner is aware of our session list, but not much more, we need to
+   * challenge their shared symmetrical key matches the one we generated in the 
+   * handshake */
+  /*
+     jnx_char *decrypted = symmetrical_decrypt(osession->shared_secret,
+     j->encrypted_joiner_guid.data,j->encrypted_joiner_guid.len -1);
 
-    free(decrypted);
+     jnx_guid dg;
+     jnx_guid_from_string(decrypted,&dg);
 
-    jnx_guid_state s = jnx_guid_compare(&g,&dg);
+     jnx_guid_state s = jnx_guid_compare(&g,&dg);
+     */
+  /*
+     JNXLOG(LDEBUG,"Decrypted the joiner guid %s",decrypted);
+     if(e == JNX_GUID_STATE_SUCCESS){
+     JNXLOG(LDEBUG,"Successfully matched the decrypted session guid"); 
+     */
+  /* Transmit the session joiner to other members of the shared session */
 
-    JNXLOG(LDEBUG,"Decrypted the joiner guid %s",decrypted);
-    if(e == JNX_GUID_STATE_SUCCESS){
-      JNXLOG(LDEBUG,"Successfully matched the decrypted session guid"); 
-    
-      /* Transmit the session joiner to other members of the shared session */
+  /* It is also worth verifying at this point that Peer C, that is joining
+   * Peer B, is not already at the other end of this session where Peer A
+   * should be */
+  /*
+     s = jnx_guid_compare(&dg,&(*osession).session_guid);
 
+     jnx_char  *sgs;
 
-    }
-  }else {
-    JNXLOG(LERROR,"Error occured retrieving joiner session!");
-  }
+     jnx_guid_to_string(&(*osession).session_guid,&sgs);
 
+     JNXLOG(LDEBUG,"The existing session guid is %s and joiner session guid is %s",
+     sgs,decrypted);
+
+     if(e == JNX_GUID_STATE_FAILURE) {
+
+     JNXLOG(LDEBUG,"Successfully verified that the joiner is not already part \
+     of the primary session");
+     }
+
+     free(decrypted);
+     }
+     }else {
+     JNXLOG(LERROR,"Error occured retrieving joiner session!");
+     }
+     */
   auth_joiner__free_unpacked(j,NULL);
 }
 static void listener_callback(const jnx_uint8 *payload,
