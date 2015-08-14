@@ -181,8 +181,8 @@ static void internal_request_invite(transport_options *t,
 
   JNXLOG(LDEBUG,"handshake_generate_invite_request"); 
   AuthInvite *i = (AuthInvite*)object;
-  jnx_guid session_guid;
-  jnx_guid_from_string(i->session_guid,&session_guid);
+  jnx_guid remote_session_guid;
+  jnx_guid_from_string(i->session_guid,&remote_session_guid);
 
   /*
    *session_guid = the guid of the session we're invited too
@@ -207,16 +207,24 @@ static void internal_request_invite(transport_options *t,
     jnx_guid remote_peer_guid;
     jnx_guid_from_string(i->inviter_guid,&remote_peer_guid);
 
+    JNXLOG(LDEBUG,"Remote peer guid %s",i->inviter_guid);
+
+
     peer *remote_peer = peerstore_lookup(t->ds->peers,
         &remote_peer_guid);
 
+    JNXCHECK(remote_peer);
+   
+    JNXLOG(LDEBUG,"Linking sessions");
     session_service_link_sessions(t->ss,0,
-        t->linking_args,&session_guid, local_peer, remote_peer);
+        t->linking_args,&(*osession).session_guid, local_peer, remote_peer);
 
+    JNXLOG(LDEBUG,"Sessions linked");
     auth_comms_initiator_start(t->ac,
         t->ds,t->ps,osession,
         "Let's handshake");
-
+    
+    JNXLOG(LDEBUG,"Handhshake complete");
     //This is the remote session guid we want to join
     jnx_size encrypted_len = strlen(i->session_guid);
 
@@ -393,6 +401,10 @@ jnx_int auth_comms_initiator_start(auth_comms_service *ac, \
 
   session_add_secure_comms_port(s,sport);
 
+  jnx_char *rg;
+  jnx_guid_to_string(&(*s).remote_peer_guid,&rg);
+  JNXLOG(LDEBUG,"Looking up remote peer guid => %s",rg);
+  free(rg);
   peer *remote_peer = peerstore_lookup(ds->peers,&(*s).remote_peer_guid);
   JNXCHECK(remote_peer);
 
