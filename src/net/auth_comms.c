@@ -214,7 +214,7 @@ static void internal_request_invite(transport_options *t,
         &remote_peer_guid);
 
     JNXCHECK(remote_peer);
-   
+
     JNXLOG(LDEBUG,"Linking sessions");
     session_service_link_sessions(t->ss,0,
         t->linking_args,&(*osession).session_guid, local_peer, remote_peer);
@@ -223,7 +223,7 @@ static void internal_request_invite(transport_options *t,
     auth_comms_initiator_start(t->ac,
         t->ds,t->ps,osession,
         "Let's handshake");
-    
+
     JNXLOG(LDEBUG,"Handhshake complete");
     //This is the remote session guid we want to join
     jnx_size encrypted_len = strlen(i->session_guid);
@@ -258,29 +258,39 @@ static void internal_request_joiner(transport_options *t,
     jnx_size bytes_read, int connected_socket, void *object, void *context) {
   AuthJoiner *j = (AuthJoiner*)object; 
 
-     jnx_guid g;
-     jnx_guid_from_string(j->session_guid,&g);
-     session *osession;
-     session_state e = session_service_fetch_session(t->ss,&g,
-     &osession);
+  jnx_guid g;
+  jnx_guid_from_string(j->session_guid,&g);
+  session *osession;
+  session_state e = session_service_fetch_session(t->ss,&g,
+      &osession);
 
-     if(e == SESSION_STATE_OKAY) {
-     jnx_size olen;
+  if(e == SESSION_STATE_OKAY) {
+    jnx_size olen;
 
-     JNXLOG(LDEBUG,"Received joiner request!");
+    JNXLOG(LDEBUG,"Received joiner request!");
 
-     jnx_char *decrypted = symmetrical_decrypt(osession->shared_secret,
-     j->encrypted_joiner_guid.data,j->encrypted_joiner_guid.len -1);
+    jnx_char *decrypted = symmetrical_decrypt(osession->shared_secret,
+        j->encrypted_joiner_guid.data,j->encrypted_joiner_guid.len -1);
 
-     jnx_guid dg;
-     jnx_guid_from_string(decrypted,&dg);
+    jnx_guid dg;
+    jnx_guid_from_string(decrypted,&dg);
 
-     JNXLOG(LDEBUG,"The session of guid %s is asking to join session %s",
-         j->session_guid,decrypted);
-     
-     free(decrypted);
-     }
-     
+    JNXLOG(LDEBUG,"The session of guid %s is asking to join session %s",
+        j->session_guid,decrypted);
+
+
+    //Pull out the session we intend to join
+    session *session_to_join;
+    session_state e = session_service_fetch_session(t->ss,&dg,
+        &session_to_join);
+
+    if(e == SESSION_STATE_OKAY) {
+      JNXLOG(LDEBUG,"Found the session joiner wishes to attach too");
+    }
+
+    free(decrypted);
+  }
+
   /* At this point we've confirmed we have a matched sessoin guid which means
    * the joiner is aware of our session list, but not much more, we need to
    * challenge their shared symmetrical key matches the one we generated in the 
@@ -326,7 +336,7 @@ static void internal_request_joiner(transport_options *t,
      JNXLOG(LERROR,"Error occured retrieving joiner session!");
      }
      */
-  auth_joiner__free_unpacked(j,NULL);
+auth_joiner__free_unpacked(j,NULL);
 }
 static void listener_callback(const jnx_uint8 *payload,
     jnx_size bytes_read, int connected_socket, void *context) {
