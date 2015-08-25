@@ -209,7 +209,6 @@ static void internal_request_invite(transport_options *t,
 
     JNXLOG(LDEBUG,"Remote peer guid %s",i->inviter_guid);
 
-
     peer *remote_peer = peerstore_lookup(t->ds->peers,
         &remote_peer_guid);
 
@@ -224,7 +223,7 @@ static void internal_request_invite(transport_options *t,
         t->ds,t->ps,osession,
         "Let's handshake");
 
-    JNXLOG(LDEBUG,"Handhshake complete");
+    JNXLOG(LDEBUG,"Handshake complete");
     //This is the remote session guid we want to join
     jnx_size encrypted_len = strlen(i->session_guid);
 
@@ -278,7 +277,6 @@ static void internal_request_joiner(transport_options *t,
     JNXLOG(LDEBUG,"The session of guid %s is asking to join session %s",
         j->session_guid,decrypted);
 
-
     //Pull out the session we intend to join
     session *session_to_join;
     session_state e = session_service_fetch_session(t->ss,&dg,
@@ -286,6 +284,8 @@ static void internal_request_joiner(transport_options *t,
 
     if(e == SESSION_STATE_OKAY) {
       JNXLOG(LDEBUG,"Found the session joiner wishes to attach too");
+
+    
     }
 
     free(decrypted);
