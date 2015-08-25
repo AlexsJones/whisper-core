@@ -41,9 +41,6 @@ int linking_test_procedure(session *s,linked_session_type session_type,
         init_port,
         12341,1);
 
-    ac = auth_comms_create();
-
-    ac->listener = jnx_socket_tcp_listener_create("9991",AF_INET,15);
     auth_comms_initiator_start(ac,ds,ps,s,"Hello from the initiator!");
   }
   return 0;
@@ -56,6 +53,9 @@ int unlinking_test_procedure(session *s,linked_session_type session_type,
 }
 void test_initiator() {
   JNXLOG(NULL,"test_linking");
+  ac = auth_comms_create();
+  ac->listener = jnx_socket_tcp_listener_create("9991",AF_INET,15);
+
   session_service *service = session_service_create(linking_test_procedure,
       unlinking_test_procedure);
   session *os;
@@ -97,7 +97,7 @@ void test_initiator() {
   printf("Found remote peer and going to create session with => ");
   print_peer(remote_peer);
   printf("\n");
-  
+
   JNXCHECK(session_is_active(os) == 0);
 
   session_service_link_sessions(service,E_AM_INITIATOR,
@@ -132,7 +132,7 @@ void test_initiator() {
   auth_comms_invite_send(ac,os,remote_invitee);
 
   while(1) {
-  
+
     sleep(1);
   }
 
