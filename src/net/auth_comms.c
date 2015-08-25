@@ -27,6 +27,9 @@ typedef struct transport_options {
   port_control_service *ps;
   void *linking_args;
 }transport_options;
+
+volatile int is_ticking_listener = 0;
+
 /* Listener Thread */
 static void send_data(jnx_char *hostname, jnx_char *port,
     unsigned int family,
@@ -40,7 +43,7 @@ static jnx_uint8 *send_data_await_reply(jnx_char *hostname, jnx_char *port,
     jnx_int bytes, jnx_size *receipt_bytes) {
   jnx_socket *sock = jnx_socket_tcp_create(family);
   jnx_uint8 *reply;
-  JNXLOG(LDEBUG,"Awaiting reply from %s",hostname);
+  JNXLOG(LDEBUG,"Awaiting reply from %s port %s",hostname,port);
   *receipt_bytes = jnx_socket_tcp_send_with_receipt(sock,hostname,port,buffer,\
       bytes,&reply);
   JNXLOG(LDEBUG,"Reply received");
@@ -327,7 +330,7 @@ static void listener_callback(const jnx_uint8 *payload,
 }
 static void *listener_bootstrap(void *args) {
   transport_options *t = (transport_options*)args;
-  while(1) {
+  while(is_ticking_listener) {
     jnx_socket_tcp_listener_tick(t->ac->listener,
         listener_callback,t);
   }
@@ -348,9 +351,11 @@ void auth_comms_listener_start(auth_comms_service *ac, discovery_service *ds,
   ts->ss = ss;
   ts->ps = ps;
   ts->linking_args = linking_args;
+  is_ticking_listener = 1;
   ac->listener_thread = jnx_thread_create(listener_bootstrap,ts);
 }
 void auth_comms_destroy(auth_comms_service **ac) {
+  is_ticking_listener = 0;
   jnx_socket_tcp_listener_destroy(&(*ac)->listener);
 }
 jnx_int auth_comms_initiator_start(auth_comms_service *ac, \
@@ -475,6 +480,7 @@ jnx_int auth_comms_invite_send(auth_comms_service *ac,
   return 0;
 }
 void auth_comms_stop(auth_comms_service *ac,session *s) {
+  is_ticking_listener = 0;
   JNXCHECK(ac);
   JNXCHECK(s);
   secure_comms_end(s);
