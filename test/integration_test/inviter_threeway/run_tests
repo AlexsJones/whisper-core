@@ -93,7 +93,7 @@ function run_full_suite()
   done;
 }
 
-pushd test/integration_test/inviter
+pushd test/integration_test/inviter_threeway
 run_full_suite $1
 popd
 exit 0

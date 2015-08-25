@@ -74,7 +74,7 @@ void test_initiator() {
   discovery_service_start(ds,BROADCAST_UPDATE_STRATEGY);
 
   int remote_peers = 0;
-  int remote_invitee = 0;
+  int has_remote_invitee = 0;
   jnx_guid **active_guids;
   peer *local = peerstore_get_local_peer(store);
   peer *remote_peer = NULL;
@@ -94,6 +94,10 @@ void test_initiator() {
       }
     }
   }
+  printf("Found remote peer and going to create session with => ");
+  print_peer(remote_peer);
+  printf("\n");
+  
   JNXCHECK(session_is_active(os) == 0);
 
   session_service_link_sessions(service,E_AM_INITIATOR,
@@ -105,6 +109,8 @@ void test_initiator() {
   session_message_write(os,"Hello Ballface! what's going on!");
   printf("-------------------------------------\n");
 
+  printf("About to invite peer C\n");
+
   /* lets invite Peer C in */
   while(!remote_invitee) {
     int num_guids = peerstore_get_active_guids(store,&active_guids);
@@ -112,7 +118,7 @@ void test_initiator() {
     for(i=0;i<num_guids;i++) {
       jnx_guid *guid = active_guids[i];
       peer *p = peerstore_lookup(store,guid);
-      if(peers_compare(p,local) != 0 && peers_compare(p,remote_peers) != 0) {
+      if(peers_compare(p,local) != 0 && peers_compare(p,remote_peer) != 0) {
         printf("Found a remote invitee! Breaking!\n");
         has_remote_invitee = 1;
         remote_invitee = p;
@@ -120,73 +126,16 @@ void test_initiator() {
       }
     }
   }
-
+  printf("Found remote invitee and going to send invite => ");
+  print_peer(remote_invitee);
+  printf("\n");
   auth_comms_invite_send(ac,os,remote_invitee);
 
   while(1) {
-    jnx_list *olist = NULL;
-    if (session_service_fetch_all_sessions(service,
-          &olist) != SESSION_STATE_NOT_FOUND) {
-
-      printf("-----------------------------------------------\n");
-
-      session *invitee_session = NULL;
-      jnx_node *n = olist->head,
-               *r = olist->head;
-
-      while(n) {
-      
-        session *s = olist->head->_data;
-
-        if(jnx_guid_compare(s->remote_peer,remote_peer) == JNX_GUID_SUCCESS) {
-          continue;
-        }else {
-          invitee_session = s;
-          printf("Found invitee session!\n");
-          break;
-        }
-        n = olist->head->next_node;
-      }
-      olist->head = r;
-
-      while (!session_is_active(s)){
-        sleep(1);
-      }
-
-      jnx_char *buffy = NULL;
-
-      int size = 0;
-      while (size <= 0) {
-        size = session_message_read(s, &buffy);
-      }
-      if(size) {
-        printf("size -> %d, buffy -> %s\n", size, buffy);
-
-        JNXCHECK(session_is_active(s) == 1);
-
-        session_service_unlink_sessions(service,E_AM_RECEIVER,
-            ds,&(*s).session_guid);
-
-        JNXCHECK(session_is_active(s) == 0);
-
-        session_service_destroy_session(service,&(*s).session_guid);
-
-        jnx_list_destroy(&olist);
-
-        break;
-      }    
-    }
-    if(olist)
-      jnx_list_destroy(&olist);
+  
+    sleep(1);
   }
 
-
-  session_service_unlink_sessions(service,E_AM_INITIATOR,
-      ds,&(*os).session_guid);
-
-  JNXCHECK(session_is_active(os) == 0);
-
-  JNXCHECK(session_service_session_is_linked(service,&os->session_guid) == 0);
 }
 int main(int argc, char **argv) {
   if (argc > 1) {
