@@ -154,13 +154,17 @@ void test_initiator() {
 
   while(!is_invitee_session_active) {
     
+    sleep(1);
+    
     jnx_list *olist = NULL;
     session_service_fetch_all_sessions(service,&olist);
 
     if(olist->counter < 2) {
       jnx_list_destroy(&olist);
+      JNXLOG(LDEBUG,"Awaiting second session...");
       continue;
     }
+    JNXLOG(LDEBUG,"Found second session...");
     
     jnx_node *n = olist->head;
 
@@ -169,18 +173,22 @@ void test_initiator() {
       session *s = n->_data;
 
       if(jnx_guid_compare(&(*s).session_guid,&(*os).session_guid )
-          == JNX_GUID_STATE_SUCCESS) {
+          == JNX_GUID_STATE_FAILURE) {
         remote_invitee_session = s; 
         is_invitee_session_active = 1; 
+        JNXLOG(LDEBUG,"Found remote session breaking!!!");
+        break;
       }
-
-      n = olist->head->next_node;
+      JNXLOG(LDEBUG,"Awaiting valid session...");
+      n = n->next_node;
     }
-
   }
 
   JNXLOG(LDEBUG,"Remote invitee session is active!");
-
+  sleep(10);
+  
+  session_message_write(remote_invitee_session,"213 Regulate!");
+  sleep(2);
 }
 int main(int argc, char **argv) {
   if (argc > 1) {

@@ -287,7 +287,6 @@ static void internal_request_joiner(transport_options *t,
 
     if(e == SESSION_STATE_OKAY) {
       JNXLOG(LDEBUG,"Found the session joiner wishes to attach too");
-
     
     }
 
