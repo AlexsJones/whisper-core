@@ -27,6 +27,15 @@
 static char *baddr = NULL;
 static char *interface = NULL;
 static auth_comms_service *ac = NULL;
+static port_control_service *ps = NULL;
+int app_accept_reject(discovery_service *ds, jnx_guid *initiator_guild,
+    jnx_guid *session_guid) {
+  return 0;
+}
+int accept_invite_callback(jnx_guid *session_guid) {
+
+  return 1;
+}
 int linking_test_procedure(session *s,linked_session_type session_type,
     void *optargs) {
   if(session_type == E_AM_INITIATOR){
@@ -35,11 +44,6 @@ int linking_test_procedure(session *s,linked_session_type session_type,
     discovery_service *ds = (discovery_service*)optargs;
     /* Adding port control service */
 
-    int init_port = rand() % 1000;
-
-    port_control_service *ps = port_control_service_create(8000 + 
-        init_port,
-        12341,1);
 
     auth_comms_initiator_start(ac,ds,ps,s,"Hello from the initiator!");
   }
@@ -53,8 +57,16 @@ int unlinking_test_procedure(session *s,linked_session_type session_type,
 }
 void test_initiator() {
   JNXLOG(NULL,"test_linking");
+ 
+  int init_port = rand() % 1000;
+ ps = port_control_service_create(8000 + 
+        init_port,
+        12341,1);
+  
   ac = auth_comms_create();
   ac->listener = jnx_socket_tcp_listener_create("9991",AF_INET,15);
+  ac->ar_callback = app_accept_reject;
+  ac->invitation_callback = accept_invite_callback;
 
   session_service *service = session_service_create(linking_test_procedure,
       unlinking_test_procedure);
@@ -72,6 +84,8 @@ void test_initiator() {
   discovery_service *ds = discovery_service_create(1234, AF_INET, baddr, store);
 
   discovery_service_start(ds,BROADCAST_UPDATE_STRATEGY);
+
+  auth_comms_listener_start(ac,ds,service,ps,NULL);
 
   int remote_peers = 0;
   int has_remote_invitee = 0;
@@ -126,15 +140,46 @@ void test_initiator() {
       }
     }
   }
+  
+  sleep(1);
+
   printf("Found remote invitee and going to send invite => ");
   print_peer(remote_invitee);
   printf("\n");
   auth_comms_invite_send(ac,os,remote_invitee);
 
-  while(1) {
+  int is_invitee_session_active = 0;
 
-    sleep(1);
+  session *remote_invitee_session = NULL;
+
+  while(!is_invitee_session_active) {
+    
+    jnx_list *olist = NULL;
+    session_service_fetch_all_sessions(service,&olist);
+
+    if(olist->counter < 2) {
+      jnx_list_destroy(&olist);
+      continue;
+    }
+    
+    jnx_node *n = olist->head;
+
+    while(n) {
+    
+      session *s = n->_data;
+
+      if(jnx_guid_compare(&(*s).session_guid,&(*os).session_guid )
+          == JNX_GUID_STATE_SUCCESS) {
+        remote_invitee_session = s; 
+        is_invitee_session_active = 1; 
+      }
+
+      n = olist->head->next_node;
+    }
+
   }
+
+  JNXLOG(LDEBUG,"Remote invitee session is active!");
 
 }
 int main(int argc, char **argv) {
