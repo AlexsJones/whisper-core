@@ -33,7 +33,6 @@ int handshake_did_receive_receiver_request(jnx_uint8 *obuffer,
   *oobject = NULL;
   AuthReceiver *a = auth_receiver__unpack(NULL,bytes_read,obuffer);
   if(a == NULL) {
-    JNXLOG(LDEBUG,"Receiver request was null!.\n");
     return 0;
   }
   *oobject = a;
@@ -44,7 +43,6 @@ int handshake_did_receive_invite_request(jnx_uint8 *obuffer,
   *oobject = NULL;
   AuthInvite *a = auth_invite__unpack(NULL,bytes_read,obuffer);
   if(a == NULL) {
-    JNXLOG(LDEBUG,"Invite request was null!.\n");
     return 0;
   }
   *oobject = a;
@@ -55,7 +53,6 @@ int handshake_did_receive_joiner_request(jnx_uint8 *obuffer,
   *oobject = NULL;
   AuthJoiner *a = auth_joiner__unpack(NULL,bytes_read,obuffer);
   if(a == NULL) {
-    JNXLOG(LDEBUG,"Joiner request was null!.\n");
     return 0;
   }
   *oobject = a;
@@ -113,14 +110,21 @@ int handshake_initiator_command_generate(session *ses,\
       JNXLOG(LDEBUG,"Generating finish request flags.\n");
       auth_parcel.is_requesting_public_key = 0;
       auth_parcel.is_requesting_finish = 1;
-      JNXLOG(LDEBUG,"Transmitting encrypted shared secret\n");
-      JNXCHECK(shared_secret != NULL);
-      jnx_size slen = strlen(shared_secret);
-      auth_parcel.shared_secret = malloc(sizeof(char) * slen + 1);
-      memcpy(auth_parcel.shared_secret,shared_secret,slen + 1);
-      auth_parcel.shared_secret_len = secret_len;
-      JNXLOG(LDEBUG,"Setting shared secret len in proto to %d\n",
-          auth_parcel.shared_secret_len);
+
+      auth_parcel.shared_secret.len = secret_len;
+      auth_parcel.shared_secret.data = malloc(sizeof(char) * auth_parcel.shared_secret.len);
+
+      JNXLOG(LDEBUG,"Transmitting encrypted shared secret with size %zu\n",auth_parcel.shared_secret.len);
+
+      jnx_int i;
+      for(i=0;i<auth_parcel.shared_secret.len;++i) {
+          auth_parcel.shared_secret.data[i] = shared_secret[i];
+      }
+
+      auth_parcel.has_shared_secret = 1;
+
+      JNXLOG(LDEBUG,"Setting shared secret len in proto to %zu\n",
+          auth_parcel.shared_secret.len);
       break;
   }
 
@@ -274,12 +278,40 @@ int handshake_generate_invite_request(session *ses,
       invitee_guid,onetbuffer);
 }
 int handshake_joiner_command_generate(session *ses, \
-    handshake_joiner_state state, jnx_guid *session_guid,\
+    handshake_joiner_state state, jnx_uint8 *encrypted_joiner_guid,\
+    jnx_size len,
     jnx_uint8 **onetbuffer) {
-  return 0;
+
+  AuthJoiner auth_joiner = AUTH_JOINER__INIT;  
+  /* session guid */
+  jnx_char *session_guid_str;
+  jnx_guid_to_string(&(*ses).session_guid,&session_guid_str);
+  len = strlen(session_guid_str);
+  auth_joiner.session_guid = malloc(sizeof(char)* len + 1);
+  memcpy(auth_joiner.session_guid,session_guid_str, len + 1);
+  free(session_guid_str);
+  /* encrypted joiner guid */
+  
+  auth_joiner.encrypted_joiner_guid.len = len;
+  auth_joiner.encrypted_joiner_guid.data = malloc(sizeof(char) * len +1);  
+  
+  jnx_int i;
+  for(i=0;i<auth_joiner.encrypted_joiner_guid.len; ++i) {
+    auth_joiner.encrypted_joiner_guid.data[i] = encrypted_joiner_guid[i];
+  }
+  
+  jnx_int parcel_len = auth_joiner__get_packed_size(&auth_joiner);
+  jnx_uint8 *obuffer = malloc(parcel_len);
+  auth_joiner__pack(&auth_joiner,obuffer);
+  /* requesting join */
+  auth_joiner.is_requesting_join = 1;
+  *onetbuffer = obuffer;
+
+  return parcel_len;
 }
 int handshake_generate_joiner_request(session *ses, \
-    jnx_guid *session_guid, jnx_uint8 **onetbuffer) {
+    jnx_uint8 *encrypted_joiner_guid, 
+    jnx_size len,jnx_uint8 **onetbuffer) {
   return handshake_joiner_command_generate(ses, JOINER_JOIN, 
-      session_guid, onetbuffer);
+      encrypted_joiner_guid, len, onetbuffer);
 }

@@ -4,8 +4,7 @@ message auth_initiator {
   required int32 is_requesting_public_key=3;
   required int32 is_requesting_finish=4;
   required string initiator_public_key=5;
-  optional string shared_secret=6;
-  optional int32 shared_secret_len=7;
-  required string secure_comms_port=8;
-  optional string initiator_message=9;
+  optional bytes shared_secret=6;
+  required string secure_comms_port=7;
+  optional string initiator_message=8;
 }

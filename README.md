@@ -1,6 +1,8 @@
 
  ![CoreImage](http://i.imgur.com/Qh67mKG.jpg)
 
+###Notice: Current work for multichat and a stable Alpha of both core and CLI is the current top priority
+
 > Imagine being able to work in an environment where your conversations arent monitored continuously.
   Take that idea and apply it to your everyday workplace where having an outspoken opinion remains locked away due to fear of leaving a digital footprint.
   Whisper aims to help provide a platform for inter-domain level chat.
