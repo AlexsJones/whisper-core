@@ -297,6 +297,19 @@ static void internal_request_joiner(transport_options *t,
     
       /* Transmit the session joiner to other members of the shared session */
 
+      /*
+       *  Attempting to join osession
+       */
+      JNXLOG(LDEBUG,"--------------------------------------------------");
+      jnx_int peers_to_update = 0;
+      if(&(*osession).remote_peer_guid) {
+        peers_to_update += 1;
+      }
+      if(&(*osession).foriegn_sessions) {
+        peers_to_update += osession->foriegn_sessions->counter;   
+      }       
+      JNXLOG(LDEBUG,"Peers to update: %d",peers_to_update);      
+      JNXLOG(LDEBUG,"--------------------------------------------------");
 
     }
   }else {
