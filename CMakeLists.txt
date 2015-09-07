@@ -29,7 +29,6 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
 endif()
 
 execute_process(COMMAND ./tools/generate_protobuf)
-file(GLOB RAW_SRC "src/**/*.c")
 file(COPY ${HEADERS} DESTINATION whisper-core)
 
 add_library(whisper-core-static STATIC ${SOURCE})
