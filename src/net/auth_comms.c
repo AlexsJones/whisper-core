@@ -294,8 +294,6 @@ static void internal_request_joiner(transport_options *t,
     JNXLOG(LDEBUG,"Decrypted the joiner guid %s",decrypted);
     if(e == JNX_GUID_STATE_SUCCESS){
       JNXLOG(LDEBUG,"Successfully matched the decrypted session guid"); 
-    
-      /* Transmit the session joiner to other members of the shared session */
 
       /*
        *  Attempting to join osession
@@ -311,6 +309,13 @@ static void internal_request_joiner(transport_options *t,
       JNXLOG(LDEBUG,"Peers to update: %d",peers_to_update);      
       JNXLOG(LDEBUG,"--------------------------------------------------");
 
+      //TODO: Thread out this?
+
+      //session_service_alert_session_update(ss,osession,) 
+      //TODO: Going to start with the local remote_peer_guid to 
+      //update only first of all
+    
+      //need to add the session as part of the foriegn sessions
     }
   }else {
     JNXLOG(LERROR,"Error occured retrieving joiner session!");
