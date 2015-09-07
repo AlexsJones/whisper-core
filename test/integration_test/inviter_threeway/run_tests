@@ -1,0 +1,99 @@
+#!/bin/bash
+OS=`uname`
+echo "System: $OS"
+if hash clang 2>/dev/null; then
+  COMPILER=clang
+  echo "Using clang for test compiler"
+else
+  if hash gcc 2>/dev/null; then
+    COMPILER=gcc
+    echo "Using gcc for test compiler"
+  else
+    echo "gcc not found - Cannot compile"
+    exit 1
+  fi
+fi
+if hash lldb 2>/dev/null; then
+  TESTCOMPILER=lldb
+  echo "Using lldb for test debugger"
+else
+  if hash gdb 2>/dev/null; then
+    TESTCOMPILER=gdb
+    echo "Using gdb for test debugger"
+  else
+    echo "gdb not found - Cannot run tests without any debugger"
+    exit 1
+  fi
+fi
+function echo_red()
+{
+  tput setaf 1
+  echo $1
+  tput sgr0
+}
+
+function echo_green()
+{
+  tput setaf 2
+  echo $1
+  tput sgr0
+}
+
+function test_against_file()
+{
+   file=$1
+  echo "Compiling $file"
+  `$COMPILER $file ../../../src/util/*.c ../../../src/data/*.c ../../../src/net/*.c ../../../src/session/*.c ../../../src/integrity/*.c ../../../src/crypto/*.c -I../../../src/crypto -I../../../src/data -I../../../src/err -I../../../src/integrity -I../../../src/net -I../../../src/session -I../../../src/util -o ${file:0:${#file}-2} -pthread -w -rdynamic -lcrypto -lssl -ljnxc -lprotobuf-c -g`
+  out=$?
+  if [ ! $out -eq 0 ]; then
+    echo "Compile failed!"
+    exit 1
+  fi
+ 
+  if [ "$ARGS" == "DEBUG" ]; then
+    echo "Using debugger..."
+    if hash lldb 2>/dev/null; then
+      echo "Running command => $TESTCOMPILER -f $current -o run -o exit"
+      $TESTCOMPILER -f $current $2 -o run -o exit
+    else
+      echo "Running command => $TESTCOMPILER --args $current"
+      $TESTCOMPILER --args $current $2
+    fi
+  else
+    echo ">>>>> $2"
+    ./$current $2
+  fi
+  out=$?
+  if [ ! $out -eq 0 ]; then
+    echo_red "Test failed"
+#    rm $current
+    exit 1
+  else
+    echo_green "Test passed"
+#   rm $current
+  fi
+
+}
+
+function run_full_suite()
+{
+  filelist=`ls *.c`
+  for file in $filelist; do
+    if [ "$file" == "run_tests" ] 
+    then
+      continue
+    fi 
+    current=${file:0:${#file}-2}
+    if [ -e $current ]
+    then
+      rm $current
+    fi
+    echo "Running next test for --> ${file}"
+    test_against_file $file $1
+  done;
+}
+
+pushd test/integration_test/inviter_threeway
+run_full_suite $1
+popd
+exit 0

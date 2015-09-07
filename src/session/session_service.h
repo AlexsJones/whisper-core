@@ -29,6 +29,13 @@ typedef enum linked_session_type {
   E_AM_INITIATOR
 }linked_session_type;
 
+typedef enum alert_session_update {
+  E_ALERT_JOINED_FORIEGN_SESSION,
+  E_ALERT_LEFT_FORIEGN_SESSION,
+  E_ALERT_SESSION_CLOSED,
+  E_ALERT_SESSION_ERROR
+}alert_session_update;
+
 typedef int (*session_linking_service_func)(session *s,
     linked_session_type session_type,
     void *optargs);
@@ -97,7 +104,9 @@ session_state session_service_unlink_sessions(session_service *s,
     void *linking_args, jnx_guid \
     *session_guid);
 
-jnx_int session_service_session_is_linked(session_service *,jnx_guid \
+jnx_int session_service_session_is_linked(session_service *service,jnx_guid \
     *session_guid);
 
+void session_service_alert_session_update(session_service *service, session *s, 
+    alert_session_update update);
 #endif
