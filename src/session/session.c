@@ -40,7 +40,7 @@ session_state session_message_write(session *s,jnx_uint8 *message) {
 
   jnx_uint8 *obuffer = malloc(olen);
 
-  secure_comms_object_pack(&sco,obuffer);
+  secure_comms_object__pack(&sco,obuffer);
 
   free(sco.message);
   free(sco.session_guid);
