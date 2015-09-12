@@ -42,6 +42,8 @@ session_state session_message_write(session *s,jnx_uint8 *message) {
 
   secure_comms_object__pack(&sco,obuffer);
 
+  JNXLOG(LDEBUG,"PACKED SECURE COMMS OBJECT");
+
   free(sco.message);
   free(sco.session_guid);
   free(session_guid);
@@ -104,7 +106,9 @@ jnx_int session_message_read(session *s, jnx_uint8 **omessage) {
       return -1;
     }
 
-    jnx_char *decrypted_message = symmetrical_decrypt(s->shared_secret,
+  JNXLOG(LDEBUG,"UNPACKED SECURE COMMS OBJECT");
+  
+  jnx_char *decrypted_message = symmetrical_decrypt(s->shared_secret,
       sco->message,strlen(sco->message));
 
     //TODO; intercept service messages?
