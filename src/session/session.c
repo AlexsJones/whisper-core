@@ -51,9 +51,11 @@ session_state session_message_write(session *s,jnx_uint8 *message) {
   int send_result = 0;
   if (0 > (send_result = send(s->secure_socket,obuffer,olen,0))) {
     perror("send:");
+    free(obuffer);
     return SESSION_STATE_FAIL;
   }
   JNXLOG(LDEBUG,"Send result => %d\n",send_result);
+  free(obuffer);
 
   /* foriegn_session replication */
   /*
@@ -64,7 +66,6 @@ session_state session_message_write(session *s,jnx_uint8 *message) {
    session *current_foriegn_session = head->_data;
    encrypted = symmetrical_encrypt(current_foriegn_session->shared_secret,
    message,len);
-
 
 
    if (0 > (send_result = send(current_foriegn_session->secure_socket,
@@ -94,8 +95,8 @@ jnx_int session_message_read(session *s, jnx_uint8 **omessage) {
     JNXLOG(LDEBUG,"Session cannot read from a null socket");
     return -1;
   }
-    jnx_uint8 buffer[2048];
-    bzero(buffer,2048);
+  jnx_uint8 buffer[2048];
+  bzero(buffer,2048);
   jnx_int bytes_read = recv(s->secure_socket,buffer,2048,0);
   if(bytes_read > 0) {
 
@@ -106,10 +107,10 @@ jnx_int session_message_read(session *s, jnx_uint8 **omessage) {
       return -1;
     }
 
-  JNXLOG(LDEBUG,"UNPACKED SECURE COMMS OBJECT");
-  
-  jnx_char *decrypted_message = symmetrical_decrypt(s->shared_secret,
-      sco->message,strlen(sco->message));
+    JNXLOG(LDEBUG,"UNPACKED SECURE COMMS OBJECT");
+
+    jnx_char *decrypted_message = symmetrical_decrypt(s->shared_secret,
+        sco->message,strlen(sco->message));
 
     //TODO; intercept service messages?
 
