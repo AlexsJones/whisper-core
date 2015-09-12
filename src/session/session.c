@@ -5,9 +5,10 @@
  * Distributed under terms of the MIT license.
  */
 #include <sys/socket.h>
+#include "secure_comms_object.pb-c.h"
 #include "session.h"
 #include "secure_comms.h"
-
+#include <string.h>
 jnx_int session_is_active(session *s) {
   jnx_int is_socket_live = secure_comms_is_socket_linked(s->secure_socket);
   if(s->is_connected && is_socket_live) {
@@ -23,35 +24,61 @@ session_state session_message_write(session *s,jnx_uint8 *message) {
       message,
       len);
 
+  jnx_char *session_guid;
+
+  jnx_guid_to_string(&(*s).session_guid,&session_guid);
+
+  /* Wrap in protobuf object */
+  SecureCommsObject sco = SECURE_COMMS_OBJECT__INIT;
+  sco.session_guid = malloc(strlen(session_guid) +1);
+  memcpy(sco.session_guid,session_guid,strlen(session_guid));
+
+  sco.message = malloc(strlen(encrypted) +1);
+  memcpy(sco.message,encrypted,strlen(encrypted));
+
+  jnx_int olen = secure_comms_object__get_packed_size(&sco);
+
+  jnx_uint8 *obuffer = malloc(olen);
+
+  secure_comms_object_pack(&sco,obuffer);
+
+  free(sco.message);
+  free(sco.session_guid);
+  free(session_guid);
+
   int send_result = 0;
-  if (0 > (send_result = send(s->secure_socket,encrypted,strlen(encrypted),0))) {
+  if (0 > (send_result = send(s->secure_socket,obuffer,olen,0))) {
     perror("send:");
     return SESSION_STATE_FAIL;
   }
   JNXLOG(LDEBUG,"Send result => %d\n",send_result);
 
   /* foriegn_session replication */
-  if(s->foriegn_sessions) {
-    jnx_node *head = s->foriegn_sessions->head,
-             *reset = s->foriegn_sessions->head;
-    while(head) {
-      session *current_foriegn_session = head->_data;
-      encrypted = symmetrical_encrypt(current_foriegn_session->shared_secret,
-          message,len);
+  /*
+     if(s->foriegn_sessions) {
+     jnx_node *head = s->foriegn_sessions->head,
+   *reset = s->foriegn_sessions->head;
+   while(head) {
+   session *current_foriegn_session = head->_data;
+   encrypted = symmetrical_encrypt(current_foriegn_session->shared_secret,
+   message,len);
 
-      if (0 > (send_result = send(current_foriegn_session->secure_socket,
-              encrypted,strlen(encrypted),0))) {
-        perror("send:");
-        JNXLOG(LWARN,"Failure to send on foriegn session");
-        head = head->next_node;
-        return SESSION_STATE_FAIL;
-      }
-      JNXLOG(LDEBUG,"foriegn_session send result => %d\n",send_result);
-      free(encrypted);
-      head = head->next_node;
-    }
-    head = reset;
-  } 
+
+
+   if (0 > (send_result = send(current_foriegn_session->secure_socket,
+   encrypted,strlen(encrypted),0))) {
+   perror("send:");
+   JNXLOG(LWARN,"Failure to send on foriegn session");
+   head = head->next_node;
+   return SESSION_STATE_FAIL;
+   }
+   JNXLOG(LDEBUG,"foriegn_session send result => %d\n",send_result);
+   free(encrypted);
+   head = head->next_node;
+   }
+   head = reset;
+   }
+   */
   /* foriegn_session replication */
   return SESSION_STATE_OKAY;
 }
@@ -65,12 +92,24 @@ jnx_int session_message_read(session *s, jnx_uint8 **omessage) {
     JNXLOG(LDEBUG,"Session cannot read from a null socket");
     return -1;
   }
-  jnx_uint8 buffer[2048];
-  bzero(buffer,2048);
+    jnx_uint8 buffer[2048];
+    bzero(buffer,2048);
   jnx_int bytes_read = recv(s->secure_socket,buffer,2048,0);
   if(bytes_read > 0) {
+
+
+    SecureCommsObject *sco = secure_comms_object__unpack(NULL,bytes_read,buffer);
+    if(sco == NULL) {
+
+      return -1;
+    }
+
     jnx_char *decrypted_message = symmetrical_decrypt(s->shared_secret,
-        buffer,bytes_read);
+      sco->message,strlen(sco->message));
+
+    //TODO; intercept service messages?
+
+    secure_comms_object__free_unpacked(sco,NULL);
     *omessage = decrypted_message;
   }
   return bytes_read;
@@ -78,7 +117,7 @@ jnx_int session_message_read(session *s, jnx_uint8 **omessage) {
 jnx_int session_message_read_foreign_sessions(session *s, 
     jnx_list **omessagelist) {
   int message_count = 0;
-  
+
   if(s->foriegn_sessions) {
     jnx_node *head = s->foriegn_sessions->head,
              *reset = s->foriegn_sessions->head;
@@ -87,7 +126,7 @@ jnx_int session_message_read_foreign_sessions(session *s,
       jnx_uint8 *message;
       jnx_int bytes_read = session_message_read(current_foriegn_session,&message);
       if(bytes_read){
-      
+
         foriegn_session_message *fsm = malloc(sizeof(foriegn_session_message));
         fsm->message = message;
         fsm->session_guid = current_foriegn_session->session_guid;
