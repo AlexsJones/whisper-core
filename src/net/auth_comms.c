@@ -109,7 +109,7 @@ static void internal_request_initiator(transport_options *t,
      */
     jnx_uint8 *onetbuffer;
     printf("About to generate handshake.\n");
-    int bytes = handshake_generate_public_key_response(osession,abort_token,
+    int bytes = protobuf_construction_generate_public_key_response(osession,abort_token,
         &onetbuffer);
     write(connected_socket,onetbuffer,bytes);
     /* free data */
@@ -137,7 +137,7 @@ static void internal_request_initiator(transport_options *t,
     } 
 
     jnx_uint8 *onetbuffer;
-    int bytes = handshake_generate_finish_response(osession,abort_token,
+    int bytes = protobuf_construction_generate_finish_response(osession,abort_token,
         &onetbuffer);
     write(connected_socket,onetbuffer,bytes);
     free(onetbuffer);    
@@ -182,7 +182,7 @@ static void internal_request_invite(transport_options *t,
     const jnx_uint8 *payload,
     jnx_size bytes_read, int connected_socket, void *object, void *context) {
 
-  JNXLOG(LDEBUG,"handshake_generate_invite_request"); 
+  JNXLOG(LDEBUG,"protobuf_construction_generate_invite_request"); 
   AuthInvite *i = (AuthInvite*)object;
   jnx_guid remote_session_guid;
   jnx_guid_from_string(i->session_guid,&remote_session_guid);
@@ -235,7 +235,7 @@ static void internal_request_invite(transport_options *t,
         i->session_guid,encrypted_len);
 
     jnx_uint8 *outbuffer;
-    int l = handshake_joiner_command_generate(osession,
+    int l = protobuf_construction_joiner_command_generate(osession,
         JOINER_JOIN,encrypted,encrypted_len,
         &outbuffer);     
 
@@ -301,7 +301,7 @@ static void listener_callback(const jnx_uint8 *payload,
   transport_options *t = (transport_options*)context;
 
   void *object;
-  switch(handshake_resolve_request_type((jnx_char*)payload,bytes_read,&object)) {
+  switch(protobuf_construction_resolve_request_type((jnx_char*)payload,bytes_read,&object)) {
     case REQUEST_TYPE_INITIATOR:
       JNXLOG(LDEBUG,"Received request type: Initiator");
       internal_request_initiator(t,payload,bytes_read,connected_socket,
@@ -383,7 +383,7 @@ jnx_int auth_comms_initiator_start(auth_comms_service *ac, \
     session_add_initiator_message(s,initiator_message);
   }
   jnx_uint8 *obuffer;
-  jnx_int bytes_read = handshake_generate_public_key_request(s,initiator_message,
+  jnx_int bytes_read = protobuf_construction_generate_public_key_request(s,initiator_message,
       &obuffer);
 
   printf("Generated initial handshake...[%d/bytes]\n",bytes_read);
@@ -395,7 +395,7 @@ jnx_int auth_comms_initiator_start(auth_comms_service *ac, \
 
   /* expect an AuthReceiver public key reply here */
   void *object;
-  if(handshake_did_receive_receiver_request(reply,replysize,&object)) {
+  if(protobuf_construction_did_receive_receiver_request(reply,replysize,&object)) {
     AuthReceiver *r = (AuthReceiver *)object;
 
     /* first thing we check is if we should abort */
@@ -424,7 +424,7 @@ jnx_int auth_comms_initiator_start(auth_comms_service *ac, \
     jnx_uint8 *fbuffer;
     JNXLOG(LDEBUG,"Initiator: Encrypted secret");
 
-    bytes_read = handshake_generate_finish_request(s,encrypted_secret,
+    bytes_read = protobuf_construction_generate_finish_request(s,encrypted_secret,
         encrypted_secret_len,&fbuffer);
     JNXLOG(LDEBUG,"Initiator: Generated finish request");
     jnx_size replysizetwo;
@@ -443,7 +443,7 @@ jnx_int auth_comms_initiator_start(auth_comms_service *ac, \
 
     void *finish_object;
 
-    if(handshake_did_receive_receiver_request(replytwo,replysizetwo,
+    if(protobuf_construction_did_receive_receiver_request(replytwo,replysizetwo,
           &finish_object)){
       AuthReceiver *ar = (AuthReceiver *)finish_object;
       if(ar->is_receiving_finish == 1 && ar->is_receiving_public_key == 0) {
@@ -465,7 +465,7 @@ jnx_int auth_comms_invite_send(auth_comms_service *ac,
   print_pair(&(*s).session_guid,&(*invitee).guid); 
   JNXLOG(LDEBUG,"auth_comms_invite_send [Session guid] [Invitee]");
   jnx_uint8 *obuffer;
-  jnx_int bytes_read = handshake_generate_invite_request(s,&(*invitee).guid,
+  jnx_int bytes_read = protobuf_construction_generate_invite_request(s,&(*invitee).guid,
       &obuffer);
   jnx_size replysize;
 
