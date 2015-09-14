@@ -21,7 +21,7 @@
 #include <jnxc_headers/jnxlist.h>
 #include <jnxc_headers/jnxcheck.h>
 #include "session.h"
-#include "handshake_control.h"
+#include "protobuf_construction.h"
 #include "peer.h"
 
 typedef enum linked_session_type {

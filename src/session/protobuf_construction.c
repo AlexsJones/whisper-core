@@ -5,7 +5,7 @@
  * Distributed under terms of the MIT license.
  */
 #include <jnxc_headers/jnxlog.h>
-#include "handshake_control.h"
+#include "protobuf_construction.h"
 #include <ifaddrs.h>
 #include <arpa/inet.h>
 #include <sys/ioctl.h>

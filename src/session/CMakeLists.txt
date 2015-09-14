@@ -4,7 +4,7 @@ ${CMAKE_CURRENT_SOURCE_DIR}/auth_invite.pb-c.c
 ${CMAKE_CURRENT_SOURCE_DIR}/auth_joiner.pb-c.c
 ${CMAKE_CURRENT_SOURCE_DIR}/auth_receiver.pb-c.c
 ${CMAKE_CURRENT_SOURCE_DIR}/secure_comms_object.pb-c.c
-${CMAKE_CURRENT_SOURCE_DIR}/handshake_control.c
+${CMAKE_CURRENT_SOURCE_DIR}/protobuf_construction.c
 ${CMAKE_CURRENT_SOURCE_DIR}/session.c
 ${CMAKE_CURRENT_SOURCE_DIR}/session_service.c
 PARENT_SCOPE)
@@ -16,7 +16,7 @@ ${CMAKE_CURRENT_SOURCE_DIR}/auth_invite.pb-c.h
 ${CMAKE_CURRENT_SOURCE_DIR}/auth_joiner.pb-c.h
 ${CMAKE_CURRENT_SOURCE_DIR}/auth_receiver.pb-c.h
 ${CMAKE_CURRENT_SOURCE_DIR}/secure_comms_object.pb-c.h
-${CMAKE_CURRENT_SOURCE_DIR}/handshake_control.h
+${CMAKE_CURRENT_SOURCE_DIR}/protobuf_construction.h
 ${CMAKE_CURRENT_SOURCE_DIR}/session.h
 ${CMAKE_CURRENT_SOURCE_DIR}/session_service.h
 PARENT_SCOPE)

@@ -15,7 +15,7 @@
 #include "auth_receiver.pb-c.h"
 #include "auth_joiner.pb-c.h"
 #include "auth_invite.pb-c.h"
-#include "handshake_control.h"
+#include "protobuf_construction.h"
 #include "secure_comms.h"
 #define CHALLENGE_REQUEST_PUBLIC_KEY 1
 #define CHALLENGE_REQUEST_FINISH 0
