@@ -18,11 +18,6 @@ jnx_int session_is_active(session *s) {
 }
 session_state session_message_write(session *s,jnx_uint8 *message) {
   /* take the raw message and des encrypt it */
-  jnx_size len = strlen(message);
-
-  jnx_char *encrypted = symmetrical_encrypt(s->shared_secret,
-      message,
-      len);
 
   jnx_char *session_guid;
 
@@ -33,14 +28,18 @@ session_state session_message_write(session *s,jnx_uint8 *message) {
   sco.session_guid = malloc(strlen(session_guid) +1);
   memcpy(sco.session_guid,session_guid,strlen(session_guid));
 
-  sco.message = malloc(strlen(encrypted) +1);
-  memcpy(sco.message,encrypted,strlen(encrypted));
+  sco.message = malloc(strlen(message) + 1);
+  memcpy(sco.message,message,strlen(message));
 
   jnx_int olen = secure_comms_object__get_packed_size(&sco);
 
   jnx_uint8 *obuffer = malloc(olen);
 
   secure_comms_object__pack(&sco,obuffer);
+
+  jnx_char *encrypted = symmetrical_encrypt(s->shared_secret,
+      obuffer,
+      olen);
 
   JNXLOG(LDEBUG,"PACKED SECURE COMMS OBJECT");
 
@@ -49,7 +48,8 @@ session_state session_message_write(session *s,jnx_uint8 *message) {
   free(session_guid);
 
   int send_result = 0;
-  if (0 > (send_result = send(s->secure_socket,obuffer,olen,0))) {
+  if (0 > (send_result = send(s->secure_socket,encrypted,strlen(encrypted)
+          +1,0))) {
     perror("send:");
     free(obuffer);
     return SESSION_STATE_FAIL;
@@ -101,7 +101,14 @@ jnx_int session_message_read(session *s, jnx_uint8 **omessage) {
   if(bytes_read > 0) {
 
 
-    SecureCommsObject *sco = secure_comms_object__unpack(NULL,bytes_read,buffer);
+    jnx_char *decrypted_message = symmetrical_decrypt(s->shared_secret,
+        buffer,bytes_read);
+    
+    
+    SecureCommsObject *sco = secure_comms_object__unpack(NULL,
+        strlen(decrypted_message) + 1,
+        decrypted_message);
+
     if(sco == NULL) {
 
       return -1;
@@ -109,8 +116,6 @@ jnx_int session_message_read(session *s, jnx_uint8 **omessage) {
 
     JNXLOG(LDEBUG,"UNPACKED SECURE COMMS OBJECT");
 
-    jnx_char *decrypted_message = symmetrical_decrypt(s->shared_secret,
-        sco->message,strlen(sco->message));
 
     //TODO; intercept service messages?
 
