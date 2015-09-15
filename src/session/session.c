@@ -89,7 +89,7 @@ jnx_int session_message_read(session *s, jnx_uint8 **omessage) {
     void *obj = NULL;
 
     if(protobuf_construction_did_receive_secure_comms_object(decrypted_message,
-          strlen(decrypted_message)+1,&obj) == 0) {
+          strlen(decrypted_message)+1,&obj)) {
         
       SecureCommsObject *sco = (SecureCommsObject*)obj;
 
