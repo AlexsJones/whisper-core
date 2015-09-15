@@ -15,6 +15,7 @@
 #include "auth_receiver.pb-c.h"
 #include "auth_joiner.pb-c.h"
 #include "auth_invite.pb-c.h"
+#include "secure_comms_object.pb-c.h"
 
 
 int protobuf_construction_did_receive_initiator_request(jnx_uint8 *obuffer,
@@ -56,6 +57,16 @@ int protobuf_construction_did_receive_joiner_request(jnx_uint8 *obuffer,
     return 0;
   }
   *oobject = a;
+  return 1;
+}
+int protobuf_construction_did_receive_secure_comms_object(jnx_uint8 *obuffer,
+    jnx_size bytes_read, void **oobject) {
+  *oobject = NULL;
+  SecureCommsObject *sco = secure_comms_object__unpack(NULL,bytes_read,obuffer);
+  if(sco == NULL) {
+    return 0;
+  }
+  *oobject = sco;
   return 1;
 }
 protobuf_construction_request_type protobuf_construction_resolve_request_type(jnx_uint8 *obuffer,
@@ -314,4 +325,29 @@ int protobuf_construction_generate_joiner_request(session *ses, \
     jnx_size len,jnx_uint8 **onetbuffer) {
   return protobuf_construction_joiner_command_generate(ses, JOINER_JOIN, 
       encrypted_joiner_guid, len, onetbuffer);
+}
+int protobuf_construction_secure_comms_generate(session *ses,
+    jnx_char *message, jnx_uint8 **onetbuffer) {
+
+  SecureCommsObject sco = SECURE_COMMS_OBJECT__INIT;
+
+  jnx_char *session_guid_str;
+  jnx_guid_to_string(&(*ses).session_guid,&session_guid_str);
+  jnx_int len = strlen(session_guid_str);
+  sco.session_guid = malloc(sizeof(char)* len + 1);
+  memcpy(sco.session_guid,session_guid_str, len + 1);
+  free(session_guid_str);
+  
+  sco.message = malloc(strlen(message) + 1);
+  memcpy(sco.message,message,strlen(message));
+  
+  jnx_int olen = secure_comms_object__get_packed_size(&sco);
+  jnx_uint8 *obuffer = malloc(olen);
+  secure_comms_object__pack(&sco,obuffer);
+
+  *onetbuffer = obuffer;
+  free(sco.message);
+  free(sco.session_guid);
+
+  return olen;
 }

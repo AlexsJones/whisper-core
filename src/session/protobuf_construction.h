@@ -51,6 +51,9 @@ int protobuf_construction_did_receive_joiner_request(jnx_uint8 *obuffer,
 
 int protobuf_construction_did_receive_invite_request(jnx_uint8 *obuffer,
     jnx_size bytes_read, void **oobject);
+
+int protobuf_construction_did_receive_secure_comms_object(jnx_uint8 *obuffer,
+    jnx_size bytes_read, void **oobject);
 /* Initiator request */
 int protobuf_construction_initiator_command_generate(session *ses,\
     protobuf_construction_initiator_state state, jnx_uint8 *shared_secret, jnx_size len,
@@ -86,4 +89,8 @@ int protobuf_construction_joiner_command_generate(session *ses, \
     protobuf_construction_joiner_state state,jnx_uint8 *encrypted_joiner_guid,\
     jnx_size len,
     jnx_uint8 **onetbuffer);
+
+int protobuf_construction_secure_comms_generate(session *ses,
+    jnx_char *message, jnx_uint8 **onetbuffer);
+
 #endif

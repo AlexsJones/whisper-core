@@ -19,33 +19,16 @@ jnx_int session_is_active(session *s) {
 session_state session_message_write(session *s,jnx_uint8 *message) {
   /* take the raw message and des encrypt it */
 
-  jnx_char *session_guid;
+  jnx_char *obuffer = NULL;
 
-  jnx_guid_to_string(&(*s).session_guid,&session_guid);
+  jnx_int olen = protobuf_construction_secure_comms_generate(s,
+      message,&obuffer);
 
-  /* Wrap in protobuf object */
-  SecureCommsObject sco = SECURE_COMMS_OBJECT__INIT;
-  sco.session_guid = malloc(strlen(session_guid) +1);
-  memcpy(sco.session_guid,session_guid,strlen(session_guid));
-
-  sco.message = malloc(strlen(message) + 1);
-  memcpy(sco.message,message,strlen(message));
-
-  jnx_int olen = secure_comms_object__get_packed_size(&sco);
-
-  jnx_uint8 *obuffer = malloc(olen);
-
-  secure_comms_object__pack(&sco,obuffer);
+  JNXCHECK(obuffer);
 
   jnx_char *encrypted = symmetrical_encrypt(s->shared_secret,
       obuffer,
       olen);
-
-  JNXLOG(LDEBUG,"PACKED SECURE COMMS OBJECT");
-
-  free(sco.message);
-  free(sco.session_guid);
-  free(session_guid);
 
   int send_result = 0;
   if (0 > (send_result = send(s->secure_socket,encrypted,strlen(encrypted)
@@ -56,7 +39,7 @@ session_state session_message_write(session *s,jnx_uint8 *message) {
   }
   JNXLOG(LDEBUG,"Send result => %d\n",send_result);
   free(obuffer);
-
+  free(encrypted);
   /* foriegn_session replication */
   /*
      if(s->foriegn_sessions) {
@@ -100,29 +83,25 @@ jnx_int session_message_read(session *s, jnx_uint8 **omessage) {
   jnx_int bytes_read = recv(s->secure_socket,buffer,2048,0);
   if(bytes_read > 0) {
 
-
     jnx_char *decrypted_message = symmetrical_decrypt(s->shared_secret,
         buffer,bytes_read);
     
-    
-    SecureCommsObject *sco = secure_comms_object__unpack(NULL,
-        strlen(decrypted_message) + 1,
-        decrypted_message);
+    void *obj = NULL;
 
-    if(sco == NULL) {
+    if(protobuf_construction_did_receive_secure_comms_object(decrypted_message,
+          strlen(decrypted_message)+1,&obj) == 0) {
+        
+      SecureCommsObject *sco = (SecureCommsObject*)obj;
 
-      return -1;
+      *omessage = sco->message;
+      
+      secure_comms_object__free_unpacked(sco,NULL);
     }
 
-    JNXLOG(LDEBUG,"UNPACKED SECURE COMMS OBJECT");
-
-
-    //TODO; intercept service messages?
-
-    secure_comms_object__free_unpacked(sco,NULL);
-    *omessage = decrypted_message;
+    free(decrypted_message);
+    return bytes_read;
   }
-  return bytes_read;
+  return 0;
 }
 jnx_int session_message_read_foreign_sessions(session *s, 
     jnx_list **omessagelist) {
