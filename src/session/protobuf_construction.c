@@ -5,7 +5,7 @@
  * Distributed under terms of the MIT license.
  */
 #include <jnxc_headers/jnxlog.h>
-#include "handshake_control.h"
+#include "protobuf_construction.h"
 #include <ifaddrs.h>
 #include <arpa/inet.h>
 #include <sys/ioctl.h>
@@ -15,9 +15,10 @@
 #include "auth_receiver.pb-c.h"
 #include "auth_joiner.pb-c.h"
 #include "auth_invite.pb-c.h"
+#include "secure_comms_object.pb-c.h"
 
 
-int handshake_did_receive_initiator_request(jnx_uint8 *obuffer,
+int protobuf_construction_did_receive_initiator_request(jnx_uint8 *obuffer,
     jnx_size bytes_read,
     void **oobject){
   *oobject = NULL;
@@ -28,7 +29,7 @@ int handshake_did_receive_initiator_request(jnx_uint8 *obuffer,
   *oobject = a;
   return 1;
 }
-int handshake_did_receive_receiver_request(jnx_uint8 *obuffer,
+int protobuf_construction_did_receive_receiver_request(jnx_uint8 *obuffer,
     jnx_size bytes_read,void **oobject) {
   *oobject = NULL;
   AuthReceiver *a = auth_receiver__unpack(NULL,bytes_read,obuffer);
@@ -38,7 +39,7 @@ int handshake_did_receive_receiver_request(jnx_uint8 *obuffer,
   *oobject = a;
   return 1;
 }
-int handshake_did_receive_invite_request(jnx_uint8 *obuffer,
+int protobuf_construction_did_receive_invite_request(jnx_uint8 *obuffer,
     jnx_size bytes_read, void **oobject) {
   *oobject = NULL;
   AuthInvite *a = auth_invite__unpack(NULL,bytes_read,obuffer);
@@ -48,7 +49,7 @@ int handshake_did_receive_invite_request(jnx_uint8 *obuffer,
   *oobject = a;
   return 1;
 }
-int handshake_did_receive_joiner_request(jnx_uint8 *obuffer,
+int protobuf_construction_did_receive_joiner_request(jnx_uint8 *obuffer,
     jnx_size bytes_read,void **oobject) {
   *oobject = NULL;
   AuthJoiner *a = auth_joiner__unpack(NULL,bytes_read,obuffer);
@@ -58,29 +59,39 @@ int handshake_did_receive_joiner_request(jnx_uint8 *obuffer,
   *oobject = a;
   return 1;
 }
-handshake_request_type handshake_resolve_request_type(jnx_uint8 *obuffer,
+int protobuf_construction_did_receive_secure_comms_object(jnx_uint8 *obuffer,
+    jnx_size bytes_read, void **oobject) {
+  *oobject = NULL;
+  SecureCommsObject *sco = secure_comms_object__unpack(NULL,bytes_read,obuffer);
+  if(sco == NULL) {
+    return 0;
+  }
+  *oobject = sco;
+  return 1;
+}
+protobuf_construction_request_type protobuf_construction_resolve_request_type(jnx_uint8 *obuffer,
     jnx_size bytes_read, void **object) {
   *object = NULL;
-  if(handshake_did_receive_initiator_request(obuffer,
+  if(protobuf_construction_did_receive_initiator_request(obuffer,
         bytes_read,object)) {
     return REQUEST_TYPE_INITIATOR;
   }
-  if(handshake_did_receive_receiver_request(obuffer,
+  if(protobuf_construction_did_receive_receiver_request(obuffer,
         bytes_read,object)) {
     return REQUEST_TYPE_RECEIVER;
   }
-  if(handshake_did_receive_invite_request(obuffer,
+  if(protobuf_construction_did_receive_invite_request(obuffer,
         bytes_read,object)) {
     return REQUEST_TYPE_INVITE;
   }
-  if(handshake_did_receive_joiner_request(obuffer,
+  if(protobuf_construction_did_receive_joiner_request(obuffer,
         bytes_read,object)) {
     return REQUEST_TYPE_JOINER;
   } 
   return REQUEST_TYPE_UNKNOWN;
 }
-int handshake_initiator_command_generate(session *ses,\
-    handshake_initiator_state state,\
+int protobuf_construction_initiator_command_generate(session *ses,\
+    protobuf_construction_initiator_state state,\
     jnx_uint8 *shared_secret,jnx_size secret_len,
     jnx_uint8 *initiator_message,
     jnx_uint8 **onetbuffer) {
@@ -103,7 +114,7 @@ int handshake_initiator_command_generate(session *ses,\
         memcpy(auth_parcel.initiator_message,initiator_message,
             strlen(initiator_message)+1);
       }else {
-        JNXLOG(LINFO,"handshake_initiator_command_generate: packed without initiator message");
+        JNXLOG(LINFO,"protobuf_construction_initiator_command_generate: packed without initiator message");
       }
       break;
     case CHALLENGE_FINISH:
@@ -161,8 +172,8 @@ int handshake_initiator_command_generate(session *ses,\
   *onetbuffer = obuffer;
   return parcel_len;
 }
-int handshake_receiver_command_generate(session *ses, \
-    handshake_receiver_state state, jnx_int abort,jnx_uint8 **onetbuffer) {
+int protobuf_construction_receiver_command_generate(session *ses, \
+    protobuf_construction_receiver_state state, jnx_int abort,jnx_uint8 **onetbuffer) {
 
   jnx_char *local_guid_str;
   jnx_guid_to_string(&(*ses).local_peer_guid,&local_guid_str);
@@ -213,32 +224,32 @@ int handshake_receiver_command_generate(session *ses, \
   *onetbuffer = obuffer;
   return parcel_len;
 }
-int handshake_generate_public_key_request(session *ses,\
+int protobuf_construction_generate_public_key_request(session *ses,\
     jnx_uint8 *initiator_message,
     jnx_uint8 **onetbuffer) {
-  return handshake_initiator_command_generate(ses,
+  return protobuf_construction_initiator_command_generate(ses,
       CHALLENGE_PUBLIC_KEY,NULL,0,initiator_message,
       onetbuffer);
 }
-int handshake_generate_finish_request(session *ses,\
+int protobuf_construction_generate_finish_request(session *ses,\
     jnx_uint8 *shared_secret,jnx_size len,
     jnx_uint8 **onetbuffer) {
-  return handshake_initiator_command_generate(ses,
+  return protobuf_construction_initiator_command_generate(ses,
       CHALLENGE_FINISH,shared_secret,len,NULL,onetbuffer);
 }
-int handshake_generate_public_key_response(session *ses,\
+int protobuf_construction_generate_public_key_response(session *ses,\
     jnx_int abort,
     jnx_uint8 **onetbuffer) {
-  return handshake_receiver_command_generate(ses,
+  return protobuf_construction_receiver_command_generate(ses,
       RESPONSE_PUBLIC_KEY,abort,onetbuffer);
 }
-int handshake_generate_finish_response(session *ses,\
+int protobuf_construction_generate_finish_response(session *ses,\
     jnx_int abort,
     jnx_uint8 **onetbuffer) {
-  return handshake_receiver_command_generate(ses,
+  return protobuf_construction_receiver_command_generate(ses,
       RESPONSE_FINISH,abort,onetbuffer);
 }
-int handshake_invite_command_generate(session *ses,
+int protobuf_construction_invite_command_generate(session *ses,
     jnx_guid *invitee_guid, jnx_uint8 **onetbuffer) {
 
   AuthInvite auth_invite = AUTH_INVITE__INIT;
@@ -272,13 +283,13 @@ int handshake_invite_command_generate(session *ses,
   *onetbuffer = obuffer;
   return parcel_len;
 }
-int handshake_generate_invite_request(session *ses,
+int protobuf_construction_generate_invite_request(session *ses,
     jnx_guid *invitee_guid, jnx_uint8 **onetbuffer) {
-  return handshake_invite_command_generate(ses,
+  return protobuf_construction_invite_command_generate(ses,
       invitee_guid,onetbuffer);
 }
-int handshake_joiner_command_generate(session *ses, \
-    handshake_joiner_state state, jnx_uint8 *encrypted_joiner_guid,\
+int protobuf_construction_joiner_command_generate(session *ses, \
+    protobuf_construction_joiner_state state, jnx_uint8 *encrypted_joiner_guid,\
     jnx_size len,
     jnx_uint8 **onetbuffer) {
 
@@ -309,9 +320,34 @@ int handshake_joiner_command_generate(session *ses, \
 
   return parcel_len;
 }
-int handshake_generate_joiner_request(session *ses, \
+int protobuf_construction_generate_joiner_request(session *ses, \
     jnx_uint8 *encrypted_joiner_guid, 
     jnx_size len,jnx_uint8 **onetbuffer) {
-  return handshake_joiner_command_generate(ses, JOINER_JOIN, 
+  return protobuf_construction_joiner_command_generate(ses, JOINER_JOIN, 
       encrypted_joiner_guid, len, onetbuffer);
+}
+int protobuf_construction_secure_comms_generate(session *ses,
+    jnx_char *message, jnx_uint8 **onetbuffer) {
+
+  SecureCommsObject sco = SECURE_COMMS_OBJECT__INIT;
+
+  jnx_char *session_guid_str;
+  jnx_guid_to_string(&(*ses).session_guid,&session_guid_str);
+  jnx_int len = strlen(session_guid_str);
+  sco.session_guid = malloc(sizeof(char)* len + 1);
+  memcpy(sco.session_guid,session_guid_str, len + 1);
+  free(session_guid_str);
+  
+  sco.session_message = malloc(strlen(message) + 1);
+  memcpy(sco.session_message,message,strlen(message) +1);
+  
+  jnx_int olen = secure_comms_object__get_packed_size(&sco);
+  jnx_uint8 *obuffer = malloc(olen);
+  secure_comms_object__pack(&sco,obuffer);
+
+  *onetbuffer = obuffer;
+  free(sco.session_message);
+  free(sco.session_guid);
+
+  return olen;
 }

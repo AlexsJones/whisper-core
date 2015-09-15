@@ -1,0 +1,4 @@
+message secure_comms_object {
+  required string session_guid=1;
+  required string session_message=2;
+}

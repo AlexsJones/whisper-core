@@ -5,9 +5,10 @@
  * Distributed under terms of the MIT license.
  */
 #include <sys/socket.h>
+#include "secure_comms_object.pb-c.h"
 #include "session.h"
 #include "secure_comms.h"
-
+#include <string.h>
 jnx_int session_is_active(session *s) {
   jnx_int is_socket_live = secure_comms_is_socket_linked(s->secure_socket);
   if(s->is_connected && is_socket_live) {
@@ -17,41 +18,53 @@ jnx_int session_is_active(session *s) {
 }
 session_state session_message_write(session *s,jnx_uint8 *message) {
   /* take the raw message and des encrypt it */
-  jnx_size len = strlen(message);
+
+  jnx_char *obuffer = NULL;
+
+  jnx_int olen = protobuf_construction_secure_comms_generate(s,
+      message,&obuffer);
+
+  JNXCHECK(obuffer);
 
   jnx_char *encrypted = symmetrical_encrypt(s->shared_secret,
-      message,
-      len);
+      obuffer,
+      olen);
 
   int send_result = 0;
-  if (0 > (send_result = send(s->secure_socket,encrypted,strlen(encrypted),0))) {
+  if (0 > (send_result = send(s->secure_socket,encrypted,strlen(encrypted)
+          +1,0))) {
     perror("send:");
+    free(obuffer);
     return SESSION_STATE_FAIL;
   }
   JNXLOG(LDEBUG,"Send result => %d\n",send_result);
-
+  free(obuffer);
+  free(encrypted);
   /* foriegn_session replication */
-  if(s->foriegn_sessions) {
-    jnx_node *head = s->foriegn_sessions->head,
-             *reset = s->foriegn_sessions->head;
-    while(head) {
-      session *current_foriegn_session = head->_data;
-      encrypted = symmetrical_encrypt(current_foriegn_session->shared_secret,
-          message,len);
+  /*
+     if(s->foriegn_sessions) {
+     jnx_node *head = s->foriegn_sessions->head,
+   *reset = s->foriegn_sessions->head;
+   while(head) {
+   session *current_foriegn_session = head->_data;
+   encrypted = symmetrical_encrypt(current_foriegn_session->shared_secret,
+   message,len);
 
-      if (0 > (send_result = send(current_foriegn_session->secure_socket,
-              encrypted,strlen(encrypted),0))) {
-        perror("send:");
-        JNXLOG(LWARN,"Failure to send on foriegn session");
-        head = head->next_node;
-        return SESSION_STATE_FAIL;
-      }
-      JNXLOG(LDEBUG,"foriegn_session send result => %d\n",send_result);
-      free(encrypted);
-      head = head->next_node;
-    }
-    head = reset;
-  } 
+
+   if (0 > (send_result = send(current_foriegn_session->secure_socket,
+   encrypted,strlen(encrypted),0))) {
+   perror("send:");
+   JNXLOG(LWARN,"Failure to send on foriegn session");
+   head = head->next_node;
+   return SESSION_STATE_FAIL;
+   }
+   JNXLOG(LDEBUG,"foriegn_session send result => %d\n",send_result);
+   free(encrypted);
+   head = head->next_node;
+   }
+   head = reset;
+   }
+   */
   /* foriegn_session replication */
   return SESSION_STATE_OKAY;
 }
@@ -69,16 +82,31 @@ jnx_int session_message_read(session *s, jnx_uint8 **omessage) {
   bzero(buffer,2048);
   jnx_int bytes_read = recv(s->secure_socket,buffer,2048,0);
   if(bytes_read > 0) {
+
     jnx_char *decrypted_message = symmetrical_decrypt(s->shared_secret,
         buffer,bytes_read);
-    *omessage = decrypted_message;
+    
+    void *obj = NULL;
+
+    if(protobuf_construction_did_receive_secure_comms_object(decrypted_message,
+          strlen(decrypted_message),&obj)) {
+        
+      SecureCommsObject *sco = (SecureCommsObject*)obj;
+
+      *omessage = strdup(sco->session_message);
+      
+      secure_comms_object__free_unpacked(sco,NULL);
+    }
+
+    free(decrypted_message);
+    return bytes_read;
   }
-  return bytes_read;
+  return 0;
 }
 jnx_int session_message_read_foreign_sessions(session *s, 
     jnx_list **omessagelist) {
   int message_count = 0;
-  
+
   if(s->foriegn_sessions) {
     jnx_node *head = s->foriegn_sessions->head,
              *reset = s->foriegn_sessions->head;
@@ -87,7 +115,7 @@ jnx_int session_message_read_foreign_sessions(session *s,
       jnx_uint8 *message;
       jnx_int bytes_read = session_message_read(current_foriegn_session,&message);
       if(bytes_read){
-      
+
         foriegn_session_message *fsm = malloc(sizeof(foriegn_session_message));
         fsm->message = message;
         fsm->session_guid = current_foriegn_session->session_guid;
