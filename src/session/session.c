@@ -88,19 +88,12 @@ jnx_int session_message_read(session *s, jnx_uint8 **omessage) {
     
     void *obj = NULL;
 
-    printf("1\n");
-
     if(protobuf_construction_did_receive_secure_comms_object(decrypted_message,
           strlen(decrypted_message),&obj)) {
         
       SecureCommsObject *sco = (SecureCommsObject*)obj;
 
-     
-    printf("----> sco message %s\n",sco->session_message);
-      
       *omessage = strdup(sco->session_message);
-      
-    
       
       secure_comms_object__free_unpacked(sco,NULL);
     }
