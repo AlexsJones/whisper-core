@@ -27,6 +27,9 @@ typedef struct transport_options {
   port_control_service *ps;
   void *linking_args;
 }transport_options;
+
+volatile int is_ticking_listener = 0;
+
 /* Listener Thread */
 static void send_data(jnx_char *hostname, jnx_char *port,
     unsigned int family,
@@ -40,7 +43,7 @@ static jnx_uint8 *send_data_await_reply(jnx_char *hostname, jnx_char *port,
     jnx_int bytes, jnx_size *receipt_bytes) {
   jnx_socket *sock = jnx_socket_tcp_create(family);
   jnx_uint8 *reply;
-  JNXLOG(LDEBUG,"Awaiting reply from %s",hostname);
+  JNXLOG(LDEBUG,"Awaiting reply from %s port %s",hostname,port);
   *receipt_bytes = jnx_socket_tcp_send_with_receipt(sock,hostname,port,buffer,\
       bytes,&reply);
   JNXLOG(LDEBUG,"Reply received");
@@ -178,14 +181,17 @@ static void internal_request_receiver(transport_options *t,
 static void internal_request_invite(transport_options *t,
     const jnx_uint8 *payload,
     jnx_size bytes_read, int connected_socket, void *object, void *context) {
+
   JNXLOG(LDEBUG,"handshake_generate_invite_request"); 
   AuthInvite *i = (AuthInvite*)object;
-  JNXLOG(LDEBUG,"Auth invite from %s to %s is that you?",
-      i->session_guid,i->invitee_guid);
+  jnx_guid remote_session_guid;
+  jnx_guid_from_string(i->session_guid,&remote_session_guid);
 
-  jnx_guid session_guid;
-  jnx_guid_from_string(i->session_guid,&session_guid);
-
+  /*
+   *session_guid = the guid of the session we're invited too
+   *inviter_guid = our response peer
+   *invitee_guid = our guid
+   */
   peer *local_peer = peerstore_get_local_peer(t->ds->peers);
   jnx_char *local_peer_guid;
   jnx_guid_to_string(&(*local_peer).guid,&local_peer_guid);
@@ -194,64 +200,53 @@ static void internal_request_invite(transport_options *t,
     JNXLOG(LDEBUG,"Local peer matches invitee!");
     JNXCHECK(t->ac->invitation_callback);
 
-    /* Are we already aware of the potential session locally? */
+    //Here we create a new session between Peer B and C
+    //We do not reference the joining session at all yet
+
     session *osession;
-    session_state e = session_service_fetch_session(t->ss,
-        &session_guid,&osession);
-    if(e != SESSION_STATE_OKAY) {
+    session_state e = session_service_create_session(t->ss,
+        &osession);
 
-      jnx_int invite_token = t->ac->invitation_callback(&session_guid); 
+    jnx_guid remote_peer_guid;
+    jnx_guid_from_string(i->inviter_guid,&remote_peer_guid);
 
-      if(!invite_token)  {
-        JNXLOG(LWARN,"handshake_generate_invite_request has been rejected!"); 
-      }else {
-        /* The invite has been accepted */    
-        JNXLOG(LDEBUG,"Invite from %s has been accepted",i->session_guid);
+    JNXLOG(LDEBUG,"Remote peer guid %s",i->inviter_guid);
 
-        /* Start auth join */
+    peer *remote_peer = peerstore_lookup(t->ds->peers,
+        &remote_peer_guid);
 
-        //Session is null at this point
-        e = session_service_create_shared_session(t->ss,
-            i->session_guid, &osession);
+    JNXCHECK(remote_peer);
 
-        jnx_guid remote_peer_guid;
-        jnx_guid_from_string(i->inviter_guid,&remote_peer_guid);
+    JNXLOG(LDEBUG,"Linking sessions");
+    session_service_link_sessions(t->ss,0,
+        t->linking_args,&(*osession).session_guid, local_peer, remote_peer);
 
-        peer *remote_peer = peerstore_lookup(t->ds->peers,
-            &remote_peer_guid);
+    JNXLOG(LDEBUG,"Sessions linked");
+    auth_comms_initiator_start(t->ac,
+        t->ds,t->ps,osession,
+        "Let's handshake");
 
-        session_service_link_sessions(t->ss,0,
-            t->linking_args,&session_guid, local_peer, remote_peer);
+    JNXLOG(LDEBUG,"Handshake complete");
+    //This is the remote session guid we want to join
+    jnx_size encrypted_len = strlen(i->session_guid);
 
-        JNXCHECK(e == SESSION_STATE_OKAY);
+    //We're encrypting it against our own independant session with Peer B
+    jnx_char *encrypted = symmetrical_encrypt(osession->shared_secret,
+        i->session_guid,encrypted_len);
 
-        auth_comms_initiator_start(t->ac,
-            t->ds,t->ps,osession,
-            "Let's handshake");
+    jnx_uint8 *outbuffer;
+    int l = handshake_joiner_command_generate(osession,
+        JOINER_JOIN,encrypted,encrypted_len,
+        &outbuffer);     
 
-        /* Handshake complete */
+    send_data(remote_peer->host_address, DEFAULT_AUTH_COMMS_PORT,
+        t->ac->listener->socket->addrfamily,outbuffer,
+        l);
 
-        /* now we encrypt, encode and send back the session_guid via the joiner request */
-        jnx_size encrypted_len = strlen(i->session_guid);
-
-        jnx_char *encrypted = symmetrical_encrypt(osession->shared_secret,
-            i->session_guid,encrypted_len);
-
-        jnx_uint8 *outbuffer;
-        int l = handshake_joiner_command_generate(osession,
-            JOINER_JOIN,encrypted,encrypted_len,
-            &outbuffer);     
-
-        send_data(remote_peer->host_address, DEFAULT_AUTH_COMMS_PORT,
-            t->ac->listener->socket->addrfamily,outbuffer,
-            l);
-
-        free(outbuffer);
-        free(encrypted);
-      }
-    }else {
-      JNXLOG(LWARN,"Session is already known - we don't need an invite");
-    }
+    free(outbuffer);
+    free(encrypted);
+  }else {
+    JNXLOG(LWARN,"Session is already known - we don't need an invite");
   }
   auth_invite__free_unpacked(i,NULL);
   free(local_peer_guid);
@@ -276,31 +271,26 @@ static void internal_request_joiner(transport_options *t,
 
     JNXLOG(LDEBUG,"Received joiner request!");
 
-    /* At this point we've confirmed we have a matched sessoin guid which means
-     * the joiner is aware of our session list, but not much more, we need to
-     * challenge their shared symmetrical key matches the one we generated in the 
-     * handshake */
-
     jnx_char *decrypted = symmetrical_decrypt(osession->shared_secret,
         j->encrypted_joiner_guid.data,j->encrypted_joiner_guid.len -1);
 
     jnx_guid dg;
     jnx_guid_from_string(decrypted,&dg);
 
-    free(decrypted);
+    JNXLOG(LDEBUG,"The session of guid %s is asking to join session %s",
+        j->session_guid,decrypted);
 
-    jnx_guid_state s = jnx_guid_compare(&g,&dg);
+    //Pull out the session we intend to join
+    session *session_to_join;
+    session_state e = session_service_fetch_session(t->ss,&dg,
+        &session_to_join);
 
-    JNXLOG(LDEBUG,"Decrypted the joiner guid %s",decrypted);
-    if(e == JNX_GUID_STATE_SUCCESS){
-      JNXLOG(LDEBUG,"Successfully matched the decrypted session guid"); 
+    if(e == SESSION_STATE_OKAY) {
+      JNXLOG(LDEBUG,"Found the session joiner wishes to attach too");
     
-      /* Transmit the session joiner to other members of the shared session */
-
-
     }
-  }else {
-    JNXLOG(LERROR,"Error occured retrieving joiner session!");
+
+    free(decrypted);
   }
 
   auth_joiner__free_unpacked(j,NULL);
@@ -339,7 +329,7 @@ static void listener_callback(const jnx_uint8 *payload,
 }
 static void *listener_bootstrap(void *args) {
   transport_options *t = (transport_options*)args;
-  while(1) {
+  while(is_ticking_listener) {
     jnx_socket_tcp_listener_tick(t->ac->listener,
         listener_callback,t);
   }
@@ -360,9 +350,11 @@ void auth_comms_listener_start(auth_comms_service *ac, discovery_service *ds,
   ts->ss = ss;
   ts->ps = ps;
   ts->linking_args = linking_args;
+  is_ticking_listener = 1;
   ac->listener_thread = jnx_thread_create(listener_bootstrap,ts);
 }
 void auth_comms_destroy(auth_comms_service **ac) {
+  is_ticking_listener = 0;
   jnx_socket_tcp_listener_destroy(&(*ac)->listener);
 }
 jnx_int auth_comms_initiator_start(auth_comms_service *ac, \
@@ -378,6 +370,10 @@ jnx_int auth_comms_initiator_start(auth_comms_service *ac, \
 
   session_add_secure_comms_port(s,sport);
 
+  jnx_char *rg;
+  jnx_guid_to_string(&(*s).remote_peer_guid,&rg);
+  JNXLOG(LDEBUG,"Looking up remote peer guid => %s",rg);
+  free(rg);
   peer *remote_peer = peerstore_lookup(ds->peers,&(*s).remote_peer_guid);
   JNXCHECK(remote_peer);
 
@@ -483,6 +479,7 @@ jnx_int auth_comms_invite_send(auth_comms_service *ac,
   return 0;
 }
 void auth_comms_stop(auth_comms_service *ac,session *s) {
+  is_ticking_listener = 0;
   JNXCHECK(ac);
   JNXCHECK(s);
   secure_comms_end(s);
