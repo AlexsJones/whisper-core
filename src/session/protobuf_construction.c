@@ -338,15 +338,15 @@ int protobuf_construction_secure_comms_generate(session *ses,
   memcpy(sco.session_guid,session_guid_str, len + 1);
   free(session_guid_str);
   
-  sco.message = malloc(strlen(message) + 1);
-  memcpy(sco.message,message,strlen(message));
+  sco.session_message = malloc(strlen(message) + 1);
+  memcpy(sco.session_message,message,strlen(message) +1);
   
   jnx_int olen = secure_comms_object__get_packed_size(&sco);
   jnx_uint8 *obuffer = malloc(olen);
   secure_comms_object__pack(&sco,obuffer);
 
   *onetbuffer = obuffer;
-  free(sco.message);
+  free(sco.session_message);
   free(sco.session_guid);
 
   return olen;

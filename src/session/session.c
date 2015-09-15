@@ -93,7 +93,7 @@ jnx_int session_message_read(session *s, jnx_uint8 **omessage) {
         
       SecureCommsObject *sco = (SecureCommsObject*)obj;
 
-      *omessage = sco->message;
+      *omessage = sco->session_message;
       
       secure_comms_object__free_unpacked(sco,NULL);
     }
