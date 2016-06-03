@@ -2,7 +2,7 @@
  *     File Name           :     test/unit_test/test_protobuf.c
  *     Created By          :     tibbar
  *     Creation Date       :     [2015-08-04 11:59]
- *     Last Modified       :     [2015-08-04 13:52]
+ *     Last Modified       :     [2016-06-03 17:28]
  *     Description         :      
  **********************************************************************************/
 #include "auth_comms.h"
@@ -88,10 +88,8 @@ void test_auth_initiator() {
 }
 
 int main(int argc, char **argv) {
-  JNXLOG_CREATE("../testlogger.conf");
   JNXLOG(LDEBUG,"Testing protobuf packing on initiator");  
   test_auth_initiator(); 
   sleep(1);
-  JNXLOG_DESTROY();
   return 0;
 }

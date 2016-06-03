@@ -186,8 +186,6 @@ int test_broadcast_update_strategy(discovery_service *svc) {
   return CLEANUP;
 }
 int main(int argc, char **argv) {
-  JNXLOG_CREATE("../testlogger.conf");
-
   test_local_and_broadcast_ip();
 
   get_broadcast_ip(&baddr, NULL);
@@ -217,6 +215,5 @@ int main(int argc, char **argv) {
   run_discovery_service_test(test_polling_update_strategy);
   
   free(baddr);
-  JNXLOG_DESTROY();
   return 0;
 }

@@ -70,9 +70,13 @@ void test_secure_comms_setup_link() {
 
   peer *l = peer_create(h,"127.0.0.1","Alex", 10);
   peer *n = peer_create(g,"127.0.0.1","Bob", 10);
+
+  //Authentication starts here
   e = session_service_link_sessions(service,
       E_AM_RECEIVER,NULL,
       &os->session_guid,l,n);
+  //Authentication ends here
+  
   JNXCHECK(e == SESSION_STATE_OKAY);
   JNXCHECK(linking_did_use_functor);
   JNXCHECK(is_receiver == 1);
@@ -87,8 +91,6 @@ void test_secure_comms_setup_link() {
   session_service_destroy(&service);
 }
 int main(int argc, char **argv) {
-  JNXLOG_CREATE("../testlogger.conf");
   test_secure_comms_setup_link();
-  JNXLOG_DESTROY();
   return 0;
 }

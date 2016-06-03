@@ -72,13 +72,10 @@ void test_peer_deserialisation() {
   JNXCHECK(NULL == p);
 }
 int main(int argc, char **argv) {
-  JNXLOG_CREATE("../testlogger.conf");
   JNXLOG(0, "Test peer to network serialisation.");
   test_peer_serialisation();
 
   JNXLOG(0, "Test network to peer deserialisation.");
   test_peer_deserialisation();
-  JNXLOG_DESTROY();
-
   return 0;
 }

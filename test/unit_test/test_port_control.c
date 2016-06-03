@@ -2,7 +2,7 @@
  *     File Name           :     test/unit_test/test_port_control_service.c
  *     Created By          :     tibbar
  *     Creation Date       :     [2015-04-03 05:30]
- *     Last Modified       :     [2015-04-03 22:48]
+ *     Last Modified       :     [2016-06-03 17:28]
  *     Description         :      
  **********************************************************************************/
 #include "port_control.h"
@@ -94,7 +94,6 @@ void test_port_increment() {
   port_control_service_destroy(&p);
 }
 int main(int argc, char **argv) {
-  JNXLOG_CREATE("../testlogger.conf");
   JNXLOG(NULL,"Test port control service");
   test_single_port();
   JNXLOG(NULL,"Test port control scanning");
@@ -105,7 +104,6 @@ int main(int argc, char **argv) {
   test_port_use_sequential();
   JNXLOG(NULL,"Test port increment");
   test_port_increment();
-  JNXLOG_DESTROY();
   return 0;
 }
 

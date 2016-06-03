@@ -20,6 +20,8 @@
 #include <jnxc_headers/jnxthread.h>
 #include <jnxc_headers/jnxlog.h>
 #include <jnxc_headers/jnx_tcp_socket.h>
+#include <whisper_protocol_headers/wpmux.h>
+#include <whisper_protocol_headers/wpprotocol.h>
 #include "session_service.h"
 #include "port_control.h"
 #include "auth_comms.h"
@@ -115,7 +117,6 @@ int main(int argc, char **argv) {
     interface = argv[1];
     printf("using interface %s", interface);
   }
-  JNXLOG_CREATE("logger.conf");
   test_initiator();
   return 0;
 }

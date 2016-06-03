@@ -16,6 +16,8 @@
 #include "auth_joiner.pb-c.h"
 #include "auth_invite.pb-c.h"
 #include "protobuf_construction.h"
+#include <whisper_protocol_headers/wpprotocol.h>
+#include <whisper_protocol_headers/wpprotocol.h>
 #include "secure_comms.h"
 #define CHALLENGE_REQUEST_PUBLIC_KEY 1
 #define CHALLENGE_REQUEST_FINISH 0
@@ -465,6 +467,9 @@ jnx_int auth_comms_invite_send(auth_comms_service *ac,
   print_pair(&(*s).session_guid,&(*invitee).guid); 
   JNXLOG(LDEBUG,"auth_comms_invite_send [Session guid] [Invitee]");
   jnx_uint8 *obuffer;
+  
+  //TODO: PROTOCOL HERE
+  
   jnx_int bytes_read = protobuf_construction_generate_invite_request(s,&(*invitee).guid,
       &obuffer);
   jnx_size replysize;
