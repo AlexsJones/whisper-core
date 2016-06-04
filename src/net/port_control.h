@@ -1,7 +1,7 @@
 #ifndef __PORT_CONTROL_H__
 #define __PORT_CONTROL_H__
-#include <jnxc_headers/jnxtypes.h>
-#include <jnxc_headers/jnxcheck.h>
+#include <jnxc_headers/jnx_types.h>
+#include <jnxc_headers/jnx_check.h>
 typedef struct port_control_service {
 	jnx_int lrange;
 	jnx_int urange;

@@ -17,9 +17,9 @@
  */
 #ifndef __SESSION_SERVICE_H__
 #define __SESSION_SERVICE_H__
-#include <jnxc_headers/jnxguid.h>
-#include <jnxc_headers/jnxlist.h>
-#include <jnxc_headers/jnxcheck.h>
+#include <jnxc_headers/jnx_guid.h>
+#include <jnxc_headers/jnx_list.h>
+#include <jnxc_headers/jnx_check.h>
 #include "session.h"
 #include "protobuf_construction.h"
 #include "peer.h"

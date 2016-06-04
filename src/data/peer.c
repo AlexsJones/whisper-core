@@ -18,7 +18,7 @@ AirlineTheme badwolf
  */
 #include <stdlib.h>
 #include <string.h>
-#include <jnxc_headers/jnxlog.h>
+#include <jnxc_headers/jnx_log.h>
 #include "peer.h"
 #include "peer.pb-c.h"
 #include "discovery.h"

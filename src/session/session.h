@@ -17,10 +17,10 @@
 #ifndef __SESSION_H__
 #define __SESSION_H__
 #include "cryptography.h"
-#include <jnxc_headers/jnxguid.h>
-#include <jnxc_headers/jnxqueue.h>
-#include <jnxc_headers/jnxsocket.h>
-#include <jnxc_headers/jnxlist.h>
+#include <jnxc_headers/jnx_guid.h>
+#include <jnxc_headers/jnx_queue.h>
+#include <jnxc_headers/jnx_socket.h>
+#include <jnxc_headers/jnx_list.h>
 typedef enum session_state {
   SESSION_STATE_OKAY,
   SESSION_STATE_FAIL,

@@ -21,9 +21,9 @@
 #include <ifaddrs.h>
 #include <arpa/inet.h>
 #include <sys/ioctl.h>
-#include <jnxc_headers/jnxsocket.h>
-#include <jnxc_headers/jnxlog.h>
-#include <jnxc_headers/jnxcheck.h>
+#include <jnxc_headers/jnx_socket.h>
+#include <jnxc_headers/jnx_log.h>
+#include <jnxc_headers/jnx_check.h>
 #include "discovery.h"
 #include "peer.h"
 #include "whisper_errors.h"

@@ -20,7 +20,7 @@
 #define __PEER_H__
 
 #include <time.h>
-#include <jnxc_headers/jnxguid.h>
+#include <jnxc_headers/jnx_guid.h>
 
 typedef enum {
   PEERS_EQUIVALENT,

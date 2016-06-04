@@ -19,7 +19,7 @@
 #include "cryptography.h"
 #include <time.h>
 #include <string.h>
-#include <jnxc_headers/jnxcheck.h>
+#include <jnxc_headers/jnx_check.h>
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 #pragma clang diagnostic ignored "-Wpointer-sign"

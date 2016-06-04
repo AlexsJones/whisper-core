@@ -17,9 +17,9 @@
  */
 #ifndef __UTILS_H__
 #define __UTILS_H__
-#include <jnxc_headers/jnxguid.h>
+#include <jnxc_headers/jnx_guid.h>
 #include "peer.h"
-#include <jnxc_headers/jnxlog.h>
+#include <jnxc_headers/jnx_log.h>
 #include "cryptography.h"
 void print_guid(jnx_guid *g);
 void print_pair(jnx_guid *a, jnx_guid *b);

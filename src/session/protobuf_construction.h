@@ -9,8 +9,8 @@
 #define protobuf_construction_H
 #include "session.h"
 #include "discovery.h"
-#include <jnxc_headers/jnxsocket.h>
-#include <jnxc_headers/jnxthread.h>
+#include <jnxc_headers/jnx_socket.h>
+#include <jnxc_headers/jnx_thread.h>
 
 typedef enum {
   CHALLENGE_FAIL,

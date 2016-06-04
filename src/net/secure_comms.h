@@ -9,7 +9,7 @@
 #define SECURE_COMMS_H
 #include "session.h"
 #include "discovery.h"
-#include <jnxc_headers/jnxtypes.h>
+#include <jnxc_headers/jnx_types.h>
 /* Called from both remote endpoints near simultaneously */
 typedef enum {
   SC_INITIATOR,

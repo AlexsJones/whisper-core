@@ -9,11 +9,11 @@
 #define AUTH_COMMS_H
 #include "discovery.h"
 #include <jnxc_headers/jnx_tcp_socket.h>
-#include <jnxc_headers/jnxencoder.h>
+#include <jnxc_headers/jnx_encoder.h>
 #include "session.h"
 #include "session_service.h"
 #include "port_control.h"
-#include <jnxc_headers/jnxthread.h>
+#include <jnxc_headers/jnx_thread.h>
 
 typedef int (*accept_reject_callback)(discovery_service *, 
     jnx_guid *initiator_guid, 

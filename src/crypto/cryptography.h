@@ -17,7 +17,7 @@
  */
 #ifndef __CRYPTOGRAPHY_H__
 #define __CRYPTOGRAPHY_H__
-#include <jnxc_headers/jnxtypes.h>
+#include <jnxc_headers/jnx_types.h>
 #include <openssl/des.h>
 #include <openssl/rand.h>
 #include <openssl/rsa.h>

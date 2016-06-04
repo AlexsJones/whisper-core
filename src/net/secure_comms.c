@@ -6,7 +6,7 @@
  */
 
 #include "secure_comms.h"
-#include <jnxc_headers/jnxsocket.h>
+#include <jnxc_headers/jnx_socket.h>
 #include <net/if.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -14,7 +14,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
-#include <jnxc_headers/jnxthread.h>
+#include <jnxc_headers/jnx_thread.h>
 #include <jnxc_headers/jnx_tcp_socket.h>
 
 jnx_int secure_comms_is_socket_linked(jnx_int sock) {

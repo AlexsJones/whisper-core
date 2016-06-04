@@ -4,7 +4,7 @@
  *
  * Distributed under terms of the MIT license.
  */
-#include <jnxc_headers/jnxlog.h>
+#include <jnxc_headers/jnx_log.h>
 #include "auth_comms.h"
 #include <ifaddrs.h>
 #include <arpa/inet.h>
