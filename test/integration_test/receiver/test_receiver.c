@@ -20,16 +20,20 @@
 #include <jnxc_headers/jnxlog.h>
 #include <jnxc_headers/jnx_tcp_socket.h>
 #include "session_service.h"
-#include "auth_comms.h"
+#include "port_control.h"
+#include <whisper_protocol_headers/wpmux.h>
+#include <whisper_protocol_headers/wpprotocol.h>
 #include "discovery.h"
 
 static char *baddr = NULL;
 static char *interface = NULL;
-static auth_comms_service *ac;
-int accept_invite_callback(jnx_guid *session_guid) {
 
-  return 1;
+void mux_callback_hook(Wpmessage *message) {
+  printf("Received mux_callback_hook\n");
 }
+
+static wp_mux *mux;
+
 int linking_test_procedure(session *s, linked_session_type session_type,
     void *optargs) {
   JNXLOG(NULL, "Linking now the receiver session..");
@@ -45,7 +49,7 @@ int linking_test_procedure(session *s, linked_session_type session_type,
 int unlinking_test_procedure(session *s, linked_session_type session_type,
     void *optargs) {
 
-  auth_comms_stop(ac,s);
+//  auth_comms_stop(ac,s);
   return 0;
 }
 
@@ -71,14 +75,14 @@ void test_receiver() {
 
   discovery_service_start(ds, BROADCAST_UPDATE_STRATEGY);
 
-  ac = auth_comms_create();
-  ac->ar_callback = app_accept_reject;
-  ac->invitation_callback = accept_invite_callback;
-  ac->listener = jnx_socket_tcp_listener_create("9991", AF_INET, 15);
+//  ac = auth_comms_create();
+//  ac->ar_callback = app_accept_reject;
+//  ac->invitation_callback = accept_invite_callback;
+//  ac->listener = jnx_socket_tcp_listener_create("9991", AF_INET, 15);
 
   port_control_service *ps = port_control_service_create(9012,11049,1); 
   
-  auth_comms_listener_start(ac, ds, service,ps, NULL);
+//  auth_comms_listener_start(ac, ds, service,ps, NULL);
 
 start:
   while (1) {
@@ -126,11 +130,12 @@ start:
 }
 
 int main(int argc, char **argv) {
+  mux = wpprotocol_mux_create("8080",AF_INET,mux_callback_hook);
   if (argc > 1) {
     interface = argv[1];
     printf("using interface %s", interface);
   }
-  JNXLOG_CREATE("logger.conf");
   test_receiver();
+  wpprotocol_mux_destroy(&mux);
   return 0;
 }

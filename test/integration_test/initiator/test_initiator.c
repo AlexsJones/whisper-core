@@ -24,36 +24,60 @@
 #include <whisper_protocol_headers/wpprotocol.h>
 #include "session_service.h"
 #include "port_control.h"
-#include "auth_comms.h"
 #include "discovery.h"
 static char *baddr = NULL;
 static char *interface = NULL;
-static auth_comms_service *ac = NULL;
+
+void mux_callback_hook(Wpmessage *message) {
+  printf("Received mux_callback_hook\n");
+}
+
+static wp_mux *mux;
+
 int linking_test_procedure(session *s,linked_session_type session_type,
     void *optargs) {
   if(session_type == E_AM_INITIATOR){
     JNXCHECK(session_type == E_AM_INITIATOR);
     JNXLOG(NULL,"Session hit linking procedure functor");
+
     discovery_service *ds = (discovery_service*)optargs;
-    /* Adding port control service */
+    jnx_size *msg_size;
 
-    int init_port = rand() % 1000;
+    jnx_char *message;
+    jnx_char *data = malloc(strlen("Hello"));
+    bzero(data,6);
+    memcpy(data,"Hello",6);
+    wp_generation_state w = wpprotocol_generate_message_proto(&message,&msg_size,"001","002",
+        data,6,SELECTED_ACTION__CREATE_SESSION);
 
-    port_control_service *ps = port_control_service_create(8000 + 
-        init_port,
-        12341,1);
+
+    wpprotocol_mux_push(mux,message);
+
+    wpprotocol_mux_tick(mux);
     
-    ac = auth_comms_create();
+    wpprotocol_mux_tick(mux);
+    sleep(1000);
+    /* Adding port control service */
+    /*
+       int init_port = rand() % 1000;
 
-    ac->listener = jnx_socket_tcp_listener_create("9991",AF_INET,15);
-    auth_comms_initiator_start(ac,ds,ps,s,"Hello from the initiator!");
+       port_control_service *ps = port_control_service_create(8000 + 
+       init_port,
+       12341,1);
+
+       ac = auth_comms_create();
+
+       ac->listener = jnx_socket_tcp_listener_create("9991",AF_INET,15);
+       auth_comms_initiator_start(ac,ds,ps,s,"Hello from the initiator!");
+       */
   }
   return 0;
 }
 int unlinking_test_procedure(session *s,linked_session_type session_type,
     void *optargs) {
 
-  auth_comms_stop(ac,s);
+//  auth_comms_stop(ac,s);
+
   return 0;
 }
 void test_initiator() {
@@ -109,14 +133,18 @@ void test_initiator() {
       ds,&(*os).session_guid);
 
   JNXCHECK(session_is_active(os) == 0);
-  
+
   JNXCHECK(session_service_session_is_linked(service,&os->session_guid) == 0);
 }
 int main(int argc, char **argv) {
+  
+  mux = wpprotocol_mux_create("8080",AF_INET,mux_callback_hook);
+
   if (argc > 1) {
     interface = argv[1];
     printf("using interface %s", interface);
   }
   test_initiator();
+  wpprotocol_mux_destroy(&mux);
   return 0;
 }
