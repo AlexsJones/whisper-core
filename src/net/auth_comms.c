@@ -376,7 +376,7 @@ jnx_int auth_comms_initiator_start(auth_comms_service *ac, \
   jnx_guid_to_string(&(*s).remote_peer_guid,&rg);
   JNXLOG(LDEBUG,"Looking up remote peer guid => %s",rg);
   free(rg);
-  peer *remote_peer = peerstore_lookup(ds->peers,&(*s).remote_peer_guid);
+   peer *remote_peer = peerstore_lookup(ds->peers,&(*s).remote_peer_guid);
   JNXCHECK(remote_peer);
 
   if(initiator_message) {

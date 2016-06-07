@@ -18,6 +18,7 @@
 #include <stdlib.h>
 #include <jnxc_headers/jnx_socket.h>
 #include <jnxc_headers/jnx_thread.h>
+#include <jnxc_headers/jnx_guid.h>
 #include <jnxc_headers/jnx_log.h>
 #include <jnxc_headers/jnx_tcp_socket.h>
 #include <whisper_protocol_headers/wpmux.h>
@@ -28,12 +29,32 @@
 static char *baddr = NULL;
 static char *interface = NULL;
 
-void mux_callback_hook(Wpmessage *message) {
-  printf("Received mux_callback_hook\n");
-}
-
 static wp_mux *mux;
 
+void send_message(Wpmessage *message, void *optargs) {
+
+  JNXLOG(LDEBUG,"Emitting message!");
+ discovery_service *ds = (discovery_service*)optargs;
+ jnx_size osize;
+ jnx_char *obuffer;
+ wp_generation_state e = wpprotocol_generate_message_string(message,
+     &obuffer,&osize); 
+
+  JNXLOG(LDEBUG,"Generated message string");
+  //get recipient guid..
+  jnx_guid rguid;
+  jnx_guid_from_string(message->recipient,&rguid); 
+
+  JNXLOG(LDEBUG,"Remote guid is %s", message->recipient);
+
+  peer *remote_peer = peerstore_lookup(ds->peers,&rguid);
+
+  jnx_socket *sock = jnx_socket_tcp_create(AF_INET);
+  jnx_socket_tcp_send(sock,remote_peer->host_address,"8080",obuffer,osize);
+  jnx_socket_destroy(&sock);
+
+  JNXLOG(LDEBUG,"Sent message of size %zu",osize);
+}
 int linking_test_procedure(session *s,linked_session_type session_type,
     void *optargs) {
   if(session_type == E_AM_INITIATOR){
@@ -47,16 +68,34 @@ int linking_test_procedure(session *s,linked_session_type session_type,
     jnx_char *data = malloc(strlen("Hello"));
     bzero(data,6);
     memcpy(data,"Hello",6);
-    wp_generation_state w = wpprotocol_generate_message_proto(&message,&msg_size,"001","002",
+
+    peer *local_peer = peerstore_get_local_peer(ds->peers);
+    peer *remote_peer = peerstore_lookup(ds->peers,&(*s).remote_peer_guid);
+
+   jnx_char *str;
+   jnx_guid_to_string(&(*local_peer).guid,&str);
+   jnx_char *str2;
+   jnx_guid_to_string(&(*remote_peer).guid,&str2);
+
+
+    wp_generation_state w = wpprotocol_generate_message(&message,str,str2,
         data,6,SELECTED_ACTION__CREATE_SESSION);
 
+    JNXCHECK(w == E_WGS_OKAY);
 
     wpprotocol_mux_push(mux,message);
 
-    wpprotocol_mux_tick(mux);
+
+    Wpmessage *omessage;
+
+    while(wpprotocol_mux_pop(mux,&omessage) == E_WMS_OKAY_EMPTY)  {
     
-    wpprotocol_mux_tick(mux);
-    sleep(1000);
+      wpprotocol_mux_tick(mux);
+      sleep(1000);
+    }
+    
+    JNXLOG(LDEBUG,"Received reply!");
+    
     /* Adding port control service */
     /*
        int init_port = rand() % 1000;
@@ -73,6 +112,7 @@ int linking_test_procedure(session *s,linked_session_type session_type,
   }
   return 0;
 }
+
 int unlinking_test_procedure(session *s,linked_session_type session_type,
     void *optargs) {
 
@@ -99,6 +139,10 @@ void test_initiator() {
 
   discovery_service_start(ds,BROADCAST_UPDATE_STRATEGY);
 
+  //CREATING WPPROTOCOL MUX
+  mux = wpprotocol_mux_create("8080",AF_INET,send_message,ds);
+  
+  
   int remote_peers = 0;
   jnx_guid **active_guids;
   peer *local = peerstore_get_local_peer(store);
@@ -138,7 +182,6 @@ void test_initiator() {
 }
 int main(int argc, char **argv) {
   
-  mux = wpprotocol_mux_create("8080",AF_INET,mux_callback_hook);
 
   if (argc > 1) {
     interface = argv[1];

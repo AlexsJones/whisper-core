@@ -28,7 +28,7 @@
 static char *baddr = NULL;
 static char *interface = NULL;
 
-void mux_callback_hook(Wpmessage *message) {
+void mux_callback_hook(Wpmessage *message,void *args) {
   printf("Received mux_callback_hook\n");
 }
 
@@ -54,6 +54,7 @@ int unlinking_test_procedure(session *s, linked_session_type session_type,
 }
 
 int app_accept_reject(discovery_service *ds, jnx_guid *initiator_guild,
+
     jnx_guid *session_guid) {
   return 0;
 }
@@ -75,19 +76,21 @@ void test_receiver() {
 
   discovery_service_start(ds, BROADCAST_UPDATE_STRATEGY);
 
-//  ac = auth_comms_create();
-//  ac->ar_callback = app_accept_reject;
-//  ac->invitation_callback = accept_invite_callback;
-//  ac->listener = jnx_socket_tcp_listener_create("9991", AF_INET, 15);
 
-  port_control_service *ps = port_control_service_create(9012,11049,1); 
-  
-//  auth_comms_listener_start(ac, ds, service,ps, NULL);
 
 start:
   while (1) {
 
     jnx_list *olist = NULL;
+
+
+    wpprotocol_mux_tick(mux);
+    Wpmessage *omessage;
+    if(wpprotocol_mux_pop(mux,omessage) == E_WMS_OKAY) {
+      if(omessage) {
+        JNXLOG(LDEBUG,"Received incoming message via the mux") ;
+      }
+    }
 
     if (session_service_fetch_all_sessions(service,
           &olist) != SESSION_STATE_NOT_FOUND) {
@@ -130,7 +133,7 @@ start:
 }
 
 int main(int argc, char **argv) {
-  mux = wpprotocol_mux_create("8080",AF_INET,mux_callback_hook);
+  mux = wpprotocol_mux_create("8080",AF_INET,mux_callback_hook,NULL);
   if (argc > 1) {
     interface = argv[1];
     printf("using interface %s", interface);
