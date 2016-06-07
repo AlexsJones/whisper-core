@@ -28,6 +28,31 @@
 static char *baddr = NULL;
 static char *interface = NULL;
 
+void send_message(Wpmessage *message, void *optargs) {
+
+  JNXLOG(LDEBUG,"Emitting message!");
+ discovery_service *ds = (discovery_service*)optargs;
+ jnx_size osize;
+ jnx_char *obuffer;
+ wp_generation_state e = wpprotocol_generate_message_string(message,
+     &obuffer,&osize); 
+
+  JNXLOG(LDEBUG,"Generated message string");
+  //get recipient guid..
+  jnx_guid rguid;
+  jnx_guid_from_string(message->recipient,&rguid); 
+
+  JNXLOG(LDEBUG,"Remote guid is %s", message->recipient);
+
+  peer *remote_peer = peerstore_lookup(ds->peers,&rguid);
+
+  jnx_socket *sock = jnx_socket_tcp_create(AF_INET);
+  jnx_socket_tcp_send(sock,remote_peer->host_address,"8080",obuffer,osize);
+  jnx_socket_destroy(&sock);
+
+  JNXLOG(LDEBUG,"Sent message of size %zu",osize);
+}
+
 void mux_callback_hook(Wpmessage *message,void *args) {
   printf("Received mux_callback_hook\n");
 }
@@ -113,7 +138,7 @@ start:
 }
 
 int main(int argc, char **argv) {
-  mux = wpprotocol_mux_create("8080",AF_INET,mux_callback_hook,NULL);
+  mux = wpprotocol_mux_create("8080",AF_INET,mux_callback_hook,send_message);
   if (argc > 1) {
     interface = argv[1];
     printf("using interface %s", interface);
