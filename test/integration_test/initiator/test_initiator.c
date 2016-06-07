@@ -55,6 +55,7 @@ void send_message(Wpmessage *message, void *optargs) {
 
   JNXLOG(LDEBUG,"Sent message of size %zu",osize);
 }
+
 int linking_test_procedure(session *s,linked_session_type session_type,
     void *optargs) {
   if(session_type == E_AM_INITIATOR){
@@ -95,20 +96,25 @@ int linking_test_procedure(session *s,linked_session_type session_type,
     }
     
     JNXLOG(LDEBUG,"Received reply!");
-    
-    /* Adding port control service */
-    /*
-       int init_port = rand() % 1000;
+  
+    switch(omessage->action->action) {
+      case SELECTED_ACTION__CREATE_SESSION:
+        JNXLOG(LDEBUG,"SELECTED_ACTION__CREATE_SESSION");
+        break;
 
-       port_control_service *ps = port_control_service_create(8000 + 
-       init_port,
-       12341,1);
+      case SELECTED_ACTION__RESPONDING_CREATED_SESSION:
+        JNXLOG(LDEBUG,"SELECTED_ACTION__RESPONDING_CREATED_SESSION");
+        break;
 
-       ac = auth_comms_create();
-
-       ac->listener = jnx_socket_tcp_listener_create("9991",AF_INET,15);
-       auth_comms_initiator_start(ac,ds,ps,s,"Hello from the initiator!");
-       */
+      case SELECTED_ACTION__SHARING_SESSION_KEY:
+        JNXLOG(LDEBUG,"SELECTED_ACTION__SHARING_SESSION_KEY");
+        break;
+      case SELECTED_ACTION__COMPLETED_SESSION:
+        JNXLOG(LDEBUG,"SELECTED_ACTION__COMPLETED_SESSION");
+        break;
+    }  
+    // Disect message type
+  
   }
   return 0;
 }

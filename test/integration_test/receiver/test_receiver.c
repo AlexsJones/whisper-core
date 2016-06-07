@@ -49,7 +49,7 @@ int linking_test_procedure(session *s, linked_session_type session_type,
 int unlinking_test_procedure(session *s, linked_session_type session_type,
     void *optargs) {
 
-//  auth_comms_stop(ac,s);
+  //  auth_comms_stop(ac,s);
   return 0;
 }
 
@@ -89,6 +89,37 @@ start:
     if(wpprotocol_mux_pop(mux,omessage) == E_WMS_OKAY) {
       if(omessage) {
         JNXLOG(LDEBUG,"Received incoming message via the mux") ;
+
+
+        switch(omessage->action->action) {
+          case SELECTED_ACTION__CREATE_SESSION:
+            JNXLOG(LDEBUG,"SELECTED_ACTION__CREATE_SESSION");
+
+            //lets respond for the test_receiver
+            jnx_char *data = malloc(strlen("Hello"));
+            bzero(data,6);
+            memcpy(data,"Hello",6);
+
+            Wpmessage *message;
+            wp_generation_state w = wpprotocol_generate_message(&message,omessage->sender,omessage->recipient,
+                data,6,SELECTED_ACTION__RESPONDING_CREATED_SESSION);
+
+            wpprotocol_mux_push(mux,message);
+
+            break;
+
+          case SELECTED_ACTION__RESPONDING_CREATED_SESSION:
+            JNXLOG(LDEBUG,"SELECTED_ACTION__RESPONDING_CREATED_SESSION");
+            break;
+
+          case SELECTED_ACTION__SHARING_SESSION_KEY:
+            JNXLOG(LDEBUG,"SELECTED_ACTION__SHARING_SESSION_KEY");
+            break;
+          case SELECTED_ACTION__COMPLETED_SESSION:
+            JNXLOG(LDEBUG,"SELECTED_ACTION__COMPLETED_SESSION");
+            break;
+        }  
+
       }
     }
 
