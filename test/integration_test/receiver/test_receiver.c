@@ -53,12 +53,6 @@ int unlinking_test_procedure(session *s, linked_session_type session_type,
   return 0;
 }
 
-int app_accept_reject(discovery_service *ds, jnx_guid *initiator_guild,
-
-    jnx_guid *session_guid) {
-  return 0;
-}
-
 void test_receiver() {
   JNXLOG(NULL, "test_linking");
   session_service *service = session_service_create(linking_test_procedure,
@@ -76,13 +70,8 @@ void test_receiver() {
 
   discovery_service_start(ds, BROADCAST_UPDATE_STRATEGY);
 
-
-
 start:
   while (1) {
-
-    jnx_list *olist = NULL;
-
 
     wpprotocol_mux_tick(mux);
     Wpmessage *omessage;
@@ -90,24 +79,23 @@ start:
       if(omessage) {
         JNXLOG(LDEBUG,"Received incoming message via the mux") ;
 
-
         switch(omessage->action->action) {
           case SELECTED_ACTION__CREATE_SESSION:
             JNXLOG(LDEBUG,"SELECTED_ACTION__CREATE_SESSION");
 
-            //lets respond for the test_receiver
             jnx_char *data = malloc(strlen("Hello"));
             bzero(data,6);
             memcpy(data,"Hello",6);
 
             Wpmessage *message;
-            wp_generation_state w = wpprotocol_generate_message(&message,omessage->sender,omessage->recipient,
+            
+            JNXLOG(LDEBUG,"Sender %s recipient %s", omessage->sender, omessage->recipient);
+            wp_generation_state w = 
+              wpprotocol_generate_message(&message,omessage->sender,omessage->recipient,
                 data,6,SELECTED_ACTION__RESPONDING_CREATED_SESSION);
 
             wpprotocol_mux_push(mux,message);
-
             break;
-
           case SELECTED_ACTION__RESPONDING_CREATED_SESSION:
             JNXLOG(LDEBUG,"SELECTED_ACTION__RESPONDING_CREATED_SESSION");
             break;
@@ -119,48 +107,9 @@ start:
             JNXLOG(LDEBUG,"SELECTED_ACTION__COMPLETED_SESSION");
             break;
         }  
-
       }
     }
-
-    if (session_service_fetch_all_sessions(service,
-          &olist) != SESSION_STATE_NOT_FOUND) {
-
-      printf("-----------------------------------------------\n");
-      session *s = jnx_list_remove_front(&olist);
-
-      while (!session_is_active(s)){
-        sleep(1);
-      }
-
-      jnx_char *buffy = NULL;
-
-      int size = 0;
-      while (size <= 0) {
-        size = session_message_read(s, &buffy);
-      }
-      if(size) {
-        printf("size -> %d, buffy -> %s\n", size, buffy);
-
-        JNXCHECK(session_is_active(s) == 1);
-
-        session_service_unlink_sessions(service,E_AM_RECEIVER,
-            ds,&(*s).session_guid);
-
-        JNXCHECK(session_is_active(s) == 0);
-
-        session_service_destroy_session(service,&(*s).session_guid);
-
-        jnx_list_destroy(&olist);
-
-        goto start;
-        break;
-      }    
-    }
-    if(olist)
-      jnx_list_destroy(&olist);
   }
-
 }
 
 int main(int argc, char **argv) {
