@@ -47,14 +47,13 @@ void send_message(Wpmessage *message, void *optargs) {
   peer *remote_peer = peerstore_lookup(ds->peers,&rguid);
 
   jnx_socket *sock = jnx_socket_tcp_create(AF_INET);
+
+  JNXLOG(LDEBUG,"Sending to host address %s",remote_peer->host_address);
+  
   jnx_socket_tcp_send(sock,remote_peer->host_address,"8080",obuffer,osize);
   jnx_socket_destroy(&sock);
 
   JNXLOG(LDEBUG,"Sent message of size %zu",osize);
-}
-
-void mux_callback_hook(Wpmessage *message,void *args) {
-  printf("Received mux_callback_hook\n");
 }
 
 static wp_mux *mux;
@@ -95,12 +94,13 @@ void test_receiver() {
 
   discovery_service_start(ds, BROADCAST_UPDATE_STRATEGY);
 
+  mux = wpprotocol_mux_create("8080",AF_INET,send_message,ds);
 start:
   while (1) {
 
     wpprotocol_mux_tick(mux);
     Wpmessage *omessage;
-    if(wpprotocol_mux_pop(mux,omessage) == E_WMS_OKAY) {
+    if(wpprotocol_mux_pop(mux,&omessage) == E_WMS_OKAY) {
       if(omessage) {
         JNXLOG(LDEBUG,"Received incoming message via the mux") ;
 
@@ -110,15 +110,16 @@ start:
 
             jnx_char *data = malloc(strlen("Hello"));
             bzero(data,6);
-            memcpy(data,"Hello",6);
+            memcpy(data,"Hello Back",11);
 
             Wpmessage *message;
             
-            JNXLOG(LDEBUG,"Sender %s recipient %s", omessage->sender, omessage->recipient);
+            JNXLOG(LDEBUG,"I am going to reply to %s", omessage->sender);
             wp_generation_state w = 
-              wpprotocol_generate_message(&message,omessage->sender,omessage->recipient,
-                data,6,SELECTED_ACTION__RESPONDING_CREATED_SESSION);
+              wpprotocol_generate_message(&message,omessage->recipient,omessage->sender,
+                data,strlen(data) + 1,SELECTED_ACTION__RESPONDING_CREATED_SESSION);
 
+            JNXLOG(LDEBUG,"Pushing reply message to mux");
             wpprotocol_mux_push(mux,message);
             break;
           case SELECTED_ACTION__RESPONDING_CREATED_SESSION:
@@ -138,7 +139,6 @@ start:
 }
 
 int main(int argc, char **argv) {
-  mux = wpprotocol_mux_create("8080",AF_INET,mux_callback_hook,send_message);
   if (argc > 1) {
     interface = argv[1];
     printf("using interface %s", interface);

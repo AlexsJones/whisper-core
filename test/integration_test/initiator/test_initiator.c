@@ -34,11 +34,11 @@ static wp_mux *mux;
 void send_message(Wpmessage *message, void *optargs) {
 
   JNXLOG(LDEBUG,"Emitting message!");
- discovery_service *ds = (discovery_service*)optargs;
- jnx_size osize;
- jnx_char *obuffer;
- wp_generation_state e = wpprotocol_generate_message_string(message,
-     &obuffer,&osize); 
+  discovery_service *ds = (discovery_service*)optargs;
+  jnx_size osize;
+  jnx_char *obuffer;
+  wp_generation_state e = wpprotocol_generate_message_string(message,
+      &obuffer,&osize); 
 
   JNXLOG(LDEBUG,"Generated message string");
   //get recipient guid..
@@ -73,10 +73,10 @@ int linking_test_procedure(session *s,linked_session_type session_type,
     peer *local_peer = peerstore_get_local_peer(ds->peers);
     peer *remote_peer = peerstore_lookup(ds->peers,&(*s).remote_peer_guid);
 
-   jnx_char *str;
-   jnx_guid_to_string(&(*local_peer).guid,&str);
-   jnx_char *str2;
-   jnx_guid_to_string(&(*remote_peer).guid,&str2);
+    jnx_char *str;
+    jnx_guid_to_string(&(*local_peer).guid,&str);
+    jnx_char *str2;
+    jnx_guid_to_string(&(*remote_peer).guid,&str2);
 
 
     wp_generation_state w = wpprotocol_generate_message(&message,str,str2,
@@ -87,34 +87,40 @@ int linking_test_procedure(session *s,linked_session_type session_type,
     wpprotocol_mux_push(mux,message);
 
 
-    Wpmessage *omessage;
+    while(1) {
 
-    while(wpprotocol_mux_pop(mux,&omessage) == E_WMS_OKAY_EMPTY)  {
-    
       wpprotocol_mux_tick(mux);
-      sleep(1000);
+      sleep(500);
+      
+      Wpmessage *omessage;
+      if(wpprotocol_mux_pop(mux,&omessage) == E_WMS_OKAY)  {
+
+        JNXLOG(LDEBUG,"Received reply!");
+
+        switch(omessage->action->action) {
+          case SELECTED_ACTION__CREATE_SESSION:
+            JNXLOG(LDEBUG,"SELECTED_ACTION__CREATE_SESSION");
+            break;
+
+          case SELECTED_ACTION__RESPONDING_CREATED_SESSION:
+            JNXLOG(LDEBUG,"SELECTED_ACTION__RESPONDING_CREATED_SESSION");
+            break;
+
+          case SELECTED_ACTION__SHARING_SESSION_KEY:
+            JNXLOG(LDEBUG,"SELECTED_ACTION__SHARING_SESSION_KEY");
+            break;
+          case SELECTED_ACTION__COMPLETED_SESSION:
+            JNXLOG(LDEBUG,"SELECTED_ACTION__COMPLETED_SESSION");
+            break;
+        }  
+
+      }
+
     }
-    
-    JNXLOG(LDEBUG,"Received reply!");
-  
-    switch(omessage->action->action) {
-      case SELECTED_ACTION__CREATE_SESSION:
-        JNXLOG(LDEBUG,"SELECTED_ACTION__CREATE_SESSION");
-        break;
 
-      case SELECTED_ACTION__RESPONDING_CREATED_SESSION:
-        JNXLOG(LDEBUG,"SELECTED_ACTION__RESPONDING_CREATED_SESSION");
-        break;
 
-      case SELECTED_ACTION__SHARING_SESSION_KEY:
-        JNXLOG(LDEBUG,"SELECTED_ACTION__SHARING_SESSION_KEY");
-        break;
-      case SELECTED_ACTION__COMPLETED_SESSION:
-        JNXLOG(LDEBUG,"SELECTED_ACTION__COMPLETED_SESSION");
-        break;
-    }  
     // Disect message type
-  
+
   }
   return 0;
 }
@@ -122,7 +128,7 @@ int linking_test_procedure(session *s,linked_session_type session_type,
 int unlinking_test_procedure(session *s,linked_session_type session_type,
     void *optargs) {
 
-//  auth_comms_stop(ac,s);
+  //  auth_comms_stop(ac,s);
 
   return 0;
 }
@@ -147,8 +153,8 @@ void test_initiator() {
 
   //CREATING WPPROTOCOL MUX
   mux = wpprotocol_mux_create("8080",AF_INET,send_message,ds);
-  
-  
+
+
   int remote_peers = 0;
   jnx_guid **active_guids;
   peer *local = peerstore_get_local_peer(store);
@@ -187,7 +193,7 @@ void test_initiator() {
   JNXCHECK(session_service_session_is_linked(service,&os->session_guid) == 0);
 }
 int main(int argc, char **argv) {
-  
+
 
   if (argc > 1) {
     interface = argv[1];
