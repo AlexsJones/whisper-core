@@ -1,5 +1,0 @@
-message auth_invite {
-  required string session_guid=1;
-  required string inviter_guid=2;
-  required string invitee_guid=3;
-}

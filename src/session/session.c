@@ -5,22 +5,21 @@
  * Distributed under terms of the MIT license.
  */
 #include <sys/socket.h>
-#include "secure_comms_object.pb-c.h"
 #include "session.h"
-#include "secure_comms.h"
 #include <string.h>
 jnx_int session_is_active(session *s) {
+/*
   jnx_int is_socket_live = secure_comms_is_socket_linked(s->secure_socket);
   if(s->is_connected && is_socket_live) {
     return 1;
   }
   return 0;
+*/
 }
 session_state session_message_write(session *s,jnx_uint8 *message) {
   /* take the raw message and des encrypt it */
 
-  jnx_char *obuffer = NULL;
-
+/*
   jnx_int olen = protobuf_construction_secure_comms_generate(s,
       message,&obuffer);
 
@@ -69,7 +68,7 @@ session_state session_message_write(session *s,jnx_uint8 *message) {
   return SESSION_STATE_OKAY;
 }
 jnx_int session_message_read(session *s, jnx_uint8 **omessage) {
-  *omessage = NULL;
+  /*omessage = NULL;
   if(!s->is_connected) {
     JNXLOG(LDEBUG,"Session not connected, cannot read");
     return -1;
@@ -101,12 +100,13 @@ jnx_int session_message_read(session *s, jnx_uint8 **omessage) {
     free(decrypted_message);
     return bytes_read;
   }
+  */
   return 0;
 }
 jnx_int session_message_read_foreign_sessions(session *s, 
     jnx_list **omessagelist) {
   int message_count = 0;
-
+/*
   if(s->foriegn_sessions) {
     jnx_node *head = s->foriegn_sessions->head,
              *reset = s->foriegn_sessions->head;
@@ -125,6 +125,7 @@ jnx_int session_message_read_foreign_sessions(session *s,
     }
     head = reset;
   }
+*/
   return message_count;
 }
 session_state session_message_read_and_decrypt(session *s, 
