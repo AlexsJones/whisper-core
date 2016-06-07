@@ -121,6 +121,7 @@ start:
 
             JNXLOG(LDEBUG,"Pushing reply message to mux");
             wpprotocol_mux_push(mux,message);
+            exit(0);
             break;
           case SELECTED_ACTION__RESPONDING_CREATED_SESSION:
             JNXLOG(LDEBUG,"SELECTED_ACTION__RESPONDING_CREATED_SESSION");
