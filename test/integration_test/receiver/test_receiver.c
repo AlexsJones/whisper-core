@@ -20,16 +20,44 @@
 #include <jnxc_headers/jnxlog.h>
 #include <jnxc_headers/jnx_tcp_socket.h>
 #include "session_service.h"
-#include "auth_comms.h"
+#include "port_control.h"
+#include <whisper_protocol_headers/wpmux.h>
+#include <whisper_protocol_headers/wpprotocol.h>
 #include "discovery.h"
 
 static char *baddr = NULL;
 static char *interface = NULL;
-static auth_comms_service *ac;
-int accept_invite_callback(jnx_guid *session_guid) {
 
-  return 1;
+void send_message(Wpmessage *message, void *optargs) {
+
+  JNXLOG(LDEBUG,"Emitting message!");
+ discovery_service *ds = (discovery_service*)optargs;
+ jnx_size osize;
+ jnx_char *obuffer;
+ wp_generation_state e = wpprotocol_generate_message_string(message,
+     &obuffer,&osize); 
+
+  JNXLOG(LDEBUG,"Generated message string");
+  //get recipient guid..
+  jnx_guid rguid;
+  jnx_guid_from_string(message->recipient,&rguid); 
+
+  JNXLOG(LDEBUG,"Remote guid is %s", message->recipient);
+
+  peer *remote_peer = peerstore_lookup(ds->peers,&rguid);
+
+  jnx_socket *sock = jnx_socket_tcp_create(AF_INET);
+
+  JNXLOG(LDEBUG,"Sending to host address %s",remote_peer->host_address);
+  
+  jnx_socket_tcp_send(sock,remote_peer->host_address,"8080",obuffer,osize);
+  jnx_socket_destroy(&sock);
+
+  JNXLOG(LDEBUG,"Sent message of size %zu",osize);
 }
+
+static wp_mux *mux;
+
 int linking_test_procedure(session *s, linked_session_type session_type,
     void *optargs) {
   JNXLOG(NULL, "Linking now the receiver session..");
@@ -45,12 +73,7 @@ int linking_test_procedure(session *s, linked_session_type session_type,
 int unlinking_test_procedure(session *s, linked_session_type session_type,
     void *optargs) {
 
-  auth_comms_stop(ac,s);
-  return 0;
-}
-
-int app_accept_reject(discovery_service *ds, jnx_guid *initiator_guild,
-    jnx_guid *session_guid) {
+  //  auth_comms_stop(ac,s);
   return 0;
 }
 
@@ -71,58 +94,49 @@ void test_receiver() {
 
   discovery_service_start(ds, BROADCAST_UPDATE_STRATEGY);
 
-  ac = auth_comms_create();
-  ac->ar_callback = app_accept_reject;
-  ac->invitation_callback = accept_invite_callback;
-  ac->listener = jnx_socket_tcp_listener_create("9991", AF_INET, 15);
-
-  port_control_service *ps = port_control_service_create(9012,11049,1); 
-  
-  auth_comms_listener_start(ac, ds, service,ps, NULL);
-
+  mux = wpprotocol_mux_create("8080",AF_INET,send_message,ds);
 start:
   while (1) {
 
-    jnx_list *olist = NULL;
+    wpprotocol_mux_tick(mux);
+    Wpmessage *omessage;
+    if(wpprotocol_mux_pop(mux,&omessage) == E_WMS_OKAY) {
+      if(omessage) {
+        JNXLOG(LDEBUG,"Received incoming message via the mux") ;
 
-    if (session_service_fetch_all_sessions(service,
-          &olist) != SESSION_STATE_NOT_FOUND) {
+        switch(omessage->action->action) {
+          case SELECTED_ACTION__CREATE_SESSION:
+            JNXLOG(LDEBUG,"SELECTED_ACTION__CREATE_SESSION");
 
-      printf("-----------------------------------------------\n");
-      session *s = jnx_list_remove_front(&olist);
+            jnx_char *data = malloc(strlen("Hello"));
+            bzero(data,6);
+            memcpy(data,"Hello Back",11);
 
-      while (!session_is_active(s)){
-        sleep(1);
+            Wpmessage *message;
+            
+            JNXLOG(LDEBUG,"I am going to reply to %s", omessage->sender);
+            wp_generation_state w = 
+              wpprotocol_generate_message(&message,omessage->recipient,omessage->sender,
+                data,strlen(data) + 1,SELECTED_ACTION__RESPONDING_CREATED_SESSION);
+
+            JNXLOG(LDEBUG,"Pushing reply message to mux");
+            wpprotocol_mux_push(mux,message);
+            exit(0);
+            break;
+          case SELECTED_ACTION__RESPONDING_CREATED_SESSION:
+            JNXLOG(LDEBUG,"SELECTED_ACTION__RESPONDING_CREATED_SESSION");
+            break;
+
+          case SELECTED_ACTION__SHARING_SESSION_KEY:
+            JNXLOG(LDEBUG,"SELECTED_ACTION__SHARING_SESSION_KEY");
+            break;
+          case SELECTED_ACTION__COMPLETED_SESSION:
+            JNXLOG(LDEBUG,"SELECTED_ACTION__COMPLETED_SESSION");
+            break;
+        }  
       }
-
-      jnx_char *buffy = NULL;
-
-      int size = 0;
-      while (size <= 0) {
-        size = session_message_read(s, &buffy);
-      }
-      if(size) {
-        printf("size -> %d, buffy -> %s\n", size, buffy);
-
-        JNXCHECK(session_is_active(s) == 1);
-
-        session_service_unlink_sessions(service,E_AM_RECEIVER,
-            ds,&(*s).session_guid);
-
-        JNXCHECK(session_is_active(s) == 0);
-
-        session_service_destroy_session(service,&(*s).session_guid);
-
-        jnx_list_destroy(&olist);
-
-        goto start;
-        break;
-      }    
     }
-    if(olist)
-      jnx_list_destroy(&olist);
   }
-
 }
 
 int main(int argc, char **argv) {
@@ -130,7 +144,7 @@ int main(int argc, char **argv) {
     interface = argv[1];
     printf("using interface %s", interface);
   }
-  JNXLOG_CREATE("logger.conf");
   test_receiver();
+  wpprotocol_mux_destroy(&mux);
   return 0;
 }

@@ -20,7 +20,7 @@
 #define __PEERSTORE_H__
 
 #include <time.h>
-#include <jnxc_headers/jnxthread.h>
+#include <jnxc_headers/jnx_thread.h>
 #include "peer.h"
 
 typedef int (*is_active_peer_t)(time_t last_update_time, peer *p);

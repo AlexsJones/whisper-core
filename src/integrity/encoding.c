@@ -17,7 +17,7 @@
  */
 #include <stdlib.h>
 #include "encoding.h"
-#include <jnxc_headers/jnxencoder.h>
+#include <jnxc_headers/jnx_encoder.h>
 
 jnx_uint8 *encode_from_string(jnx_uint8 *input, jnx_size input_length,
     jnx_size *output_length) {

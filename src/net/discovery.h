@@ -18,9 +18,9 @@
 #ifndef __DISCOVERY_H__
 #define __DISCOVERY_H__
 
-#include <jnxc_headers/jnxtypes.h>
+#include <jnxc_headers/jnx_types.h>
 #include <jnxc_headers/jnx_udp_socket.h>
-#include <jnxc_headers/jnxthread.h>
+#include <jnxc_headers/jnx_thread.h>
 #include <time.h>
 #include "peer.h"
 #include "peerstore.h"

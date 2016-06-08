@@ -122,8 +122,6 @@ void test_multilevel_encryption() {
   asymmetrical_destroy_key(keypair);
 }
 int main(int argc, char **argv) {
-  JNXLOG_CREATE("../testlogger.conf");
-
   JNXLOG(LDEBUG,"Test generate shared secret");
   test_secret_generate();
   JNXLOG(LDEBUG,"Test RSA key");
@@ -138,6 +136,5 @@ int main(int argc, char **argv) {
     test_multilevel_encryption();
   }
   sleep(1);
-  JNXLOG_DESTROY();
   return 0;
 }
