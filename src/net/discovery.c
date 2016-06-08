@@ -26,7 +26,6 @@
 #include <jnxc_headers/jnx_check.h>
 #include "discovery.h"
 #include "peer.h"
-#include "whisper_errors.h"
 
 extern void peerstore_peer_no_longer_active(peerstore *ps, peer *p);
 
@@ -377,7 +376,7 @@ int discovery_service_start(discovery_service *svc, discovery_strategy *strategy
 
   if (0 != listen_for_discovery_packets(svc)) {
     JNXLOG(0, "[DISCOVERY] Couldn't start the discovery listener.\n");
-    return ERR_DISCOVERY_START;
+    return 1;
   }
 
   initiate_discovery(svc);
