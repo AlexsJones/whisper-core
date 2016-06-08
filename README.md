@@ -1,7 +1,7 @@
 
  ![CoreImage](http://i.imgur.com/Qh67mKG.jpg)
 
-###Notice: Current work for multichat and a stable Alpha of both core and CLI is the current top priority
+###Notice: Major refactoring in process
 
 > Imagine being able to work in an environment where your conversations arent monitored continuously.
   Take that idea and apply it to your everyday workplace where having an outspoken opinion remains locked away due to fear of leaving a digital footprint.
@@ -38,11 +38,6 @@ The core acts as the framework for higher level programs to hook into.
 
 ####Cryptography (Multisession)
 ![CryptoMulti](http://i.imgur.com/428nUmL.png)
-####Structure
-![CoreStructure](http://i.imgur.com/0mUNLxm.png)
-
-####Code base
-![Codebase](http://i.imgur.com/D2BL4ZG.png)
 
 ### Table of Contents
   * [Installation](#installation)
@@ -60,34 +55,4 @@ cmake . -DRUN_TESTS=ON #Or ignore the flag for no tests
 make
 sudo make install 
 ```
-
-#### Additional Deps <a id="Deps"></a>
-
-```
--lssl -lcrypto -lprotobuf-c
-```
-
-####  Regenerate Protobuf files <a id="protobuf"></a>
-
-```
-./tools/generate_protobuf
-```
-
-This currently uses a wildcard `*.proto` with an assumption for now that there is one proto file in a directory
-
-#### Components <a id="components"></a>
-
-| Component | Status |
-| ---------:| -----------:|
-|Session Service | DONE |
-|Session Object  | DONE |
-|Discovery Service| DONE|
-|Multicast Service| DONE|
-|Secure Sockets|DONE|
-|Key encrypt/decrpt|DONE|
-|Integrity Service|DONE|
-|Commandline IO|DONE|
-|Basic GUI|DONE|
-|Web service interface to core| NOT STARTED|
-
 
