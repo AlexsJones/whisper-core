@@ -16,8 +16,8 @@
  * =====================================================================================
  */
 #include <stdlib.h>
-#include <jnxc_headers/jnxcheck.h>
-#include <jnxc_headers/jnxlog.h>
+#include <jnxc_headers/jnx_check.h>
+#include <jnxc_headers/jnx_log.h>
 #include "peer.h"
 #include "peerstore.h"
 

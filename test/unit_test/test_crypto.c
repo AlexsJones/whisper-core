@@ -17,9 +17,9 @@
  */
 #include <stdlib.h>
 #include "cryptography.h"
-#include <jnxc_headers/jnxencoder.h>
-#include <jnxc_headers/jnxcheck.h>
-#include <jnxc_headers/jnxlog.h>
+#include <jnxc_headers/jnx_encoder.h>
+#include <jnxc_headers/jnx_check.h>
+#include <jnxc_headers/jnx_log.h>
 
 void test_secret_generate() {
   jnx_uint8 *buffer;

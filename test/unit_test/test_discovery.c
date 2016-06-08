@@ -24,8 +24,8 @@
 #include "discovery.h"
 #include "peer.h"
 #include "peerstore.h"
-#include <jnxc_headers/jnxcheck.h>
-#include <jnxc_headers/jnxlog.h>
+#include <jnxc_headers/jnx_check.h>
+#include <jnxc_headers/jnx_log.h>
 
 static char *baddr = LDEBUG;
 
