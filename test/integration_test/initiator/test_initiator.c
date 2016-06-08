@@ -23,7 +23,7 @@
 #include <jnxc_headers/jnx_tcp_socket.h>
 #include <whisper_protocol_headers/wpmux.h>
 #include <whisper_protocol_headers/wpprotocol.h>
-#include "session_service.h"
+#include "connection.h"
 #include "discovery.h"
 static char *baddr = NULL;
 static char *interface = NULL;
@@ -169,18 +169,27 @@ void test_initiator() {
     }
   }
 
-  // session_service_link_sessions(service,E_AM_INITIATOR,
-  //     ds,&(*os).session_guid,local,remote_peer);
+
+  connection_controller *connectionc = connection_controller_create("8080", AF_INET, ds);
+
+  // Create a connection to a peer using the messaging system
+  const connection_request *request = connection_controller_initiation_request(connectionc, local, remote_peer);
 
 
-  // //Linking sessions is a nonblocking action that takes place in a background queuing system
+  while(1) {
 
+    connection_controller_tick(connectionc);
 
-  // session_service_unlink_sessions(service,E_AM_INITIATOR,
-  //     ds,&(*os).session_guid);
+    if((connection_controller_fetch_state(request) == E_CRS_HANDSHAKECOMPLETE)) {
 
+      break;
+    }
 
-  // JNXCHECK(session_service_session_is_linked(service,&os->session_guid) == 0);
+    sleep(1);
+  }
+
+ 
+  connection_controller_destroy(&connectionc);
 }
 int main(int argc, char **argv) {
 
