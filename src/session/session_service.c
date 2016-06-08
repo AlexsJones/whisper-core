@@ -57,11 +57,13 @@ static void session_service_add_session(session_service *service, session *s) {
   JNXCHECK(service->session_list->counter == kc + 1);
 }
 session_service *session_service_create(session_linking_service_func linking_func,
-    session_unlinking_service_func unlinking_func) {
+    session_unlinking_service_func unlinking_func, const wp_mux *mux) {
   session_service *s = malloc(sizeof(session_service));
   s->session_list = jnx_list_create();
   s->unlinking_func = unlinking_func;
   s->linking_func = linking_func;
+  JNXCHECK(mux);
+  s->mux = mux;
   return s;
 }
 void session_service_destroy(session_service **service) {
