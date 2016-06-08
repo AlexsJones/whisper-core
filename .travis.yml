@@ -2,7 +2,8 @@ language: c
 compiler:
     - gcc
     - clang
-script: sudo apt-get install gdb libprotobuf-c0-dev protobuf-c-compiler uuid-dev && git submodule update --init && cmake && make && ./test/unit/run_tests
+script: 
+    sudo apt-get install gdb libprotobuf-c0-dev protobuf-c-compiler uuid-dev && git submodule update --init && cmake && make && ./test/unit/run_tests
     irc:
         channels:
           - "chat.freenode.net#whisper-core"
