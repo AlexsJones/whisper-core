@@ -25,7 +25,7 @@
 #ifndef __DISCOVERY_STRATEGY_H__
 #define __DISCOVERY_STRATEGY_H__
 
-#include <jnxc_headers/jnxtypes.h>
+#include <jnxc_headers/jnx_types.h>
 #include "peer.h"
 #include "discovery.h"
 
