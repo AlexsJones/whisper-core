@@ -50,6 +50,8 @@ void internal_connnection_message_processor(connection_controller *controller,
   }
   h = r;
 
+  JNXLOG(LDEBUG, "Message raw payload [%s]",message->action->contextdata->rawdata.data);
+
   switch(message->action->action) {
     case SELECTED_ACTION__CREATE_SESSION:
       //Create a new connection and add it to our connection pool

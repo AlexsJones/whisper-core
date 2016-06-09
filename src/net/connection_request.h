@@ -2,6 +2,7 @@
 #define __CONNECTION_H__
 #include <jnxc_headers/jnx_guid.h>
 #include "peer.h"
+#include "cryptography.h"
 #include "discovery.h"
 #include <whisper_protocol_headers/wpprotocol.h>
 
@@ -21,6 +22,7 @@ typedef struct connection_request {
     peer *local;
     peer *remote;
     const discovery_service *ds;
+    RSA *keypair;
 }connection_request;
 
 connection_request *connection_request_create(peer *local, peer *remote,const discovery_service *ds);
