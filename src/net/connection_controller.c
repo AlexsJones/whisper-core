@@ -52,41 +52,45 @@ void internal_connnection_message_processor(connection_controller *controller,
 
   JNXLOG(LDEBUG, "Message raw payload [%s]",message->action->contextdata->rawdata.data);
 
+  Wpmessage *out_message;
+
   switch(message->action->action) {
-    case SELECTED_ACTION__CREATE_SESSION:
-      //Create a new connection and add it to our connection pool
-      JNXLOG(LDEBUG,"Message action -> SELECTED_ACTION__CREATE_SESSION");
-      break;
+
     case SELECTED_ACTION__RESPONDING_CREATED_SESSION:
       JNXLOG(LDEBUG,"Message action -> SELECTED_ACTION__RESPONDING_CREATED_SESSION");
       //Update connection status with 
-      Wpmessage *message = connection_request_create_message(oconnection,E_CRS_CHALLENGE_REPLY);
+      out_message = connection_request_create_message(oconnection,E_CRS_CHALLENGE_REPLY);
       JNXCHECK(message);
-      JNXLOG(LDEBUG,"Pushing new message into mux");
-      wpprotocol_mux_push(controller->mux,message);
-      //Do some checking
       break;
     case SELECTED_ACTION__SHARING_SESSION_KEY:
       JNXCHECK(oconnection);
       JNXLOG(LDEBUG,"Message action -> SELECTED_ACTION__SHARING_SESSION_KEY");
-
+      out_message = connection_request_create_message(oconnection,E_CRS_SESSION_KEY_SHARE);
       break;
       JNXCHECK(oconnection);
     case SELECTED_ACTION__COMPLETED_SESSION:
       JNXLOG(LDEBUG,"Message action -> SELECTED_ACTION__COMPLETED_SESSION");
-
+      out_message = connection_request_create_message(oconnection,E_CRS_COMPLETE);
       break;
   }
+  if(message){
+     JNXLOG(LDEBUG,"Pushing new message into mux");
+     
+    wpprotocol_mux_push(controller->mux,out_message);
+  }
 
+  wpmessage__free_unpacked(message,NULL);
 }
 
-connection_controller *connection_controller_create(jnx_char *traffic_port, jnx_uint8 family, 
+connection_controller *connection_controller_create(jnx_char *traffic_port, 
+    jnx_uint8 family, 
     const discovery_service *ds) {
   connection_controller *controller = malloc(sizeof(connection_controller));
   controller->ds = ds;
   controller->port = strdup(traffic_port);
   controller->connections = jnx_list_create();
-  controller->mux = wpprotocol_mux_create(traffic_port, family,internal_connection_control_emitter, controller);
+  controller->mux = wpprotocol_mux_create(traffic_port, 
+      family,internal_connection_control_emitter, controller);
   return controller;
 }
 
@@ -113,7 +117,8 @@ void connection_controller_tick(connection_controller *controller) {
   }
 }
 
-connection_controller_state connection_controller_initiation_request(connection_controller *controller, 
+connection_controller_state connection_controller_initiation_request(
+    connection_controller *controller, 
     peer *local, peer *remote, connection_request **outrequest) {
   
   connection_request *c = connection_request_create(local,remote,controller->ds);
@@ -127,16 +132,19 @@ connection_controller_state connection_controller_initiation_request(connection_
 
   return E_CCS_OKAY;
 }
-connection_request_state connection_controller_fetch_state(connection_request *request) {
+connection_request_state connection_controller_fetch_state(
+    connection_request *request) {
 
   return request->state;
 }
-connection_controller_state connection_controller_add_connection_request(connection_controller *controller,
+connection_controller_state connection_controller_add_connection_request(
+    connection_controller *controller,
   connection_request *c) {
   jnx_list_add(controller->connections,c);
   return E_CCS_OKAY;
 }
-connection_controller_state connection_controller_remove_connection_request(connection_controller *controller,
+connection_controller_state connection_controller_remove_connection_request(
+    connection_controller *controller,
   connection_request *c) {
 
   return E_CCS_OKAY;

@@ -20,21 +20,26 @@ typedef struct connection_controller {
 }connection_controller;
 
 
-connection_controller *connection_controller_create(jnx_char *traffic_port, jnx_uint8 family, 
+connection_controller *connection_controller_create(jnx_char *traffic_port, 
+    jnx_uint8 family, 
 	const discovery_service *ds);
 
 void *connection_controller_destroy(connection_controller **controller);
 
 void connection_controller_tick(connection_controller *controller);
 
-connection_controller_state connection_controller_initiation_request(connection_controller *controller, 
+connection_controller_state connection_controller_initiation_request(
+    connection_controller *controller, 
 	peer *local, peer *remote, connection_request **outrequest);
 
-connection_request_state connection_controller_fetch_state(connection_request *request);
+connection_request_state connection_controller_fetch_state(connection_request 
+    *request);
 
-connection_controller_state connection_controller_add_connection_request(connection_controller *controller,
+connection_controller_state connection_controller_add_connection_request(
+    connection_controller *controller,
 	connection_request *c);
 
-connection_controller_state connection_controller_remove_connection_request(connection_controller *controller,
+connection_controller_state connection_controller_remove_connection_request(
+    connection_controller *controller,
 	connection_request *c);
 #endif

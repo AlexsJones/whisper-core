@@ -12,6 +12,7 @@ typedef enum connection_request_state {
 	E_CRS_INITIAL_CHALLENGE,
 	E_CRS_CHALLENGE_REPLY,
 	E_CRS_SESSION_KEY_SHARE,
+	E_CRS_COMPLETE,
 	E_CRS_CREATED
 
 }connection_request_state;

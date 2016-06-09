@@ -21,14 +21,11 @@
 #include <jnxc_headers/jnx_guid.h>
 #include <jnxc_headers/jnx_log.h>
 #include <jnxc_headers/jnx_tcp_socket.h>
-#include <whisper_protocol_headers/wpmux.h>
-#include <whisper_protocol_headers/wpprotocol.h>
 #include "connection_controller.h"
 #include "discovery.h"
 static char *baddr = NULL;
 static char *interface = NULL;
 
-static wp_mux *mux;
 
 
 void test_initiator() {
@@ -42,8 +39,6 @@ void test_initiator() {
   discovery_service_start(ds,BROADCAST_UPDATE_STRATEGY);
 
   // //CREATING WPPROTOCOL MUX
-  // mux = wpprotocol_mux_create("8080",AF_INET,send_message,ds);
-
 
   int remote_peers = 0;
   jnx_guid **active_guids;
@@ -67,8 +62,6 @@ void test_initiator() {
 
   connection_controller *connectionc = connection_controller_create("8080", AF_INET, ds);
 
-  // Create a connection to a peer using the messaging system
-
   connection_request *request;
   connection_controller_initiation_request(connectionc, local, remote_peer, &request);
 
@@ -77,7 +70,7 @@ void test_initiator() {
     connection_controller_tick(connectionc);
 
     if((connection_controller_fetch_state(request) == E_CRS_CHALLENGE_REPLY)) {
-
+      JNXLOG(LDEBUG,"Test received challenger reply -- breaking!");
       break;
     }
 
@@ -96,6 +89,5 @@ int main(int argc, char **argv) {
     printf("using interface %s", interface);
   }
   test_initiator();
-  wpprotocol_mux_destroy(&mux);
   return 0;
 }
