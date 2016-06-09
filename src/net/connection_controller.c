@@ -60,7 +60,10 @@ void internal_connnection_message_processor(connection_controller *controller,
     case SELECTED_ACTION__RESPONDING_CREATED_SESSION:
       JNXLOG(LDEBUG,"Message action -> SELECTED_ACTION__RESPONDING_CREATED_SESSION");
       //Update connection status with 
-
+      Wpmessage *message = connection_request_create_message(oconnection,E_CRS_CHALLENGE_REPLY);
+      JNXCHECK(message);
+      JNXLOG(LDEBUG,"Pushing new message into mux");
+      wpprotocol_mux_push(controller->mux,message);
       //Do some checking
       break;
     case SELECTED_ACTION__SHARING_SESSION_KEY:
