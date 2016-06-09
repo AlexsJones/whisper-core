@@ -1,5 +1,6 @@
 #include "connection_controller.h"
-
+#include <jnxc_headers/jnx_check.h>
+#include <jnxc_headers/jnx_guid.h>
 void internal_connection_control_emitter(Wpmessage *message, void *opt_args){
 
   connection_controller *controller = (connection_controller*)opt_args;
@@ -20,30 +21,54 @@ void internal_connection_control_emitter(Wpmessage *message, void *opt_args){
   JNXLOG(LDEBUG,"Sent message of size %zu",osize);
 }
 
-void internal_connnection_message_processor(connection_controller *controller, Wpmessage *message){
-	JNXCHECK(controller);
-	if(!message) {
-		JNXLOG(LERROR,"Malformed message receieved by internal_connnection_message_processor");
-		return;
-	}
-	switch(message->action->action) {
-		case SELECTED_ACTION__CREATE_SESSION:
-		//Create a new connection and add it to our connection pool
-		JNXLOG(LDEBUG,"Message action -> SELECTED_ACTION__CREATE_SESSION");
-		break;
-		case SELECTED_ACTION__RESPONDING_CREATED_SESSION:
-		JNXLOG(LDEBUG,"Message action -> SELECTED_ACTION__RESPONDING_CREATED_SESSION");
-		//Update connection status with 
-		break;
-		case SELECTED_ACTION__SHARING_SESSION_KEY:
-		JNXLOG(LDEBUG,"Message action -> SELECTED_ACTION__SHARING_SESSION_KEY");
+void internal_connnection_message_processor(connection_controller *controller,
+    Wpmessage *message){
+  JNXCHECK(controller);
+  if(!message) {
+    JNXLOG(LERROR,
+        "Malformed message receieved by internal_connnection_message_processor");
+    return;
+  }
 
-		break;
-		case SELECTED_ACTION__COMPLETED_SESSION:
-		JNXLOG(LDEBUG,"Message action -> SELECTED_ACTION__COMPLETED_SESSION");
+  //Fetch the existing connection if it exists
+  jnx_node *h = controller->connections->head;
+  jnx_node *r = controller->connections->head;
+  connection_request *oconnection = NULL;
 
-		break;
-	}
+  jnx_guid message_guid;
+  jnx_guid_from_string(message->id,&message_guid);
+  while(h != NULL) {
+
+    connection_request *c = (connection_request*)h->_data;
+    if(jnx_guid_compare(&(*c).id,&message_guid) == JNX_GUID_STATE_SUCCESS) {
+      JNXLOG(LDEBUG,"Found existing connection!");    
+      oconnection = c;      
+      break;
+    }
+    h = h->next_node;
+  }
+  h = r;
+
+  switch(message->action->action) {
+    case SELECTED_ACTION__CREATE_SESSION:
+      //Create a new connection and add it to our connection pool
+      JNXLOG(LDEBUG,"Message action -> SELECTED_ACTION__CREATE_SESSION");
+      break;
+    case SELECTED_ACTION__RESPONDING_CREATED_SESSION:
+      JNXLOG(LDEBUG,"Message action -> SELECTED_ACTION__RESPONDING_CREATED_SESSION");
+      //Update connection status with 
+      break;
+    case SELECTED_ACTION__SHARING_SESSION_KEY:
+      JNXCHECK(oconnection);
+      JNXLOG(LDEBUG,"Message action -> SELECTED_ACTION__SHARING_SESSION_KEY");
+
+      break;
+      JNXCHECK(oconnection);
+    case SELECTED_ACTION__COMPLETED_SESSION:
+      JNXLOG(LDEBUG,"Message action -> SELECTED_ACTION__COMPLETED_SESSION");
+
+      break;
+  }
 
 }
 
@@ -79,9 +104,11 @@ void connection_controller_tick(connection_controller *controller) {
   }
 }
 
-connection_request_state connection_controller_initiation_request(connection_controller *controller, 
+connection_controller_state connection_controller_initiation_request(connection_controller *controller, 
     peer *local, peer *remote, connection_request **outrequest) {
-  //Message
+  
+  connection_request *c = connection_request_create();
+  // //Message
   jnx_char *data = malloc(strlen("Hello"));
   bzero(data,6);
   memcpy(data,"Hello",6);
@@ -91,22 +118,39 @@ connection_request_state connection_controller_initiation_request(connection_con
   jnx_char *str2;
   jnx_guid_to_string(&(*remote).guid,&str2);
   Wpmessage *message;
-  wp_generation_state w = wpprotocol_generate_message(&message,str1,str2,
+
+
+  jnx_char *connection_id;
+  jnx_guid_to_string(&(*c).id,&connection_id);
+  wp_generation_state w = wpprotocol_generate_message(&message,
+    connection_id,
+    str1,str2,
       data,6,SELECTED_ACTION__CREATE_SESSION);
   free(data);
   free(str1);
   free(str2);
   if(!message) {
 
-    return E_CRS_FAILED;
+    connection_request_destroy(&c);
+    return E_CCS_FAILED;
   }
-  //Connection request
-
+  
   wpprotocol_mux_push(controller->mux,message);
-
-  return E_CRS_UNKNOWN;
+  JNXCHECK(connection_controller_add_connection_request(controller,c) == E_CCS_OKAY);
+  connection_request_update_state(c, E_CRS_PREHANDSHAKE);
+  return E_CCS_OKAY;
 }
 connection_request_state connection_controller_fetch_state(connection_request *request) {
 
   return request->state;
+}
+connection_controller_state connection_controller_add_connection_request(connection_controller *controller,
+  connection_request *c) {
+  jnx_list_add(controller->connections,c);
+  return E_CCS_OKAY;
+}
+connection_controller_state connection_controller_remove_connection_request(connection_controller *controller,
+  connection_request *c) {
+
+  return E_CCS_OKAY;
 }

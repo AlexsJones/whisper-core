@@ -68,7 +68,9 @@ void test_initiator() {
   connection_controller *connectionc = connection_controller_create("8080", AF_INET, ds);
 
   // Create a connection to a peer using the messaging system
-  const connection_request *request = connection_controller_initiation_request(connectionc, local, remote_peer);
+
+  connection_request *request;
+  connection_controller_initiation_request(connectionc, local, remote_peer, &request);
 
 
   while(1) {
