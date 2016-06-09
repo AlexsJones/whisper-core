@@ -29,18 +29,19 @@ void internal_connnection_message_processor(connection_controller *controller,
         "Malformed message receieved by internal_connnection_message_processor");
     return;
   }
-
+  JNXLOG(LDEBUG,"Received message on connection %s",message->id);
   //Fetch the existing connection if it exists
   jnx_node *h = controller->connections->head;
   jnx_node *r = controller->connections->head;
   connection_request *oconnection = NULL;
 
-  jnx_guid message_guid;
-  jnx_guid_from_string(message->id,&message_guid);
+  jnx_guid *message_guid;
+  jnx_guid_from_string(message->id,message_guid);
+  
   while(h != NULL) {
     
     connection_request *c = (connection_request*)h->_data;
-    if(jnx_guid_compare(&(*c).id,&message_guid) == JNX_GUID_STATE_SUCCESS) {
+    if(jnx_guid_compare(&(*c).id,message_guid) == JNX_GUID_STATE_SUCCESS) {
       JNXLOG(LDEBUG,"Found existing connection!");    
       oconnection = c;      
       break;

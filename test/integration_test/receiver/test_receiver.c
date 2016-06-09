@@ -90,9 +90,9 @@ start:
 
             Wpmessage *message;
             
-            JNXLOG(LDEBUG,"I am going to reply to %s", omessage->sender);
+            JNXLOG(LDEBUG,"I am going on connection %s", omessage->id);
             wp_generation_state w = 
-              wpprotocol_generate_message(&message,omessage->recipient,omessage->sender,
+              wpprotocol_generate_message(&message,omessage->id,omessage->recipient,omessage->sender,
                 data,strlen(data) + 1,SELECTED_ACTION__RESPONDING_CREATED_SESSION);
 
             JNXLOG(LDEBUG,"Pushing reply message to mux");
