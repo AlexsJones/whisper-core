@@ -1,10 +1,14 @@
 set(SOURCE ${SOURCE}
 ${CMAKE_CURRENT_SOURCE_DIR}/discovery.c
+${CMAKE_CURRENT_SOURCE_DIR}/connection_controller.c
+${CMAKE_CURRENT_SOURCE_DIR}/connection_request.c
 PARENT_SCOPE)
 
 set(HEADERS
 ${HEADERS}
 ${CMAKE_CURRENT_SOURCE_DIR}/discovery.h
+${CMAKE_CURRENT_SOURCE_DIR}/connection_request.h
+${CMAKE_CURRENT_SOURCE_DIR}/connection_controller.h
 PARENT_SCOPE)
 
 set(LINKER_LIBRARIES
