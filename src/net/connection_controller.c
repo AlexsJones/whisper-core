@@ -38,7 +38,7 @@ void internal_connnection_message_processor(connection_controller *controller,
   jnx_guid message_guid;
   jnx_guid_from_string(message->id,&message_guid);
   while(h != NULL) {
-
+    
     connection_request *c = (connection_request*)h->_data;
     if(jnx_guid_compare(&(*c).id,&message_guid) == JNX_GUID_STATE_SUCCESS) {
       JNXLOG(LDEBUG,"Found existing connection!");    
@@ -57,6 +57,8 @@ void internal_connnection_message_processor(connection_controller *controller,
     case SELECTED_ACTION__RESPONDING_CREATED_SESSION:
       JNXLOG(LDEBUG,"Message action -> SELECTED_ACTION__RESPONDING_CREATED_SESSION");
       //Update connection status with 
+
+      //Do some checking
       break;
     case SELECTED_ACTION__SHARING_SESSION_KEY:
       JNXCHECK(oconnection);
@@ -77,6 +79,7 @@ connection_controller *connection_controller_create(jnx_char *traffic_port, jnx_
   connection_controller *controller = malloc(sizeof(connection_controller));
   controller->ds = ds;
   controller->port = strdup(traffic_port);
+  controller->connections = jnx_list_create();
   controller->mux = wpprotocol_mux_create(traffic_port, family,internal_connection_control_emitter, controller);
   return controller;
 }
@@ -107,37 +110,15 @@ void connection_controller_tick(connection_controller *controller) {
 connection_controller_state connection_controller_initiation_request(connection_controller *controller, 
     peer *local, peer *remote, connection_request **outrequest) {
   
-  connection_request *c = connection_request_create();
-  // //Message
-  jnx_char *data = malloc(strlen("Hello"));
-  bzero(data,6);
-  memcpy(data,"Hello",6);
-  //Action state
-  jnx_char *str1;
-  jnx_guid_to_string(&(*local).guid,&str1);
-  jnx_char *str2;
-  jnx_guid_to_string(&(*remote).guid,&str2);
-  Wpmessage *message;
-
-
-  jnx_char *connection_id;
-  jnx_guid_to_string(&(*c).id,&connection_id);
-  wp_generation_state w = wpprotocol_generate_message(&message,
-    connection_id,
-    str1,str2,
-      data,6,SELECTED_ACTION__CREATE_SESSION);
-  free(data);
-  free(str1);
-  free(str2);
-  if(!message) {
-
-    connection_request_destroy(&c);
-    return E_CCS_FAILED;
-  }
+  connection_request *c = connection_request_create(local,remote,controller->ds);
   
+  Wpmessage *message = connection_request_create_message(c,E_CRS_INITIAL_CHALLENGE);
+  JNXCHECK(message);
+  JNXLOG(LDEBUG,"Pushing new message into mux");
   wpprotocol_mux_push(controller->mux,message);
+  
   JNXCHECK(connection_controller_add_connection_request(controller,c) == E_CCS_OKAY);
-  connection_request_update_state(c, E_CRS_PREHANDSHAKE);
+
   return E_CCS_OKAY;
 }
 connection_request_state connection_controller_fetch_state(connection_request *request) {

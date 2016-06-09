@@ -72,12 +72,11 @@ void test_initiator() {
   connection_request *request;
   connection_controller_initiation_request(connectionc, local, remote_peer, &request);
 
-
   while(1) {
 
     connection_controller_tick(connectionc);
 
-    if((connection_controller_fetch_state(request) == E_CRS_HANDSHAKECOMPLETE)) {
+    if((connection_controller_fetch_state(request) == E_CRS_CHALLENGE_REPLY)) {
 
       break;
     }
