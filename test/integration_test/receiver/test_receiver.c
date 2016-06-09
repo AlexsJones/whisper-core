@@ -19,14 +19,13 @@
 #include <jnxc_headers/jnxsocket.h>
 #include <jnxc_headers/jnxlog.h>
 #include <jnxc_headers/jnx_tcp_socket.h>
-#include "session_service.h"
-#include "port_control.h"
 #include <whisper_protocol_headers/wpmux.h>
 #include <whisper_protocol_headers/wpprotocol.h>
 #include "discovery.h"
 
 static char *baddr = NULL;
 static char *interface = NULL;
+static wp_mux *mux;
 
 void send_message(Wpmessage *message, void *optargs) {
 
@@ -56,33 +55,9 @@ void send_message(Wpmessage *message, void *optargs) {
   JNXLOG(LDEBUG,"Sent message of size %zu",osize);
 }
 
-static wp_mux *mux;
-
-int linking_test_procedure(session *s, linked_session_type session_type,
-    void *optargs) {
-  JNXLOG(NULL, "Linking now the receiver session..");
-  /*
-     jnx_char *default_secure_comms = "6666";
-     auth_comms_service *ac = auth_comms_create();
-     ac->listener = jnx_socket_tcp_listener_create("9991",AF_INET,15);
-     auth_comms_initiator_start(ac,ds,os,default_secure_comms);
-     */
-  return 0;
-}
-
-int unlinking_test_procedure(session *s, linked_session_type session_type,
-    void *optargs) {
-
-  //  auth_comms_stop(ac,s);
-  return 0;
-}
-
 void test_receiver() {
   JNXLOG(NULL, "test_linking");
-  session_service *service = session_service_create(linking_test_procedure,
-      unlinking_test_procedure);
-
-  //Lets generate the guid of some remote session
+ 
   jnx_guid h;
   jnx_guid_create(&h);
 
@@ -105,6 +80,7 @@ start:
         JNXLOG(LDEBUG,"Received incoming message via the mux") ;
 
         switch(omessage->action->action) {
+
           case SELECTED_ACTION__CREATE_SESSION:
             JNXLOG(LDEBUG,"SELECTED_ACTION__CREATE_SESSION");
 
@@ -121,6 +97,7 @@ start:
 
             JNXLOG(LDEBUG,"Pushing reply message to mux");
             wpprotocol_mux_push(mux,message);
+            wpprotocol_mux_tick(mux);
             exit(0);
             break;
           case SELECTED_ACTION__RESPONDING_CREATED_SESSION:

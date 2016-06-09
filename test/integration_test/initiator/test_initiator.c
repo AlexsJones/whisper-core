@@ -23,120 +23,15 @@
 #include <jnxc_headers/jnx_tcp_socket.h>
 #include <whisper_protocol_headers/wpmux.h>
 #include <whisper_protocol_headers/wpprotocol.h>
-#include "connection.h"
+#include "connection_controller.h"
 #include "discovery.h"
 static char *baddr = NULL;
 static char *interface = NULL;
 
 static wp_mux *mux;
 
-// void send_message(Wpmessage *message, void *optargs) {
 
-//   JNXLOG(LDEBUG,"Emitting message!");
-//   discovery_service *ds = (discovery_service*)optargs;
-//   jnx_size osize;
-//   jnx_char *obuffer;
-//   wp_generation_state e = wpprotocol_generate_message_string(message,
-//       &obuffer,&osize); 
-
-//   JNXLOG(LDEBUG,"Generated message string");
-//   //get recipient guid..
-//   jnx_guid rguid;
-//   jnx_guid_from_string(message->recipient,&rguid); 
-
-//   JNXLOG(LDEBUG,"Remote guid is %s", message->recipient);
-
-//   peer *remote_peer = peerstore_lookup(ds->peers,&rguid);
-
-//   jnx_socket *sock = jnx_socket_tcp_create(AF_INET);
-//   jnx_socket_tcp_send(sock,remote_peer->host_address,"8080",obuffer,osize);
-//   jnx_socket_destroy(&sock);
-
-//   JNXLOG(LDEBUG,"Sent message of size %zu",osize);
-// }
-
-// int linking_test_procedure(session *s,linked_session_type session_type,
-//     void *optargs) {
-//   if(session_type == E_AM_INITIATOR){
-//     JNXCHECK(session_type == E_AM_INITIATOR);
-//     JNXLOG(NULL,"Session hit linking procedure functor");
-
-//     discovery_service *ds = (discovery_service*)optargs;
-//     jnx_size *msg_size;
-
-//     jnx_char *message;
-//     jnx_char *data = malloc(strlen("Hello"));
-//     bzero(data,6);
-//     memcpy(data,"Hello",6);
-
-//     peer *local_peer = peerstore_get_local_peer(ds->peers);
-//     peer *remote_peer = peerstore_lookup(ds->peers,&(*s).remote_peer_guid);
-
-//     jnx_char *str;
-//     jnx_guid_to_string(&(*local_peer).guid,&str);
-//     jnx_char *str2;
-//     jnx_guid_to_string(&(*remote_peer).guid,&str2);
-
-
-//     wp_generation_state w = wpprotocol_generate_message(&message,str,str2,
-//         data,6,SELECTED_ACTION__CREATE_SESSION);
-
-//     JNXCHECK(w == E_WGS_OKAY);
-
-//     JNXCHECK(E_WMS_OKAY == wpprotocol_mux_push(mux,message));
-
-//     while(1) {
-
-//       wpprotocol_mux_tick(mux);
-//       Wpmessage *omessage;
-//       if(wpprotocol_mux_pop(mux,&omessage) == E_WMS_OKAY)  {
-
-//         JNXLOG(LDEBUG,"Received reply!");
-
-//         switch(omessage->action->action) {
-//           case SELECTED_ACTION__CREATE_SESSION:
-//             JNXLOG(LDEBUG,"SELECTED_ACTION__CREATE_SESSION");
-//             break;
-
-//           case SELECTED_ACTION__RESPONDING_CREATED_SESSION:
-//             JNXLOG(LDEBUG,"SELECTED_ACTION__RESPONDING_CREATED_SESSION");
-//             exit(0);
-//             break;
-
-//           case SELECTED_ACTION__SHARING_SESSION_KEY:
-//             JNXLOG(LDEBUG,"SELECTED_ACTION__SHARING_SESSION_KEY");
-//             break;
-//           case SELECTED_ACTION__COMPLETED_SESSION:
-//             JNXLOG(LDEBUG,"SELECTED_ACTION__COMPLETED_SESSION");
-//             break;
-//         }  
-
-//       }else {
-//         JNXLOG(LDEBUG,"Waiting...")
-//       }
-      
-//     }
-//   }
-//   return 0;
-// }
-
-// int unlinking_test_procedure(session *s,linked_session_type session_type,
-//     void *optargs) {
-
-//   //  auth_comms_stop(ac,s);
-
-//   return 0;
-// }
 void test_initiator() {
-  // JNXLOG(NULL,"test_linking");
-  // session_service *service = session_service_create(linking_test_procedure,
-  //     unlinking_test_procedure);
-  // session *os;
-  // session_state e = session_service_create_session(service,&os);
-  // JNXCHECK(session_service_session_is_linked(service,&os->session_guid) == 0);
-  // //Lets generate the guid of some remote session
-  // jnx_guid h;
-  // jnx_guid_create(&h);
 
   peerstore *store = peerstore_init(local_peer_for_user("initiator_bob",10,interface), 0);
 
@@ -188,7 +83,8 @@ void test_initiator() {
     sleep(1);
   }
 
- 
+  JNXLOG(LDEBUG,"Connection complete!");
+
   connection_controller_destroy(&connectionc);
 }
 int main(int argc, char **argv) {
