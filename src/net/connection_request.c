@@ -16,6 +16,11 @@ connection_request *connection_request_create(peer *remote,
   free(connection_id);
   return r;
 }
+connection_request *connection_request_create_with_identity_chain(peer *remote,jnx_guid *id, const discovery_service *ds) {
+  connection_request *c = connection_request_create(remote,ds);
+  (*c).id = *id;
+  return c;
+}
 void connection_request_update_state(connection_request *req, connection_request_state s) {
   req->state = s;
 }

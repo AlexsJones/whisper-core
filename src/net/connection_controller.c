@@ -63,7 +63,7 @@ void internal_connnection_message_processor(connection_controller *controller,
       JNXLOG(LDEBUG,"Message action -> SELECTED_ACTION__CREATE_SESSION");
       //Update connection status with 
       JNXLOG(LDEBUG,"Creating new session to contain incoming challenge");
-      connection_request *c = connection_request_create(remote,controller->ds);  
+      connection_request *c = connection_request_create_with_identity_chain(remote,&message_guid,controller->ds);  
       out_message = connection_request_create_exchange_message(c,message,E_CRS_CHALLENGE_REPLY);
       JNXCHECK(message);
       JNXLOG(LDEBUG,"Pushing new message into mux");
