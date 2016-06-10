@@ -109,12 +109,9 @@ Wpmessage *connection_request_create_exchange_message(connection_request *req, W
       JNXLOG(LDEBUG,"Decoded the challenger public key, wrapping local public key");
       //Wrap public key inside of challengers
       jnx_char *local_public_key = asymmetrical_key_to_string(req->keypair,PUBLIC);
-      jnx_size local_public_key_len;
-      jnx_char *encrypted_local_public_key = asymmetrical_encrypt(req->keypair,local_public_key,&local_public_key_len);
-      free(local_public_key);
       //Now encode the encrypted key
       jnx_size encoded_len;
-      jnx_char *encoded = encode_from_string(encrypted_local_public_key,local_public_key_len,&encoded_len);
+      jnx_char *encoded = encode_from_string(local_public_key,strlen(local_public_key),&encoded_len);
 
       JNXLOG(LDEBUG,"Generated public key");
       jnx_guid_to_string(&(*req->local).guid,&str1);
