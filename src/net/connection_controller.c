@@ -39,9 +39,11 @@ void internal_connnection_message_processor(connection_controller *controller,
   jnx_node *h = controller->connections->head;
   jnx_node *r = controller->connections->head;
   connection_request *oconnection = NULL;  
+  jnx_guid incoming_connection_guid;
+  jnx_guid_from_string(message->id,&incoming_connection_guid);
   while(h != NULL) {   
     connection_request *c = (connection_request*)h->_data;
-    if(jnx_guid_compare(&(*c).id,&message_guid) == JNX_GUID_STATE_SUCCESS) {
+    if(jnx_guid_compare(&(*c).id,&incoming_connection_guid) == JNX_GUID_STATE_SUCCESS) {
       JNXLOG(LDEBUG,"Found existing connection %s",message->id);    
       oconnection = c;      
       break;
