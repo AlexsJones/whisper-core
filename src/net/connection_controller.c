@@ -62,8 +62,9 @@ void internal_connnection_message_processor(connection_controller *controller,
       }
       JNXLOG(LDEBUG,"Message action -> SELECTED_ACTION__RESPONDING_CREATED_SESSION");
       //Update connection status with 
+      JNXLOG(LDEBUG,"Creating new session to contain incoming challenge");
       connection_request *c = connection_request_create(remote,controller->ds);  
-      out_message = connection_request_create_exchange_message(oconnection,message,E_CRS_CHALLENGE_REPLY);
+      out_message = connection_request_create_exchange_message(c,message,E_CRS_CHALLENGE_REPLY);
       JNXCHECK(message);
       JNXLOG(LDEBUG,"Pushing new message into mux");
       wpprotocol_mux_push(controller->mux,message);
