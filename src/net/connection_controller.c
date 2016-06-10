@@ -91,22 +91,17 @@ void internal_connnection_message_processor(connection_controller *controller,
       JNXLOG(LDEBUG,"Message action -> SELECTED_ACTION__RESPONDING_CREATED_SESSION");
       JNXLOG(LDEBUG,"Reply receieved");
       break;
-      // case SELECTED_ACTION__RESPONDING_CREATED_SESSION:
-      //   JNXLOG(LDEBUG,"Message action -> SELECTED_ACTION__RESPONDING_CREATED_SESSION");
-      //   //Update connection status with 
-      //   out_message = connection_request_create_exchange_message(oconnection,message,E_CRS_CHALLENGE_REPLY);
-      //   JNXCHECK(message);
-      //   break;
-      // case SELECTED_ACTION__SHARING_SESSION_KEY:
-      //   JNXCHECK(oconnection);
-      //   JNXLOG(LDEBUG,"Message action -> SELECTED_ACTION__SHARING_SESSION_KEY");
-      //   out_message = connection_request_create_exchange_message(oconnection,message,E_CRS_SESSION_KEY_SHARE);
-      //   break;
-      //   JNXCHECK(oconnection);
-      // case SELECTED_ACTION__COMPLETED_SESSION:
-      //   JNXLOG(LDEBUG,"Message action -> SELECTED_ACTION__COMPLETED_SESSION");
-      //   out_message = connection_request_create_exchange_message(oconnection,message,E_CRS_COMPLETE);
-      //   break;
+
+      case SELECTED_ACTION__SHARING_SESSION_KEY:
+        JNXCHECK(oconnection);
+        JNXLOG(LDEBUG,"Message action -> SELECTED_ACTION__SHARING_SESSION_KEY");
+     //   out_message = connection_request_create_exchange_message(oconnection,message,E_CRS_SESSION_KEY_SHARE);
+        break;
+        JNXCHECK(oconnection);
+      case SELECTED_ACTION__COMPLETED_SESSION:
+        JNXLOG(LDEBUG,"Message action -> SELECTED_ACTION__COMPLETED_SESSION");
+      //  out_message = connection_request_create_exchange_message(oconnection,message,E_CRS_COMPLETE);
+        break;
 
   }
 
@@ -168,7 +163,6 @@ connection_controller_state connection_controller_initiation_request(
 }
 connection_request_state connection_controller_fetch_state(
     connection_request *request) {
-
   return request->state;
 }
 connection_controller_state connection_controller_add_connection_request(

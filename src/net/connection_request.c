@@ -1,6 +1,7 @@
 #include "connection_request.h"
 #include "encoding.h"
 #include "peerstore.h"
+#include "encoding.h"
 connection_request *connection_request_create(peer *remote,
     const discovery_service *ds) {
   connection_request *r = malloc(sizeof(connection_request));
@@ -96,7 +97,25 @@ Wpmessage *connection_request_create_exchange_message(connection_request *req, W
       //Generate keypair and send over my public key
       reply_public_key = asymmetrical_key_to_string(req->keypair,PUBLIC);
       //Encrypt my key in the challengers public key
-      // RSA *challenger_key_public = asymmetrical_key_from_string() 
+      jnx_size odecoded;
+      JNXCHECK((*incoming_message->action->contextdata).has_rawdata);
+      jnx_char *decoded = decode_to_string((*incoming_message->action->contextdata).rawdata.data,
+        (*incoming_message->action->contextdata).rawdata.len,&odecoded);
+
+      RSA *remote_public_key = asymmetrical_key_from_string(decoded,PUBLIC);
+      free(decoded);
+      JNXCHECK(remote_public_key);
+      req->remote_keypair = remote_public_key;
+      JNXLOG(LDEBUG,"Decoded the challenger public key, wrapping local public key");
+      //Wrap public key inside of challengers
+      jnx_char *local_public_key = asymmetrical_key_to_string(req->keypair,PUBLIC);
+      jnx_size local_public_key_len;
+      jnx_char *encrypted_local_public_key = asymmetrical_encrypt(req->keypair,local_public_key,&local_public_key_len);
+      free(local_public_key);
+      //Now encode the encrypted key
+      jnx_size encoded_len;
+      jnx_char *encoded = encode_from_string(encrypted_local_public_key,local_public_key_len,&encoded_len);
+
       JNXLOG(LDEBUG,"Generated public key");
       jnx_guid_to_string(&(*req->local).guid,&str1);
       jnx_guid_to_string(&(*req->remote).guid,&str2);
@@ -110,10 +129,11 @@ Wpmessage *connection_request_create_exchange_message(connection_request *req, W
       wp_generation_state w = wpprotocol_generate_message(&message,
           connection_id,
           str1,str2, /* SWAP THE OUTGOING SENDER TO THE LOCAL PEER */
-          reply_public_key,strlen(reply_public_key) +1,
+          encoded,encoded_len,
           SELECTED_ACTION__RESPONDING_CREATED_SESSION);
 
       JNXCHECK(w == E_WGS_OKAY);
+      free(encoded);
       break;
     case E_CRS_SESSION_KEY_SHARE:
 
