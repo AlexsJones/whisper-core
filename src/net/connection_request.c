@@ -88,7 +88,7 @@ Wpmessage *connection_request_create_exchange_message(connection_request *req, W
       reply_public_key = asymmetrical_key_to_string(req->keypair,PUBLIC);
       //Encrypt my key in the challengers public key
       // RSA *challenger_key_public = asymmetrical_key_from_string() 
-
+      JNXLOG(LDEBUG,"Generated public key");
       jnx_guid_to_string(&(*req->local).guid,&str1);
       jnx_guid_to_string(&(*req->remote).guid,&str2);
 
