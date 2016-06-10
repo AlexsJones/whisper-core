@@ -52,7 +52,7 @@ void internal_connnection_message_processor(connection_controller *controller,
   //Get the remote sender as a peer
   peer *remote = peerstore_lookup(controller->ds->peers,&message_guid);
 
-  Wpmessage *out_message;
+  Wpmessage *out_message = NULL;
   switch(message->action->action) {
     case SELECTED_ACTION__CREATE_SESSION:
       if(oconnection) {
