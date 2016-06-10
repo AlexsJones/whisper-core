@@ -13,6 +13,8 @@ connection_request *connection_request_create(peer *remote,
   jnx_char *connection_id;
   jnx_guid_to_string(&(*r).id,&connection_id);
   JNXLOG(LDEBUG, "Generated new connection with id %s", connection_id);
+  JNXLOG(LDEBUG, "Connection local peer is %s",&(*r->local).guid);
+  JNXLOG(LDEBUG, "Connection remote peer is %s",&(*r->remote).guid);
   free(connection_id);
   return r;
 }
@@ -105,7 +107,7 @@ Wpmessage *connection_request_create_exchange_message(connection_request *req, W
       JNXCHECK(str2);
       wp_generation_state w = wpprotocol_generate_message(&message,
           connection_id,
-          str1,str2,
+          str2,str1, /* SWAP THE OUTGOING SENDER TO THE LOCAL PEER */
           reply_public_key,strlen(reply_public_key) +1,
           SELECTED_ACTION__RESPONDING_CREATED_SESSION);
 

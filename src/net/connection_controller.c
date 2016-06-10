@@ -55,8 +55,7 @@ void internal_connnection_message_processor(connection_controller *controller,
   switch(message->action->action) {
     case SELECTED_ACTION__CREATE_SESSION:
       if(oconnection) {
-
-        JNXLOG(LERROR,"There should not be an existing connection !!!!!!!!!!!!!!!!!!!");
+        JNXLOG(LERROR,"There should not be an existing connection");
         exit(1);
       }
       JNXLOG(LDEBUG,"Message action -> SELECTED_ACTION__CREATE_SESSION");
