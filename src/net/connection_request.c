@@ -50,7 +50,7 @@ Wpmessage *connection_request_create_initiation_message(connection_request *req,
   wp_generation_state w = wpprotocol_generate_message(&message,
       connection_id,
       str1,str2,
-      encoded_public_key,osize,
+      encoded_public_key,osize + 1,
       SELECTED_ACTION__CREATE_SESSION);
   JNXLOG(LDEBUG,"Generated message E_CRS_INITIAL_CHALLENGE")
     JNXCHECK(w == E_WGS_OKAY);

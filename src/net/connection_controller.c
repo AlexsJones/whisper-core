@@ -33,7 +33,7 @@ void internal_connnection_message_processor(connection_controller *controller,
   connection_request *oconnection = NULL;
 
   jnx_guid message_guid;
-  jnx_guid_from_string(message->id,&message_guid);
+  jnx_guid_from_string(message->sender,&message_guid);
   
   while(h != NULL) {
     
