@@ -26,11 +26,15 @@ void internal_connnection_message_processor(connection_controller *controller,
         "Malformed message receieved by internal_connnection_message_processor");
     return;
   }
-
   //Get the remote sender as a peer
   jnx_guid message_guid;
   jnx_guid_from_string(message->sender,&message_guid);
   peer *remote = peerstore_lookup(controller->ds->peers,&message_guid);
+  peer *local = peerstore_get_local_peer(controller->ds->peers);
+  JNXCHECK(remote);
+  if (jnx_guid_compare(&(*remote).guid,&(*local).guid) == JNX_GUID_STATE_SUCCESS) {
+    JNXFAIL("A message has been sent from this node to this node");
+  }
   //Fetch the existing connection if it exists
   jnx_node *h = controller->connections->head;
   jnx_node *r = controller->connections->head;
@@ -70,11 +74,10 @@ void internal_connnection_message_processor(connection_controller *controller,
       JNXLOG(LDEBUG, "Generated new connection with id %s", connection_id);
       free(connection_id);
       out_message = connection_request_create_exchange_message(c,message,E_CRS_CHALLENGE_REPLY);
-      JNXCHECK(message);
-      JNXLOG(LDEBUG,"Pushing new message into mux");
-      wpprotocol_mux_push(controller->mux,message);
+      JNXCHECK(out_message);
+      
+      wpprotocol_mux_push(controller->mux,out_message);
       JNXCHECK(connection_controller_add_connection_request(controller,c) == E_CCS_OKAY);
-      JNXCHECK(message);
       break;
 
     case SELECTED_ACTION__RESPONDING_CREATED_SESSION:

@@ -119,6 +119,10 @@ Wpmessage *connection_request_create_exchange_message(connection_request *req, W
 
       break;
   }
+  JNXLOG(LDEBUG,"=====Created new exchange message=====");
+  JNXLOG(LDEBUG,"Sender: %s",str1);
+  JNXLOG(LDEBUG,"Recipient: %s",str2);
+  JNXLOG(LDEBUG,"======================================");
   if(reply_public_key) {
     free(reply_public_key);
   }
@@ -131,6 +135,5 @@ Wpmessage *connection_request_create_exchange_message(connection_request *req, W
   if(connection_id) {
     free(connection_id);
   }
-  JNXLOG(LDEBUG,"Returning newly created message");
   return message;
 }
