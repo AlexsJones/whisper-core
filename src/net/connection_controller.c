@@ -60,7 +60,7 @@ void internal_connnection_message_processor(connection_controller *controller,
         JNXLOG(LERROR,"There should not be an existing connection !!!!!!!!!!!!!!!!!!!");
         exit(1);
       }
-      JNXLOG(LDEBUG,"Message action -> SELECTED_ACTION__RESPONDING_CREATED_SESSION");
+      JNXLOG(LDEBUG,"Message action -> SELECTED_ACTION__CREATE_SESSION");
       //Update connection status with 
       JNXLOG(LDEBUG,"Creating new session to contain incoming challenge");
       connection_request *c = connection_request_create(remote,controller->ds);  
@@ -71,6 +71,16 @@ void internal_connnection_message_processor(connection_controller *controller,
       JNXCHECK(connection_controller_add_connection_request(controller,c) == E_CCS_OKAY);
       JNXCHECK(message);
       break;
+
+    case SELECTED_ACTION__RESPONDING_CREATED_SESSION:
+    if(!oconnection) {
+
+      JNXLOG(LERROR,"Found an reply without an existing connection");
+      exit(1);
+    }
+      JNXLOG(LDEBUG,"Message action -> SELECTED_ACTION__RESPONDING_CREATED_SESSION");
+      JNXLOG(LDEBUG,"Reply receieved");
+    break;
     // case SELECTED_ACTION__RESPONDING_CREATED_SESSION:
     //   JNXLOG(LDEBUG,"Message action -> SELECTED_ACTION__RESPONDING_CREATED_SESSION");
     //   //Update connection status with 
