@@ -9,13 +9,15 @@ connection_request *connection_request_create(peer *remote,
   r->ds = ds;
   r->remote = remote;
   r->keypair = asymmetrical_generate_key(2048);
-  jnx_guid_create(&(*r).id);
-  jnx_char *connection_id;
-  jnx_guid_to_string(&(*r).id,&connection_id);
-  JNXLOG(LDEBUG, "Generated new connection with id %s", connection_id);
-  JNXLOG(LDEBUG, "Connection local peer is %s",&(*r->local).guid);
-  JNXLOG(LDEBUG, "Connection remote peer is %s",&(*r->remote).guid);
-  free(connection_id);
+  
+  jnx_char *local_guid;
+  jnx_char *remote_guid;
+  jnx_guid_to_string(&(*r->local).guid,&local_guid); 
+  jnx_guid_to_string(&(*r->remote).guid,&remote_guid); 
+  JNXLOG(LDEBUG,"Created connection with local guid %s and remote guid %s",
+      local_guid,remote_guid);
+  free(local_guid);
+  free(remote_guid);
   return r;
 }
 connection_request *connection_request_create_with_identity_chain(peer *remote,jnx_guid *id, const discovery_service *ds) {
@@ -107,7 +109,7 @@ Wpmessage *connection_request_create_exchange_message(connection_request *req, W
       JNXCHECK(str2);
       wp_generation_state w = wpprotocol_generate_message(&message,
           connection_id,
-          str2,str1, /* SWAP THE OUTGOING SENDER TO THE LOCAL PEER */
+          str1,str2, /* SWAP THE OUTGOING SENDER TO THE LOCAL PEER */
           reply_public_key,strlen(reply_public_key) +1,
           SELECTED_ACTION__RESPONDING_CREATED_SESSION);
 
