@@ -48,7 +48,7 @@ void internal_connnection_message_processor(connection_controller *controller,
 
   JNXLOG(LDEBUG,"Received message with connection id %s",message->id);
   JNXLOG(LDEBUG,"Message sender is %s",message->sender);
-  JNXLOG(LDEBUG,"Message sender host_address is %s" -> remote->host_address);
+  JNXLOG(LDEBUG,"Message sender host_address is %s", remote->host_address);
   JNXLOG(LDEBUG, "Message raw payload [%s]",message->action->contextdata->rawdata.data);
 
   Wpmessage *out_message = NULL;
