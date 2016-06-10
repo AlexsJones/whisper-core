@@ -53,9 +53,13 @@ Wpmessage *connection_request_create_message(connection_request *req, connection
           SELECTED_ACTION__CREATE_SESSION);
       JNXLOG(LDEBUG,"Generated message E_CRS_INITIAL_CHALLENGE")
       JNXCHECK(w == E_WGS_OKAY);
+      JNXLOG(LDEBUG,"Freeing public_key");
       free(public_key);
+      JNXLOG(LDEBUG,"Freeing str1");
       free(str1);
+      JNXLOG(LDEBUG,"Freeing str2");
       free(str2);
+      JNXLOG(LDEBUG,"Freeing connection_id");
       free(connection_id);
       break;
 
@@ -94,5 +98,6 @@ Wpmessage *connection_request_create_message(connection_request *req, connection
 
       break;
   }
+  JNXLOG(LDEBUG,"Returning newly created message");
   return message;
 }

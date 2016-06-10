@@ -69,10 +69,6 @@ void test_initiator() {
 
     connection_controller_tick(connectionc);
 
-    if((connection_controller_fetch_state(request) == E_CRS_CHALLENGE_REPLY)) {
-      JNXLOG(LDEBUG,"Test received challenger reply -- breaking!");
-      break;
-    }
 
     sleep(1);
   }
