@@ -2,6 +2,9 @@
 #include <jnxc_headers/jnx_check.h>
 #include <jnxc_headers/jnx_guid.h>
 void internal_connection_control_emitter(Wpmessage *message, void *opt_args){
+  //The message system may involve recycled 
+
+
 
   connection_controller *controller = (connection_controller*)opt_args;
   jnx_size osize;
@@ -59,18 +62,18 @@ void internal_connnection_message_processor(connection_controller *controller,
     case SELECTED_ACTION__RESPONDING_CREATED_SESSION:
       JNXLOG(LDEBUG,"Message action -> SELECTED_ACTION__RESPONDING_CREATED_SESSION");
       //Update connection status with 
-      out_message = connection_request_create_message(oconnection,E_CRS_CHALLENGE_REPLY);
+      out_message = connection_request_create_exchange_message(oconnection,message,E_CRS_CHALLENGE_REPLY);
       JNXCHECK(message);
       break;
     case SELECTED_ACTION__SHARING_SESSION_KEY:
       JNXCHECK(oconnection);
       JNXLOG(LDEBUG,"Message action -> SELECTED_ACTION__SHARING_SESSION_KEY");
-      out_message = connection_request_create_message(oconnection,E_CRS_SESSION_KEY_SHARE);
+      out_message = connection_request_create_exchange_message(oconnection,message,E_CRS_SESSION_KEY_SHARE);
       break;
       JNXCHECK(oconnection);
     case SELECTED_ACTION__COMPLETED_SESSION:
       JNXLOG(LDEBUG,"Message action -> SELECTED_ACTION__COMPLETED_SESSION");
-      out_message = connection_request_create_message(oconnection,E_CRS_COMPLETE);
+      out_message = connection_request_create_exchange_message(oconnection,message,E_CRS_COMPLETE);
       break;
   }
   if(message){
@@ -123,7 +126,7 @@ connection_controller_state connection_controller_initiation_request(
   
   connection_request *c = connection_request_create(local,remote,controller->ds);
   
-  Wpmessage *message = connection_request_create_message(c,E_CRS_INITIAL_CHALLENGE);
+  Wpmessage *message = connection_request_create_initiation_message(c,E_CRS_INITIAL_CHALLENGE);
   JNXCHECK(message);
   JNXLOG(LDEBUG,"Pushing new message into mux");
   wpprotocol_mux_push(controller->mux,message);
