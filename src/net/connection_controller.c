@@ -26,17 +26,16 @@ void internal_connnection_message_processor(connection_controller *controller,
         "Malformed message receieved by internal_connnection_message_processor");
     return;
   }
-  JNXLOG(LDEBUG,"Received message with connection id %s",message->id);
+
+  //Get the remote sender as a peer
+  jnx_guid message_guid;
+  jnx_guid_from_string(message->sender,&message_guid);
+  peer *remote = peerstore_lookup(controller->ds->peers,&message_guid);
   //Fetch the existing connection if it exists
   jnx_node *h = controller->connections->head;
   jnx_node *r = controller->connections->head;
-  connection_request *oconnection = NULL;
-
-  jnx_guid message_guid;
-  jnx_guid_from_string(message->sender,&message_guid);
-  
-  while(h != NULL) {
-    
+  connection_request *oconnection = NULL;  
+  while(h != NULL) {   
     connection_request *c = (connection_request*)h->_data;
     if(jnx_guid_compare(&(*c).id,&message_guid) == JNX_GUID_STATE_SUCCESS) {
       JNXLOG(LDEBUG,"Found existing connection %s",message->id);    
@@ -47,10 +46,10 @@ void internal_connnection_message_processor(connection_controller *controller,
   }
   h = r;
 
+  JNXLOG(LDEBUG,"Received message with connection id %s",message->id);
+  JNXLOG(LDEBUG,"Message sender is %s",message->sender);
+  JNXLOG(LDEBUG,"Message sender host_address is %s" -> remote->host_address);
   JNXLOG(LDEBUG, "Message raw payload [%s]",message->action->contextdata->rawdata.data);
-
-  //Get the remote sender as a peer
-  peer *remote = peerstore_lookup(controller->ds->peers,&message_guid);
 
   Wpmessage *out_message = NULL;
   switch(message->action->action) {
@@ -98,11 +97,6 @@ void internal_connnection_message_processor(connection_controller *controller,
     //   out_message = connection_request_create_exchange_message(oconnection,message,E_CRS_COMPLETE);
     //   break;
 
-  }
-  if(message){
-     JNXLOG(LDEBUG,"Pushing new message into mux");
-     
-    wpprotocol_mux_push(controller->mux,out_message);
   }
 
   wpmessage__free_unpacked(message,NULL);
