@@ -30,7 +30,7 @@ void connection_controller_tick(connection_controller *controller);
 
 connection_controller_state connection_controller_initiation_request(
     connection_controller *controller, 
-	peer *local, peer *remote, connection_request **outrequest);
+	peer *remote, connection_request **outrequest);
 
 connection_request_state connection_controller_fetch_state(connection_request 
     *request);

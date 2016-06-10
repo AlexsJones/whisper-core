@@ -26,7 +26,7 @@ typedef struct connection_request {
     RSA *keypair;
 }connection_request;
 
-connection_request *connection_request_create(peer *local, peer *remote,const discovery_service *ds);
+connection_request *connection_request_create(peer *remote,const discovery_service *ds);
 
 Wpmessage *connection_request_create_initiation_message(connection_request *req,connection_request_state s);
 

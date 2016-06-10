@@ -2,28 +2,22 @@
 #include <jnxc_headers/jnx_check.h>
 #include <jnxc_headers/jnx_guid.h>
 void internal_connection_control_emitter(Wpmessage *message, void *opt_args){
-  //The message system may involve recycled 
-
-
-
   connection_controller *controller = (connection_controller*)opt_args;
   jnx_size osize;
   jnx_char *obuffer;
   wp_generation_state e = wpprotocol_generate_message_string(message,
       &obuffer,&osize); 
-  JNXLOG(LDEBUG,"Generated message string");
   jnx_guid rguid;
   jnx_guid_from_string(message->recipient,&rguid); 
-  JNXLOG(LDEBUG,"Remote guid is %s", message->recipient);
   peer *remote_peer = peerstore_lookup(controller->ds->peers,&rguid);
   jnx_socket *sock = jnx_socket_tcp_create(AF_INET);
+  JNXLOG(LDEBUG,"Sending message to %s", remote_peer->host_address);
   jnx_socket_tcp_send(sock,remote_peer->host_address,controller->port,obuffer,osize);
   jnx_socket_destroy(&sock);
   free(obuffer);
   wpmessage__free_unpacked(message,NULL);
   JNXLOG(LDEBUG,"Sent message of size %zu",osize);
 }
-
 void internal_connnection_message_processor(connection_controller *controller,
     Wpmessage *message){
   JNXCHECK(controller);
@@ -32,20 +26,20 @@ void internal_connnection_message_processor(connection_controller *controller,
         "Malformed message receieved by internal_connnection_message_processor");
     return;
   }
-  JNXLOG(LDEBUG,"Received message on connection %s",message->id);
+  JNXLOG(LDEBUG,"Received message with connection id %s",message->id);
   //Fetch the existing connection if it exists
   jnx_node *h = controller->connections->head;
   jnx_node *r = controller->connections->head;
   connection_request *oconnection = NULL;
 
-  jnx_guid *message_guid;
-  jnx_guid_from_string(message->id,message_guid);
+  jnx_guid message_guid;
+  jnx_guid_from_string(message->id,&message_guid);
   
   while(h != NULL) {
     
     connection_request *c = (connection_request*)h->_data;
-    if(jnx_guid_compare(&(*c).id,message_guid) == JNX_GUID_STATE_SUCCESS) {
-      JNXLOG(LDEBUG,"Found existing connection!");    
+    if(jnx_guid_compare(&(*c).id,&message_guid) == JNX_GUID_STATE_SUCCESS) {
+      JNXLOG(LDEBUG,"Found existing connection %s",message->id);    
       oconnection = c;      
       break;
     }
@@ -55,26 +49,44 @@ void internal_connnection_message_processor(connection_controller *controller,
 
   JNXLOG(LDEBUG, "Message raw payload [%s]",message->action->contextdata->rawdata.data);
 
+  //Get the remote sender as a peer
+  peer *remote = peerstore_lookup(controller->ds->peers,&message_guid);
+
   Wpmessage *out_message;
-
   switch(message->action->action) {
+    case SELECTED_ACTION__CREATE_SESSION:
+      if(oconnection) {
 
-    case SELECTED_ACTION__RESPONDING_CREATED_SESSION:
+        JNXLOG(LERROR,"There should not be an existing connection !!!!!!!!!!!!!!!!!!!");
+        exit(1);
+      }
       JNXLOG(LDEBUG,"Message action -> SELECTED_ACTION__RESPONDING_CREATED_SESSION");
       //Update connection status with 
+      connection_request *c = connection_request_create(remote,controller->ds);  
       out_message = connection_request_create_exchange_message(oconnection,message,E_CRS_CHALLENGE_REPLY);
       JNXCHECK(message);
+      JNXLOG(LDEBUG,"Pushing new message into mux");
+      wpprotocol_mux_push(controller->mux,message);
+      JNXCHECK(connection_controller_add_connection_request(controller,c) == E_CCS_OKAY);
+      JNXCHECK(message);
       break;
-    case SELECTED_ACTION__SHARING_SESSION_KEY:
-      JNXCHECK(oconnection);
-      JNXLOG(LDEBUG,"Message action -> SELECTED_ACTION__SHARING_SESSION_KEY");
-      out_message = connection_request_create_exchange_message(oconnection,message,E_CRS_SESSION_KEY_SHARE);
-      break;
-      JNXCHECK(oconnection);
-    case SELECTED_ACTION__COMPLETED_SESSION:
-      JNXLOG(LDEBUG,"Message action -> SELECTED_ACTION__COMPLETED_SESSION");
-      out_message = connection_request_create_exchange_message(oconnection,message,E_CRS_COMPLETE);
-      break;
+    // case SELECTED_ACTION__RESPONDING_CREATED_SESSION:
+    //   JNXLOG(LDEBUG,"Message action -> SELECTED_ACTION__RESPONDING_CREATED_SESSION");
+    //   //Update connection status with 
+    //   out_message = connection_request_create_exchange_message(oconnection,message,E_CRS_CHALLENGE_REPLY);
+    //   JNXCHECK(message);
+    //   break;
+    // case SELECTED_ACTION__SHARING_SESSION_KEY:
+    //   JNXCHECK(oconnection);
+    //   JNXLOG(LDEBUG,"Message action -> SELECTED_ACTION__SHARING_SESSION_KEY");
+    //   out_message = connection_request_create_exchange_message(oconnection,message,E_CRS_SESSION_KEY_SHARE);
+    //   break;
+    //   JNXCHECK(oconnection);
+    // case SELECTED_ACTION__COMPLETED_SESSION:
+    //   JNXLOG(LDEBUG,"Message action -> SELECTED_ACTION__COMPLETED_SESSION");
+    //   out_message = connection_request_create_exchange_message(oconnection,message,E_CRS_COMPLETE);
+    //   break;
+
   }
   if(message){
      JNXLOG(LDEBUG,"Pushing new message into mux");
@@ -121,10 +133,9 @@ void connection_controller_tick(connection_controller *controller) {
 }
 
 connection_controller_state connection_controller_initiation_request(
-    connection_controller *controller, 
-    peer *local, peer *remote, connection_request **outrequest) {
+    connection_controller *controller, peer *remote, connection_request **outrequest) {
   
-  connection_request *c = connection_request_create(local,remote,controller->ds);
+  connection_request *c = connection_request_create(remote,controller->ds);
   
   Wpmessage *message = connection_request_create_initiation_message(c,E_CRS_INITIAL_CHALLENGE);
   JNXCHECK(message);

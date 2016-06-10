@@ -27,7 +27,6 @@ static char *baddr = NULL;
 static char *interface = NULL;
 
 
-
 void test_initiator() {
 
   peerstore *store = peerstore_init(local_peer_for_user("initiator_bob",10,interface), 0);
@@ -63,7 +62,7 @@ void test_initiator() {
   connection_controller *connectionc = connection_controller_create("8080", AF_INET, ds);
 
   connection_request *request;
-  connection_controller_initiation_request(connectionc, local, remote_peer, &request);
+  connection_controller_initiation_request(connectionc,remote_peer, &request);
 
   while(1) {
 

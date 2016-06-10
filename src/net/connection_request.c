@@ -1,8 +1,10 @@
 #include "connection_request.h"
 #include "encoding.h"
-connection_request *connection_request_create(peer *local, peer *remote,
+#include "peerstore.h"
+connection_request *connection_request_create(peer *remote,
     const discovery_service *ds) {
   connection_request *r = malloc(sizeof(connection_request));
+  peer *local = peerstore_get_local_peer(ds->peers);
   r->local = local;
   r->ds = ds;
   r->remote = remote;
@@ -62,7 +64,6 @@ Wpmessage *connection_request_create_initiation_message(connection_request *req,
   free(str2);
   JNXLOG(LDEBUG,"Freeing connection_id");
   free(connection_id);
-
   JNXLOG(LDEBUG,"Returning newly created message");
   return message;
 }
@@ -75,6 +76,7 @@ Wpmessage *connection_request_create_exchange_message(connection_request *req, W
   jnx_char *str2=NULL;
   jnx_char *connection_id = NULL;
   jnx_char *reply_public_key = NULL;
+
   switch(s) {
 
     case E_CRS_CHALLENGE_REPLY:
@@ -86,7 +88,6 @@ Wpmessage *connection_request_create_exchange_message(connection_request *req, W
       reply_public_key = asymmetrical_key_to_string(req->keypair,PUBLIC);
       //Encrypt my key in the challengers public key
       // RSA *challenger_key_public = asymmetrical_key_from_string() 
-
 
       jnx_guid_to_string(&(*req->local).guid,&str1);
       jnx_guid_to_string(&(*req->remote).guid,&str2);
