@@ -10,7 +10,6 @@ connection_request *connection_request_create(peer *remote,
   r->ds = ds;
   r->remote = remote;
   r->keypair = asymmetrical_generate_key(2048);
-  
   jnx_char *local_guid;
   jnx_char *remote_guid;
   jnx_guid_to_string(&(*r->local).guid,&local_guid); 
@@ -42,6 +41,7 @@ Wpmessage *connection_request_create_initiation_message(connection_request *req,
   jnx_char *connection_id = NULL;
   JNXLOG(LDEBUG,"E_CRS_INITIAL_CHALLENGE");
   //Generate keypair and send over my public key
+  JNXCHECK(req->keypair);
   jnx_char *public_key = asymmetrical_key_to_string(req->keypair,PUBLIC);
   jnx_size osize;
   jnx_uint8 *encoded_public_key = encode_from_string(public_key,
@@ -97,22 +97,10 @@ Wpmessage *connection_request_create_exchange_message(connection_request *req, W
       //Generate keypair and send over my public key
       reply_public_key = asymmetrical_key_to_string(req->keypair,PUBLIC);
       //Encrypt my key in the challengers public key
-      jnx_size odecoded;
-      JNXCHECK((*incoming_message->action->contextdata).has_rawdata);
-      jnx_char *decoded = decode_to_string((*incoming_message->action->contextdata).rawdata.data,
-        (*incoming_message->action->contextdata).rawdata.len,&odecoded);
-
-      RSA *remote_public_key = asymmetrical_key_from_string(decoded,PUBLIC);
-      free(decoded);
-      JNXCHECK(remote_public_key);
-      req->remote_keypair = remote_public_key;
-      JNXLOG(LDEBUG,"Decoded the challenger public key, wrapping local public key");
-      //Wrap public key inside of challengers
-      jnx_char *local_public_key = asymmetrical_key_to_string(req->keypair,PUBLIC);
-      //Now encode the encrypted key
       jnx_size encoded_len;
-      jnx_char *encoded = encode_from_string(local_public_key,strlen(local_public_key),&encoded_len);
-
+      jnx_char *encoded = encode_from_string(reply_public_key,
+          strlen(reply_public_key) +1,&encoded_len);
+  
       JNXLOG(LDEBUG,"Generated public key");
       jnx_guid_to_string(&(*req->local).guid,&str1);
       jnx_guid_to_string(&(*req->remote).guid,&str2);
