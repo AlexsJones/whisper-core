@@ -46,7 +46,7 @@ Wpmessage *connection_request_create_initiation_message(connection_request *req,
   jnx_char *public_key = asymmetrical_key_to_string(req->keypair,PUBLIC);
   jnx_size osize;
   jnx_uint8 *encoded_public_key = encode_from_string(public_key,
-      strlen(public_key), &osize); 
+      strlen(public_key)+1, &osize); 
 
   JNXLOG(LDEBUG,encoded_public_key);
   jnx_guid_to_string(&(*req->local).guid,&str1);
@@ -61,7 +61,7 @@ Wpmessage *connection_request_create_initiation_message(connection_request *req,
   wp_generation_state w = wpprotocol_generate_message(&message,
       connection_id,
       str1,str2,
-      encoded_public_key,osize + 1,
+      encoded_public_key,osize,
       SELECTED_ACTION__CREATE_SESSION);
   JNXLOG(LDEBUG,"Generated message E_CRS_INITIAL_CHALLENGE")
     JNXCHECK(w == E_WGS_OKAY);
