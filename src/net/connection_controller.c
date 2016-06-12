@@ -1,4 +1,5 @@
 #include "connection_controller.h"
+#include "encoding.h"
 #include <jnxc_headers/jnx_check.h>
 #include <jnxc_headers/jnx_guid.h>
 void internal_connection_control_emitter(Wpmessage *message, void *opt_args){
@@ -99,15 +100,18 @@ void internal_connnection_message_processor(connection_controller *controller,
       //Update connection state-------
       oconnection->state = E_CRS_COMPLETE;
       //------------------------------
-      JNXLOG(LDEBUG,"Completed!!!!");
-      break;
-      JNXCHECK(oconnection);
-    case SELECTED_ACTION__COMPLETED_SESSION:
-      JNXLOG(LDEBUG,"Message action -> SELECTED_ACTION__COMPLETED_SESSION");
-      oconnection->state = E_CRS_COMPLETE;
+      jnx_size decoded_len;
+      jnx_char *decoded_key = decode_to_string(message->action->contextdata->rawdata.data,
+        message->action->contextdata->rawdata.len,&decoded_len);
+      jnx_size decrypted_key_len;
+      jnx_char *decrypted_key = asymmetrical_decrypt(oconnection->keypair,decoded_key,
+        decoded_len,&decrypted_key_len);
 
-      break;
 
+      free(decoded_key);
+      free(decrypted_key);
+      JNXLOG(LDEBUG,"Completed with shared session key of %s",decrypted_key);
+      break;
   }
 
   wpmessage__free_unpacked(message,NULL);
