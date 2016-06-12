@@ -20,7 +20,8 @@ connection_request *connection_request_create(peer *remote,
   free(remote_guid);
   return r;
 }
-connection_request *connection_request_create_with_identity_chain(peer *remote,jnx_guid *id, const discovery_service *ds) {
+connection_request *connection_request_create_with_identity_chain(peer *remote,
+    jnx_guid *id, const discovery_service *ds) {
   connection_request *c = connection_request_create(remote,ds);
   (*c).id = *id;
   return c;
@@ -78,7 +79,8 @@ Wpmessage *connection_request_create_initiation_message(connection_request *req,
   return message;
 }
 
-Wpmessage *connection_request_create_exchange_message(connection_request *req, Wpmessage *incoming_message, 
+Wpmessage *connection_request_create_exchange_message(connection_request *req, 
+    Wpmessage *incoming_message, 
     connection_request_state s) {
 
   Wpmessage *message = NULL;
@@ -88,7 +90,6 @@ Wpmessage *connection_request_create_exchange_message(connection_request *req, W
   jnx_char *reply_public_key = NULL;
 
   switch(s) {
-
     case E_CRS_CHALLENGE_REPLY:
       JNXLOG(LDEBUG,"E_CRS_CHALLENGE_REPLY");
       connection_id = NULL;
@@ -96,11 +97,10 @@ Wpmessage *connection_request_create_exchange_message(connection_request *req, W
       str2 = NULL;
       //Generate keypair and send over my public key
       reply_public_key = asymmetrical_key_to_string(req->keypair,PUBLIC);
-      //Encrypt my key in the challengers public key
       jnx_size encoded_len;
       jnx_char *encoded = encode_from_string(reply_public_key,
           strlen(reply_public_key) +1,&encoded_len);
-  
+
       JNXLOG(LDEBUG,"Generated public key");
       jnx_guid_to_string(&(*req->local).guid,&str1);
       jnx_guid_to_string(&(*req->remote).guid,&str2);
@@ -121,6 +121,11 @@ Wpmessage *connection_request_create_exchange_message(connection_request *req, W
       free(encoded);
       break;
     case E_CRS_SESSION_KEY_SHARE:
+     
+
+
+
+
 
       break;
   }

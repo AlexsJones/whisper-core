@@ -65,19 +65,15 @@ void internal_connnection_message_processor(connection_controller *controller,
         exit(1);
       }
       JNXLOG(LDEBUG,"Message action -> SELECTED_ACTION__CREATE_SESSION");
-      //Update connection status with 
-      JNXLOG(LDEBUG,"Creating new session to contain incoming challenge");
       jnx_guid message_id_guid;
       jnx_guid_from_string(message->id,&message_id_guid);
-      connection_request *c = connection_request_create_with_identity_chain(remote,&message_id_guid,controller->ds);  
-
-      jnx_char *connection_id;
-      jnx_guid_to_string(&(*c).id,&connection_id);
-      JNXLOG(LDEBUG, "Generated new connection with id %s", connection_id);
-      free(connection_id);
+      connection_request *c = connection_request_create_with_identity_chain(
+          remote,&message_id_guid,controller->ds);      
+      //Update connection state-------
+      c->state = E_CRS_CHALLENGE_REPLY;
+      //------------------------------
       out_message = connection_request_create_exchange_message(c,message,E_CRS_CHALLENGE_REPLY);
       JNXCHECK(out_message);
-      
       wpprotocol_mux_push(controller->mux,out_message);
       JNXCHECK(connection_controller_add_connection_request(controller,c) == E_CCS_OKAY);
       break;
@@ -88,20 +84,29 @@ void internal_connnection_message_processor(connection_controller *controller,
         JNXLOG(LERROR,"Found an reply without an existing connection");
         exit(1);
       }
+      //Update connection state-------
+      oconnection->state = E_CRS_SESSION_KEY_SHARE;
+      //------------------------------
       JNXLOG(LDEBUG,"Message action -> SELECTED_ACTION__RESPONDING_CREATED_SESSION");
-      JNXLOG(LDEBUG,"Reply receieved");
+      out_message = connection_request_create_exchange_message(c,message,
+          E_CRS_SESSION_KEY_SHARE);
+      wpprotocol_mux_push(controller->mux,out_message);
       break;
 
-      case SELECTED_ACTION__SHARING_SESSION_KEY:
-        JNXCHECK(oconnection);
-        JNXLOG(LDEBUG,"Message action -> SELECTED_ACTION__SHARING_SESSION_KEY");
-     //   out_message = connection_request_create_exchange_message(oconnection,message,E_CRS_SESSION_KEY_SHARE);
-        break;
-        JNXCHECK(oconnection);
-      case SELECTED_ACTION__COMPLETED_SESSION:
-        JNXLOG(LDEBUG,"Message action -> SELECTED_ACTION__COMPLETED_SESSION");
-      //  out_message = connection_request_create_exchange_message(oconnection,message,E_CRS_COMPLETE);
-        break;
+    case SELECTED_ACTION__SHARING_SESSION_KEY:
+      JNXCHECK(oconnection);
+      JNXLOG(LDEBUG,"Message action -> SELECTED_ACTION__SHARING_SESSION_KEY");
+      //Update connection state-------
+      oconnection->state = E_CRS_COMPLETE;
+      //------------------------------
+
+      break;
+      JNXCHECK(oconnection);
+    case SELECTED_ACTION__COMPLETED_SESSION:
+      JNXLOG(LDEBUG,"Message action -> SELECTED_ACTION__COMPLETED_SESSION");
+      oconnection->state = E_CRS_COMPLETE;
+
+      break;
 
   }
 
@@ -145,8 +150,9 @@ void connection_controller_tick(connection_controller *controller) {
 
 connection_controller_state connection_controller_initiation_request(
     connection_controller *controller, peer *remote, connection_request **outrequest) {
-
   connection_request *c = connection_request_create(remote,controller->ds);
+  //Update connection state
+  c->state = E_CRS_INITIAL_CHALLENGE;
   jnx_char *connection_id;
   jnx_guid_to_string(&(*c).id,&connection_id);
   JNXLOG(LDEBUG, "Generated new connection with id %s", connection_id);
