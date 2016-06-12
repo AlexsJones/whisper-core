@@ -100,20 +100,15 @@ Wpmessage *connection_request_create_exchange_message(connection_request *req,
       jnx_size encoded_len;
       jnx_char *encoded = encode_from_string(reply_public_key,
           strlen(reply_public_key) +1,&encoded_len);
-
-      JNXLOG(LDEBUG,"Generated public key");
       jnx_guid_to_string(&(*req->local).guid,&str1);
       jnx_guid_to_string(&(*req->remote).guid,&str2);
-
-      JNXLOG(LDEBUG,"Local guid %s Remote guid %s",str1,str2);
       jnx_guid_to_string(&(*req).id,&connection_id);
-      JNXLOG(LDEBUG, "Generating message with connection id %s", connection_id);
       JNXCHECK(connection_id);
       JNXCHECK(str1);
       JNXCHECK(str2);
       wp_generation_state w = wpprotocol_generate_message(&message,
           connection_id,
-          str1,str2, /* SWAP THE OUTGOING SENDER TO THE LOCAL PEER */
+          str1,str2,
           encoded,encoded_len,
           SELECTED_ACTION__RESPONDING_CREATED_SESSION);
 
@@ -121,12 +116,44 @@ Wpmessage *connection_request_create_exchange_message(connection_request *req,
       free(encoded);
       break;
     case E_CRS_SESSION_KEY_SHARE:
-     
+     JNXLOG(LDEBUG,"E_CRS_CHALLENGE_REPLY");
+      connection_id = NULL;
+      str1 = NULL;
+      str2 = NULL;
+      //Generate shared secret and encrypt it
+      jnx_char *raw = incoming_message->action->contextdata->rawdata.data;
+      jnx_size out_decoded;
+      jnx_char *decoded = decode_to_string(raw,strlen(raw),&out_decoded);
+      RSA *remote_keypair = asymmetrical_key_from_string(decoded,PUBLIC);
+      jnx_uint8 *buffer;
+      jnx_char secret_size = generate_shared_secret(&buffer);
 
+      //encrypt shared secret & store in local session
+      req->shared_secret = malloc(secret_size + 1);
+      bzero(req->shared_secret,secret_size + 1);
+      memcpy(req->shared_secret,buffer,secret_size);
+      jnx_size asym_encrypted_size;
+      jnx_char *encrypted_string = asymmetrical_encrypt(remote_keypair,buffer,&asym_encrypted_size);
+      jnx_size encoded_secret_len;
+      jnx_char *encoded_secret = encode_from_string(encrypted_string,asym_encrypted_size,&encoded_secret_len);
 
+      jnx_guid_to_string(&(*req->local).guid,&str1);
+      jnx_guid_to_string(&(*req->remote).guid,&str2);
+      jnx_guid_to_string(&(*req).id,&connection_id);
+      JNXLOG(LDEBUG, "Generating message with connection id %s", connection_id);
+      JNXCHECK(connection_id);
+      JNXCHECK(str1);
+      JNXCHECK(str2);
+      w = wpprotocol_generate_message(&message,
+          connection_id,
+          str1,str2,
+          encoded_secret,encoded_secret_len,
+          SELECTED_ACTION__RESPONDING_CREATED_SESSION);
 
-
-
+      JNXCHECK(w == E_WGS_OKAY);
+      free(encoded_secret);
+      free(encrypted_string);
+      free(decoded);
       break;
   }
   JNXLOG(LDEBUG,"=====Created new exchange message=====");

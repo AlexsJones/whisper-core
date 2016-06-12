@@ -99,7 +99,7 @@ void internal_connnection_message_processor(connection_controller *controller,
       //Update connection state-------
       oconnection->state = E_CRS_COMPLETE;
       //------------------------------
-
+      JNXLOG(LDEBUG,"Completed!!!!");
       break;
       JNXCHECK(oconnection);
     case SELECTED_ACTION__COMPLETED_SESSION:

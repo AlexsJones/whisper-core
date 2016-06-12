@@ -25,6 +25,7 @@ typedef struct connection_request {
     const discovery_service *ds;
     RSA *keypair;
     RSA *remote_keypair;
+    jnx_uint8 *shared_secret;
 }connection_request;
 
 connection_request *connection_request_create(peer *remote,const discovery_service *ds);
