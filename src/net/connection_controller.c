@@ -108,9 +108,9 @@ void internal_connnection_message_processor(connection_controller *controller,
         decoded_len,&decrypted_key_len);
 
 
-      free(decoded_key);
-      free(decrypted_key);
       JNXLOG(LDEBUG,"Completed with shared session key of %s",decrypted_key);
+      oconnection->shared_secret = decrypted_key;
+      free(decoded_key);
       break;
   }
 
