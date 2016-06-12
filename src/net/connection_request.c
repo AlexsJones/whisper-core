@@ -116,7 +116,7 @@ Wpmessage *connection_request_create_exchange_message(connection_request *req,
       free(encoded);
       break;
     case E_CRS_SESSION_KEY_SHARE:
-     JNXLOG(LDEBUG,"E_CRS_CHALLENGE_REPLY");
+     JNXLOG(LDEBUG,"E_CRS_SESSION_KEY_SHARE");
       connection_id = NULL;
       str1 = NULL;
       str2 = NULL;
@@ -155,7 +155,7 @@ Wpmessage *connection_request_create_exchange_message(connection_request *req,
           connection_id,
           str1,str2,
           encoded_secret,encoded_secret_len,
-          SELECTED_ACTION__RESPONDING_CREATED_SESSION);
+          SELECTED_ACTION__SHARING_SESSION_KEY);
 
       JNXCHECK(w == E_WGS_OKAY);
       free(encoded_secret);
