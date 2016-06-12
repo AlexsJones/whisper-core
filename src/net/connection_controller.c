@@ -88,7 +88,7 @@ void internal_connnection_message_processor(connection_controller *controller,
       oconnection->state = E_CRS_SESSION_KEY_SHARE;
       //------------------------------
       JNXLOG(LDEBUG,"Message action -> SELECTED_ACTION__RESPONDING_CREATED_SESSION");
-      out_message = connection_request_create_exchange_message(c,message,
+      out_message = connection_request_create_exchange_message(oconnection,message,
           E_CRS_SESSION_KEY_SHARE);
       wpprotocol_mux_push(controller->mux,out_message);
       break;

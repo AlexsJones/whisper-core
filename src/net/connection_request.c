@@ -124,19 +124,26 @@ Wpmessage *connection_request_create_exchange_message(connection_request *req,
       jnx_char *raw = incoming_message->action->contextdata->rawdata.data;
       jnx_size out_decoded;
       jnx_char *decoded = decode_to_string(raw,strlen(raw),&out_decoded);
+      JNXLOG(LDEBUG,"Decoded to string %s",decoded);
       RSA *remote_keypair = asymmetrical_key_from_string(decoded,PUBLIC);
+      JNXLOG(LDEBUG,"Generated from remote public key");
       jnx_uint8 *buffer;
       jnx_char secret_size = generate_shared_secret(&buffer);
-
+      JNXLOG(LDEBUG,"Generated shared secret %s",buffer);
       //encrypt shared secret & store in local session
       req->shared_secret = malloc(secret_size + 1);
       bzero(req->shared_secret,secret_size + 1);
       memcpy(req->shared_secret,buffer,secret_size);
       jnx_size asym_encrypted_size;
+      JNXLOG(LDEBUG,"About to encrypt shared secret");
+      JNXCHECK(remote_keypair);
       jnx_char *encrypted_string = asymmetrical_encrypt(remote_keypair,buffer,&asym_encrypted_size);
       jnx_size encoded_secret_len;
+      JNXCHECK(encrypted_string);
+      JNXLOG(LDEBUG,"Encrypted shared secret %s",encrypted_string);
+      JNXLOG(LDEBUG,"About to encode encrypted shared secret");
       jnx_char *encoded_secret = encode_from_string(encrypted_string,asym_encrypted_size,&encoded_secret_len);
-
+      JNXLOG(LDEBUG,"Encoded shared secret successfully");
       jnx_guid_to_string(&(*req->local).guid,&str1);
       jnx_guid_to_string(&(*req->remote).guid,&str2);
       jnx_guid_to_string(&(*req).id,&connection_id);
@@ -154,6 +161,7 @@ Wpmessage *connection_request_create_exchange_message(connection_request *req,
       free(encoded_secret);
       free(encrypted_string);
       free(decoded);
+      free(buffer);
       break;
   }
   JNXLOG(LDEBUG,"=====Created new exchange message=====");
