@@ -28,16 +28,21 @@ typedef struct connection_request {
     jnx_uint8 *shared_secret;
 }connection_request;
 
-connection_request *connection_request_create(peer *remote,const discovery_service *ds);
+connection_request *connection_request_create(peer *remote,
+    const discovery_service *ds);
 
-connection_request *connection_request_create_with_identity_chain(peer *remote,jnx_guid *id, const discovery_service *ds);
+connection_request *connection_request_create_with_identity_chain(peer *remote,
+    jnx_guid *id, const discovery_service *ds);
 
-Wpmessage *connection_request_create_initiation_message(connection_request *req,connection_request_state s);
+Wpmessage *connection_request_create_initiation_message(connection_request *req,
+    connection_request_state s);
 
-Wpmessage *connection_request_create_exchange_message(connection_request *req, Wpmessage *incoming_message, 
+Wpmessage *connection_request_create_exchange_message(connection_request *req, 
+    Wpmessage *incoming_message, 
 	connection_request_state s);
 
-void connection_request_update_state(connection_request *req, connection_request_state s);
+void connection_request_update_state(connection_request *req, 
+    connection_request_state s);
 
 void connection_request_destroy(connection_request **req);
 

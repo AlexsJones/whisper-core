@@ -26,7 +26,8 @@ connection_request *connection_request_create_with_identity_chain(peer *remote,
   (*c).id = *id;
   return c;
 }
-void connection_request_update_state(connection_request *req, connection_request_state s) {
+void connection_request_update_state(connection_request *req, 
+    connection_request_state s) {
   req->state = s;
 }
 void connection_request_destroy(connection_request **req) {
@@ -109,7 +110,7 @@ Wpmessage *connection_request_create_exchange_message(connection_request *req,
       free(encoded);
       break;
     case E_CRS_SESSION_KEY_SHARE:
-     JNXLOG(LDEBUG,"E_CRS_SESSION_KEY_SHARE");
+      JNXLOG(LDEBUG,"E_CRS_SESSION_KEY_SHARE");
       connection_id = NULL;
       str1 = NULL;
       str2 = NULL;
@@ -130,12 +131,14 @@ Wpmessage *connection_request_create_exchange_message(connection_request *req,
       jnx_size asym_encrypted_size;
       JNXLOG(LDEBUG,"About to encrypt shared secret");
       JNXCHECK(remote_keypair);
-      jnx_char *encrypted_string = asymmetrical_encrypt(remote_keypair,buffer,&asym_encrypted_size);
+      jnx_char *encrypted_string = asymmetrical_encrypt(remote_keypair,
+          buffer,&asym_encrypted_size);
       jnx_size encoded_secret_len;
       JNXCHECK(encrypted_string);
       JNXLOG(LDEBUG,"Encrypted shared secret %s",encrypted_string);
       JNXLOG(LDEBUG,"About to encode encrypted shared secret");
-      jnx_char *encoded_secret = encode_from_string(encrypted_string,asym_encrypted_size,&encoded_secret_len);
+      jnx_char *encoded_secret = encode_from_string(encrypted_string,
+          asym_encrypted_size,&encoded_secret_len);
       JNXLOG(LDEBUG,"Encoded shared secret successfully");
       jnx_guid_to_string(&(*req->local).guid,&str1);
       jnx_guid_to_string(&(*req->remote).guid,&str2);
