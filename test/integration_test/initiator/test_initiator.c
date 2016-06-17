@@ -26,7 +26,15 @@
 static char *baddr = NULL;
 static char *interface = NULL;
 
-
+void on_connection_incoming(const connection_request *c) {
+  JNXLOG(LDEBUG,"Callback for incoming new connection");
+}
+void on_connection_completed(const connection_request *c) {
+  JNXLOG(LDEBUG,"Callback for completed connection");
+}
+void on_connection_closed(const connection_request *c) {
+  JNXLOG(LDEBUG,"Callback for connection closed");
+}
 void test_initiator() {
 
   peerstore *store = peerstore_init(local_peer_for_user("initiator_bob",10,interface), 0);
@@ -59,7 +67,10 @@ void test_initiator() {
   }
 
 
-  connection_controller *connectionc = connection_controller_create("8080", AF_INET, ds);
+  connection_controller *connectionc = connection_controller_create("8080", 
+      AF_INET, ds,
+      on_connection_completed, on_connection_incoming,
+      on_connection_closed);
 
   connection_request *request;
   connection_controller_initiation_request(connectionc,remote_peer, &request);
@@ -67,7 +78,6 @@ void test_initiator() {
   while(1) {
 
     connection_controller_tick(connectionc);
-
 
     sleep(1);
   }

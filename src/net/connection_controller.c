@@ -77,6 +77,10 @@ void internal_connnection_message_processor(connection_controller *controller,
       JNXCHECK(out_message);
       wpprotocol_mux_push(controller->mux,out_message);
       JNXCHECK(connection_controller_add_connection_request(controller,c) == E_CCS_OKAY);
+      //Update the notification for a new incoming connection
+      if(controller->ic) {
+        controller->ic(c);
+      }
       break;
 
     case SELECTED_ACTION__RESPONDING_CREATED_SESSION:
@@ -102,15 +106,19 @@ void internal_connnection_message_processor(connection_controller *controller,
       //------------------------------
       jnx_size decoded_len;
       jnx_char *decoded_key = decode_to_string(message->action->contextdata->rawdata.data,
-        message->action->contextdata->rawdata.len,&decoded_len);
+          message->action->contextdata->rawdata.len,&decoded_len);
       jnx_size decrypted_key_len;
       jnx_char *decrypted_key = asymmetrical_decrypt(oconnection->keypair,decoded_key,
-        decoded_len,&decrypted_key_len);
+          decoded_len,&decrypted_key_len);
 
 
       JNXLOG(LDEBUG,"Completed with shared session key of %s",decrypted_key);
       oconnection->shared_secret = decrypted_key;
       free(decoded_key);
+      //Update notification of connection completed
+      if(controller->nc) {
+        controller->nc(oconnection);
+      }
       break;
   }
 
@@ -119,13 +127,20 @@ void internal_connnection_message_processor(connection_controller *controller,
 
 connection_controller *connection_controller_create(jnx_char *traffic_port, 
     jnx_uint8 family, 
-    const discovery_service *ds) {
+	const discovery_service *ds,
+        connection_controller_notification_connection_completed nc,
+        connection_controller_notification_connection_incoming ic,
+        connection_controller_notification_connection_closed cc) {
   connection_controller *controller = malloc(sizeof(connection_controller));
   controller->ds = ds;
   controller->port = strdup(traffic_port);
   controller->connections = jnx_list_create();
   controller->mux = wpprotocol_mux_create(traffic_port, 
       family,internal_connection_control_emitter, controller);
+  /* Notification handlers */
+  controller->nc = nc;
+  controller->ic = ic;
+  controller->cc = cc;
   return controller;
 }
 
@@ -184,6 +199,30 @@ connection_controller_state connection_controller_add_connection_request(
 connection_controller_state connection_controller_remove_connection_request(
     connection_controller *controller,
     connection_request *c) {
+  jnx_node *h = controller->connections->head;
+  jnx_node *previous = NULL;
+  while(h) {
+
+    connection_request *current = h->_data;
+    if(current) {
+      if(jnx_guid_compare(&(*c).id,&(*current).id) == JNX_GUID_STATE_SUCCESS){
+        jnx_node *current_node = h;
+        connection_request *current_request = current_node->_data;
+       
+        //Notify that the current connection is being closed and removed
+
+        free(current_node);
+        if(current_node->next_node) {
+          previous->next_node = current_node->next_node;
+          current_node->next_node->prev_node = previous;
+        }else {
+          previous->next_node = NULL;
+        }
+      }  
+    }
+    h = h->next_node;
+    previous = h;
+  }
 
   return E_CCS_OKAY;
 }

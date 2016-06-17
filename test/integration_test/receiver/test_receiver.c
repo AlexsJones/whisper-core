@@ -25,6 +25,15 @@
 static char *baddr = NULL;
 static char *interface = NULL;
 
+void on_connection_incoming(const connection_request *c) {
+  JNXLOG(LDEBUG,"Callback for incoming new connection");
+}
+void on_connection_completed(const connection_request *c) {
+  JNXLOG(LDEBUG,"Callback for completed connection");
+}
+void on_connection_closed(const connection_request *c) {
+  JNXLOG(LDEBUG,"Callback for connection closed");
+}
 void test_receiver() {
   JNXLOG(NULL, "test_linking");
  
@@ -39,7 +48,9 @@ void test_receiver() {
 
   discovery_service_start(ds, BROADCAST_UPDATE_STRATEGY);
 
-  connection_controller *connectionc = connection_controller_create("8080", AF_INET, ds);
+  connection_controller *connectionc = connection_controller_create("8080", AF_INET, ds,
+      on_connection_completed, on_connection_incoming, on_connection_closed);
+
 
   while (1) {
 
