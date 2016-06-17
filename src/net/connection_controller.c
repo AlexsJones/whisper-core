@@ -131,12 +131,20 @@ void internal_connnection_message_processor(connection_controller *controller,
       //This will be received by the initiator on successful connection from the
       //recipient
       oconnection->state = E_CRS_COMPLETE;
-      
-      
-      
-      if(controller->nc) {
-        controller->nc(oconnection);
+
+      jnx_char *decrypted = symmetrical_decrypt(oconnection->shared_secret,
+          message->action->contextdata->rawdata.data,
+          message->action->contextdata->rawdata.len);
+
+      if(strcmp(decrypted,"OKAY") == 0) {
+
+        if(controller->nc) {
+          controller->nc(oconnection);
+        }
+      }else {
+        JNXLOG(LERROR,"Could not decrypt the completion message successfully!");
       }
+      free(decrypted); 
       break;
   }
 
@@ -145,10 +153,10 @@ void internal_connnection_message_processor(connection_controller *controller,
 
 connection_controller *connection_controller_create(jnx_char *traffic_port, 
     jnx_uint8 family, 
-	const discovery_service *ds,
-        connection_controller_notification_connection_completed nc,
-        connection_controller_notification_connection_incoming ic,
-        connection_controller_notification_connection_closed cc) {
+    const discovery_service *ds,
+    connection_controller_notification_connection_completed nc,
+    connection_controller_notification_connection_incoming ic,
+    connection_controller_notification_connection_closed cc) {
   connection_controller *controller = malloc(sizeof(connection_controller));
   controller->ds = ds;
   controller->port = strdup(traffic_port);
@@ -226,7 +234,7 @@ connection_controller_state connection_controller_remove_connection_request(
       if(jnx_guid_compare(&(*c).id,&(*current).id) == JNX_GUID_STATE_SUCCESS){
         jnx_node *current_node = h;
         connection_request *current_request = current_node->_data;
-       
+
         //Notify that the current connection is being closed and removed
         connection_request_destroy(&current_request);
         free(current_node);

@@ -169,9 +169,16 @@ Wpmessage *connection_request_create_exchange_message(connection_request *req,
       jnx_guid_to_string(&(*req->local).guid,&str1);
       jnx_guid_to_string(&(*req->remote).guid,&str2);
       jnx_guid_to_string(&(*req).id,&connection_id);
+      
+      if(!req->shared_secret) {
+        JNXLOG(LERROR,"Should not be sending a completion message with no shared key!");
+        exit(1);
+      }
+      jnx_char *encrypted = symmetrical_encrypt(req->shared_secret,"OKAY",5);
+      
       w = wpprotocol_generate_message(&message,
           connection_id,str1,str2,
-          "Okay",5,SELECTED_ACTION__COMPLETED_SESSION);
+          encrypted,strlen(encrypted),SELECTED_ACTION__COMPLETED_SESSION);
       break;
   }
   JNXLOG(LDEBUG,"=====Created new exchange message=====");
