@@ -9,6 +9,7 @@ connection_request *connection_request_create(peer *remote,
   r->local = local;
   r->ds = ds;
   r->remote = remote;
+  r->shared_secret = NULL;
   r->keypair = asymmetrical_generate_key(2048);
   jnx_char *local_guid;
   jnx_char *remote_guid;
@@ -32,6 +33,9 @@ void connection_request_update_state(connection_request *req,
 }
 void connection_request_destroy(connection_request **req) {
   asymmetrical_destroy_key((*req)->keypair);
+  if((*req)->shared_secret) {
+    free((*req)->shared_secret);
+  }  
   JNXCHECK(*req);
   free(*req);
 }
@@ -158,6 +162,16 @@ Wpmessage *connection_request_create_exchange_message(connection_request *req,
       free(encrypted_string);
       free(decoded);
       free(buffer);
+      break;
+
+    case E_CRS_COMPLETE:
+      JNXLOG(LDEBUG,"E_CRS_COMPLETE");
+      jnx_guid_to_string(&(*req->local).guid,&str1);
+      jnx_guid_to_string(&(*req->remote).guid,&str2);
+      jnx_guid_to_string(&(*req).id,&connection_id);
+      w = wpprotocol_generate_message(&message,
+          connection_id,str1,str2,
+          "Okay",5,SELECTED_ACTION__COMPLETED_SESSION);
       break;
   }
   JNXLOG(LDEBUG,"=====Created new exchange message=====");

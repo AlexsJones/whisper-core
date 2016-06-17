@@ -66,7 +66,6 @@ void test_initiator() {
     }
   }
 
-
   connection_controller *connectionc = connection_controller_create("8080", 
       AF_INET, ds,
       on_connection_completed, on_connection_incoming,

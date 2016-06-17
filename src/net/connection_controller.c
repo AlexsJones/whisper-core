@@ -119,6 +119,24 @@ void internal_connnection_message_processor(connection_controller *controller,
       if(controller->nc) {
         controller->nc(oconnection);
       }
+      //Tell the initiator we're all set
+      out_message = connection_request_create_exchange_message(oconnection,message,
+          E_CRS_COMPLETE);
+      wpprotocol_mux_push(controller->mux,out_message);
+      break;
+
+    case SELECTED_ACTION__COMPLETED_SESSION:
+      JNXCHECK(oconnection);
+      JNXLOG(LDEBUG,"Message action -> SELECTED_ACTION__COMPLETED_SESSION");
+      //This will be received by the initiator on successful connection from the
+      //recipient
+      oconnection->state = E_CRS_COMPLETE;
+      
+      
+      
+      if(controller->nc) {
+        controller->nc(oconnection);
+      }
       break;
   }
 
@@ -210,7 +228,7 @@ connection_controller_state connection_controller_remove_connection_request(
         connection_request *current_request = current_node->_data;
        
         //Notify that the current connection is being closed and removed
-
+        connection_request_destroy(&current_request);
         free(current_node);
         if(current_node->next_node) {
           previous->next_node = current_node->next_node;
