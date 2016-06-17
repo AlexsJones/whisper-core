@@ -16,8 +16,8 @@
  * =====================================================================================
  */
 #include <stdlib.h>
-#include <jnxc_headers/jnxsocket.h>
-#include <jnxc_headers/jnxlog.h>
+#include <jnxc_headers/jnx_socket.h>
+#include <jnxc_headers/jnx_log.h>
 #include <jnxc_headers/jnx_tcp_socket.h>
 #include "discovery.h"
 #include "connection_controller.h"
