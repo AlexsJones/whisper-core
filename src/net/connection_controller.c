@@ -222,33 +222,25 @@ connection_controller_state connection_controller_add_connection_request(
   jnx_list_add(controller->connections,c);
   return E_CCS_OKAY;
 }
+int compare_connection(void *a, void *b) {
+  
+  connection_request *ac = (connection_request*)a;
+  connection_request *bc = (connection_request*)b;
+
+  if(jnx_guid_compare(&(*ac).id,&(*bc).id) == JNX_GUID_STATE_SUCCESS) {
+    return 0;
+  }
+  return -1;
+}
 connection_controller_state connection_controller_remove_connection_request(
     connection_controller *controller,
     connection_request *c) {
-  jnx_node *h = controller->connections->head;
-  jnx_node *previous = NULL;
-  while(h) {
 
-    connection_request *current = h->_data;
-    if(current) {
-      if(jnx_guid_compare(&(*c).id,&(*current).id) == JNX_GUID_STATE_SUCCESS){
-        jnx_node *current_node = h;
-        connection_request *current_request = current_node->_data;
-
-        //Notify that the current connection is being closed and removed
-        connection_request_destroy(&current_request);
-        free(current_node);
-        if(current_node->next_node) {
-          previous->next_node = current_node->next_node;
-          current_node->next_node->prev_node = previous;
-        }else {
-          previous->next_node = NULL;
-        }
-      }  
-    }
-    h = h->next_node;
-    previous = h;
+  connection_request *r = jnx_list_remove_from(&(*controller).connections,
+      c,compare_connection);  
+  if(!r) {
+    return E_CCS_FAILED;
   }
-
+  connection_request_destroy(&r);
   return E_CCS_OKAY;
 }

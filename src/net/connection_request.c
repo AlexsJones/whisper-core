@@ -121,8 +121,10 @@ Wpmessage *connection_request_create_exchange_message(connection_request *req,
       //Generate shared secret and encrypt it
       jnx_char *raw = incoming_message->action->contextdata->rawdata.data;
       jnx_size out_decoded;
-      jnx_char *decoded = decode_to_string(raw,strlen(raw),&out_decoded);
+      jnx_char *decoded = decode_to_string(raw,
+          incoming_message->action->contextdata->rawdata.len,&out_decoded);
       JNXLOG(LDEBUG,"Decoded to string %s",decoded);
+      JNXCHECK(decoded);
       RSA *remote_keypair = asymmetrical_key_from_string(decoded,PUBLIC);
       JNXLOG(LDEBUG,"Generated from remote public key");
       jnx_uint8 *buffer;
@@ -169,13 +171,13 @@ Wpmessage *connection_request_create_exchange_message(connection_request *req,
       jnx_guid_to_string(&(*req->local).guid,&str1);
       jnx_guid_to_string(&(*req->remote).guid,&str2);
       jnx_guid_to_string(&(*req).id,&connection_id);
-      
+
       if(!req->shared_secret) {
         JNXLOG(LERROR,"Should not be sending a completion message with no shared key!");
         exit(1);
       }
       jnx_char *encrypted = symmetrical_encrypt(req->shared_secret,"OKAY",5);
-      
+
       w = wpprotocol_generate_message(&message,
           connection_id,str1,str2,
           encrypted,strlen(encrypted),SELECTED_ACTION__COMPLETED_SESSION);
