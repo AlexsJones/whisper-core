@@ -47,6 +47,15 @@ The core acts as the framework for higher level programs to hook into.
 
 
 
+### Requirements
+
+```
+cmake
+build-essential
+protobuf-c-compiler
+lib-ssl
+```
+
 #### Installation <a id="installation"></a>
 
 
