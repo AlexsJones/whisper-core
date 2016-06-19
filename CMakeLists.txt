@@ -16,6 +16,7 @@ add_subdirectory(src/crypto)
 add_subdirectory(src/data)
 add_subdirectory(src/integrity)
 add_subdirectory(src/net)
+add_subdirectory(src/session)
 add_subdirectory(src/util)
 
 include_directories(${PROJECT_INC_DIR}src/crypto)
