@@ -2,19 +2,23 @@
 *     File Name           :     /home/jonesax/Work/whisper-core/src/session/session.c
 *     Created By          :     jonesax
 *     Creation Date       :     [2016-06-19 17:03]
-*     Last Modified       :     [2016-06-19 17:04]
+*     Last Modified       :     [2016-06-19 18:12]
 *     Description         :      
 **********************************************************************************/
 
 #include "session.h"
 
-session *session_create(peer *remote,connection_controller *c) {
+session *session_create() {
   session *s = malloc(sizeof(session));
-  s->controller = c;
+  s->connection_request_list = jnx_list_create();
   return s;
 }
+void session_add_connection(session *s, connection_request *c) {
+  jnx_list_add(s->connection_request_list,c);
+}
 void session_destroy(session **s) {
- 
-  *s = NULL;
+
+  jnx_list_destroy(&(*s)->connection_request_list);
   free(*s);
+  *s = NULL;
 }

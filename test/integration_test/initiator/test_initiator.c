@@ -22,26 +22,12 @@
 #include <jnxc_headers/jnx_log.h>
 #include <jnxc_headers/jnx_tcp_socket.h>
 #include "connection_controller.h"
+#include "session_controller.h"
 #include "discovery.h"
 static char *baddr = NULL;
 static char *interface = NULL;
-static running = 1;
 connection_controller *connectionc;
 
-void on_connection_incoming(const connection_request *c) {
-  JNXLOG(LDEBUG,"Callback for incoming new connection");
-}
-void on_connection_completed(const connection_request *c) {
-  JNXLOG(LDEBUG,"Callback for completed connection");
-  
-  connection_controller_remove_connection_request(connectionc,
-      (connection_request*)c);
-  JNXLOG(LDEBUG,"Connection complete!");
-  running = 0;
-}
-void on_connection_closed(const connection_request *c) {
-  JNXLOG(LDEBUG,"Callback for connection closed");
-}
 void test_initiator() {
 
   peerstore *store = peerstore_init(local_peer_for_user("initiator_bob",10,interface), 0);
@@ -75,18 +61,21 @@ void test_initiator() {
 
   connectionc = connection_controller_create("8080", 
       AF_INET, ds,
-      on_connection_completed, on_connection_incoming,
-      on_connection_closed);
+      NULL,NULL,NULL);
 
-  connection_request *request;
-  connection_controller_initiation_request(connectionc,remote_peer, &request);
 
-  while(running) {
+  session_controller *sc = session_controller_create(connectionc);
+
+  session* sess = session_controller_session_create(sc,remote_peer);
+
+  while(!session_controller_is_session_ready(sc,sess)) {
 
     connection_controller_tick(connectionc);
 
     sleep(1);
   }
+
+  session_controller_destroy(&sc);
 
   connection_controller_destroy(&connectionc);
 }
