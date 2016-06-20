@@ -2,7 +2,7 @@
  *     File Name           :     /home/jonesax/Work/whisper-core/src/session/session_controller.c
  *     Created By          :     jonesax
  *     Creation Date       :     [2016-06-19 17:30]
- *     Last Modified       :     [2016-06-20 11:45]
+ *     Last Modified       :     [2016-06-20 14:22]
  *     Description         :      
  **********************************************************************************/
 #include "session_controller.h"
