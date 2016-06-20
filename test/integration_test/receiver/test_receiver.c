@@ -28,7 +28,7 @@ static char *interface = NULL;
 
 void test_receiver() {
   JNXLOG(NULL, "test_linking");
- 
+
   jnx_guid h;
   jnx_guid_create(&h);
 
@@ -44,14 +44,24 @@ void test_receiver() {
       NULL,NULL,NULL);
 
   session_controller *sc = session_controller_create(connectionc);
-
+  
+  
   while (1) {
 
     connection_controller_tick(connectionc);
  
-  }
-  session_controller_detroy(&sc);
+    if(sc->session_list->head) {
+      
+      session *s = sc->session_list->head->_data;
+      if(session_controller_is_session_ready(sc,s)) {
+        connection_controller_tick(connectionc);
+        break;
+      }
+    }
   
+  }
+  session_controller_destroy(&sc);
+
   connection_controller_destroy(&connectionc);
 }
 
