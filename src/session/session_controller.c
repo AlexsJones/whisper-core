@@ -2,7 +2,7 @@
  *     File Name           :     /home/jonesax/Work/whisper-core/src/session/session_controller.c
  *     Created By          :     jonesax
  *     Creation Date       :     [2016-06-19 17:30]
- *     Last Modified       :     [2016-06-20 14:22]
+ *     Last Modified       :     [2016-06-20 14:58]
  *     Description         :      
  **********************************************************************************/
 #include "session_controller.h"
@@ -113,8 +113,13 @@ int session_controller_is_session_ready(session_controller *sc,
     session *s) {
 
   jnx_list *connection_list = s->connection_request_list;
-
+  if(!connection_list) {
+    return 0;
+  }
   jnx_node *head = connection_list->head;
+  if(!head) {
+    return 0;
+  }
   while(head) {
 
     connection_request *r = head->_data;

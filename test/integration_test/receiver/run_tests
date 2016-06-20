@@ -50,7 +50,6 @@ function test_against_file()
     exit 1
   fi
 
-  ARGS="DEBUG"
   if [ "$ARGS" == "DEBUG" ]; then
     echo "Using debugger..."
     if hash lldb 2>/dev/null; then
