@@ -198,6 +198,7 @@ connection_controller_state connection_controller_initiation_request(
   connection_request *c = connection_request_create(remote,controller->ds);
   //Update connection state
   c->state = E_CRS_INITIAL_CHALLENGE;
+  *outrequest = NULL;
   jnx_char *connection_id;
   jnx_guid_to_string(&(*c).id,&connection_id);
   JNXLOG(LDEBUG, "Generated new connection with id %s", connection_id);
@@ -210,6 +211,7 @@ connection_controller_state connection_controller_initiation_request(
 
   JNXCHECK(connection_controller_add_connection_request(controller,c) == E_CCS_OKAY);
 
+  *outrequest = c;
   return E_CCS_OKAY;
 }
 connection_request_state connection_controller_fetch_state(

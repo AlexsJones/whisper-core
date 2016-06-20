@@ -29,7 +29,8 @@ session_controller *session_controller_create(
 }
 session *session_controller_session_create(session_controller *s,
     peer *remote_peer) {
-
+  JNXLOG(LDEBUG,"------------------------------------------------------------");
+  JNXLOG(LDEBUG,"Creating new session!");
   session *ses = session_create();
   //Add the peer as a connection
   connection_request *request;
@@ -37,15 +38,17 @@ session *session_controller_session_create(session_controller *s,
       s->connection_controller,remote_peer,
       &request);
   JNXCHECK(e == E_CCS_OKAY);
+  JNXCHECK(request);
   session_add_connection(ses,request);
  
   jnx_char *sguid, *rguid;
   jnx_guid_to_string(&(*ses).id,&sguid);
   jnx_guid_to_string(&(*request).id,&rguid);
-  JNXLOG(LDEBUG,"Created new session %s with connection request %s",
+  JNXLOG(LDEBUG,"--------------Created new session %s with connection request %s",
       sguid,rguid);
   free(sguid);
   free(rguid);
+  JNXLOG(LDEBUG,"------------------------------------------------------------");
   return ses;
 }
 void session_controller_session_add_peer(session_controller *sc,
