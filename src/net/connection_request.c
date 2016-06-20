@@ -11,6 +11,7 @@ connection_request *connection_request_create(peer *remote,
   r->remote = remote;
   r->shared_secret = NULL;
   r->keypair = asymmetrical_generate_key(2048);
+  jnx_guid_create(&(*r).id); 
   jnx_char *local_guid;
   jnx_char *remote_guid;
   jnx_guid_to_string(&(*r->local).guid,&local_guid); 

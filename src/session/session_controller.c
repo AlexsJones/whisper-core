@@ -2,7 +2,7 @@
  *     File Name           :     /home/jonesax/Work/whisper-core/src/session/session_controller.c
  *     Created By          :     jonesax
  *     Creation Date       :     [2016-06-19 17:30]
- *     Last Modified       :     [2016-06-19 19:33]
+ *     Last Modified       :     [2016-06-20 10:58]
  *     Description         :      
  **********************************************************************************/
 #include "session_controller.h"
@@ -36,9 +36,16 @@ session *session_controller_session_create(session_controller *s,
   connection_controller_state e = connection_controller_initiation_request(
       s->connection_controller,remote_peer,
       &request);
-
+  JNXCHECK(e == E_CCS_OKAY);
   session_add_connection(ses,request);
-
+ 
+  jnx_char *sguid, *rguid;
+  jnx_guid_to_string(&(*ses).id,&sguid);
+  jnx_guid_to_string(&(*request).id,&rguid);
+  JNXLOG(LDEBUG,"Created new session %s with connection request %s",
+      sguid,rguid);
+  free(sguid);
+  free(rguid);
   return ses;
 }
 void session_controller_session_add_peer(session_controller *sc,
@@ -60,10 +67,14 @@ int session_controller_is_session_ready(session_controller *sc,
   while(head) {
 
     connection_request *r = head->_data;
+    jnx_char *guid;
+    jnx_guid_to_string(&(*r).id,&guid);
     if(r->state != E_CRS_COMPLETE) {
-      JNXLOG(LDEBUG,"Session found connection request that is not ready");
+      JNXLOG(LDEBUG,"Session found connection request %s that is not ready",guid);
+      free(guid);
       return 0;
     } 
+    free(guid);
     head = head->next_node;
   }
   JNXLOG(LDEBUG,"Session found that all of its connections are ready!");
