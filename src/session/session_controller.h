@@ -2,7 +2,7 @@
 *     File Name           :     src/session/session_controller.h
 *     Created By          :     jonesax
 *     Creation Date       :     [2016-06-19 17:21]
-*     Last Modified       :     [2016-06-19 18:08]
+*     Last Modified       :     [2016-06-20 11:38]
 *     Description         :      
 **********************************************************************************/
 #ifndef __SESSION_CONTROLLER_H__
@@ -13,6 +13,7 @@
 typedef struct session_controller {
   connection_controller *connection_controller;
   jnx_list *session_list; 
+  const discovery_service *discovery;
 }session_controller;
 
 session_controller *session_controller_create(
@@ -20,6 +21,18 @@ session_controller *session_controller_create(
 
 session *session_controller_session_create(session_controller *s,
     peer *remote_peer);
+
+typedef enum E_SC_STATE{ 
+  E_SC_OKAY,
+  E_SC_FAILED
+}E_SC_STATE;
+
+E_SC_STATE session_controller_add_session(session_controller *sc, session *s);
+
+E_SC_STATE session_controller_remove_session(session_controller *sc, session *s);
+
+session *session_controller_session_create_from_incoming(session_controller *s,
+    connection_request *req);
 
 void session_controller_session_add_peer(session_controller *sc,
     session *s, peer *remote_peer);

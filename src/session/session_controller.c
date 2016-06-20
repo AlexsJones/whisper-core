@@ -2,14 +2,24 @@
  *     File Name           :     /home/jonesax/Work/whisper-core/src/session/session_controller.c
  *     Created By          :     jonesax
  *     Creation Date       :     [2016-06-19 17:30]
- *     Last Modified       :     [2016-06-20 10:58]
+ *     Last Modified       :     [2016-06-20 11:45]
  *     Description         :      
  **********************************************************************************/
 #include "session_controller.h"
 #include "connection_controller.h"
 
+static session_controller *scontroller_handle = NULL;
+
 void internal_incoming(const connection_request *c) { 
   JNXLOG(LDEBUG,"Session controller internal incoming");
+  //Create a session based on the incoming connection
+  JNXCHECK(scontroller_handle);
+  connection_request *connection = (connection_request*)c;
+  session *s = session_controller_session_create_from_incoming((session_controller*)
+      scontroller_handle,
+      (connection_request*)connection);
+
+  session_controller_add_session(scontroller_handle,s);
 }
 void internal_completed(const connection_request *c) {
   JNXLOG(LDEBUG,"Session controller internal completed");
@@ -25,12 +35,31 @@ session_controller *session_controller_create(
   sc->connection_controller->nc = internal_completed;
   sc->connection_controller->ic = internal_incoming;
   sc->connection_controller->cc = internal_closed;
+  
+  scontroller_handle = sc;
   return sc;
+}
+E_SC_STATE session_controller_add_session(session_controller *sc, session *s) {
+  jnx_list_add(sc->session_list,s);
+}
+int compare_sessions(void *A, void *B) {
+
+  session *sa = (session*)A;
+  session *sb = (session*)B;
+
+  if(jnx_guid_compare(&(*sa).id,&(*sb).id) == JNX_GUID_STATE_SUCCESS) {
+    return 0;
+  }
+
+  return 1;
+}
+E_SC_STATE session_controller_remove_session(session_controller *sc, session *s) {
+  
+  jnx_list_remove_from(&(*sc).session_list,s,compare_sessions);
 }
 session *session_controller_session_create(session_controller *s,
     peer *remote_peer) {
   JNXLOG(LDEBUG,"------------------------------------------------------------");
-  JNXLOG(LDEBUG,"Creating new session!");
   session *ses = session_create();
   //Add the peer as a connection
   connection_request *request;
@@ -48,6 +77,25 @@ session *session_controller_session_create(session_controller *s,
       sguid,rguid);
   free(sguid);
   free(rguid);
+  JNXLOG(LDEBUG,"------------------------------------------------------------");
+  session_controller_add_session(s,ses);
+  return ses;
+}
+session *session_controller_session_create_from_incoming(session_controller *s,
+    connection_request *req) {
+
+  JNXLOG(LDEBUG,"------------------------------------------------------------");
+  session *ses = session_create();
+  session_add_connection(ses,req);
+
+  jnx_char *sguid, *rguid;
+  jnx_guid_to_string(&(*ses).id,&sguid);
+  jnx_guid_to_string(&(*req).id,&rguid);
+  JNXLOG(LDEBUG,"--------------Created new response session %s with connection request %s",
+      sguid,rguid);
+  free(sguid);
+  free(rguid);
+  JNXLOG(LDEBUG,"------------------------------------------------------------");
   JNXLOG(LDEBUG,"------------------------------------------------------------");
   return ses;
 }
@@ -85,7 +133,16 @@ int session_controller_is_session_ready(session_controller *sc,
 }
 void session_controller_destroy(session_controller **sc) {
 
+  jnx_node *h = (*sc)->session_list->head;
+
+  while(h) {
+    session *s = h->_data;
+    session_destroy(&s); 
+    h = h->next_node;
+  }
+
   jnx_list_destroy(&(*sc)->session_list);
   free(*sc);
   *sc = NULL;
+  scontroller_handle = NULL;
 }
