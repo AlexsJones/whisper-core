@@ -2,7 +2,7 @@
  *     File Name           :     /home/jonesax/Work/whisper-core/src/session/session_controller.c
  *     Created By          :     jonesax
  *     Creation Date       :     [2016-06-19 17:30]
- *     Last Modified       :     [2016-06-20 14:22]
+ *     Last Modified       :     [2016-06-20 14:54]
  *     Description         :      
  **********************************************************************************/
 #include "session_controller.h"
@@ -130,6 +130,11 @@ int session_controller_is_session_ready(session_controller *sc,
   }
   JNXLOG(LDEBUG,"Session found that all of its connections are ready!");
   return 1;
+}
+void session_controller_session_message_send(session_controller *sc,
+    session *s) {
+
+
 }
 void session_controller_destroy(session_controller **sc) {
 
