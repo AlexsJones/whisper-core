@@ -52,7 +52,7 @@ Wpmessage *connection_request_create_initiation_message(connection_request *req,
   jnx_char *public_key = asymmetrical_key_to_string(req->keypair,PUBLIC);
   jnx_size osize;
   jnx_uint8 *encoded_public_key = encode_from_string(public_key,
-      strlen(public_key)+1, &osize); 
+      strlen(public_key), &osize); 
 
   JNXLOG(LDEBUG,encoded_public_key);
   jnx_guid_to_string(&(*req->local).guid,&str1);
@@ -98,7 +98,7 @@ Wpmessage *connection_request_create_exchange_message(connection_request *req,
       reply_public_key = asymmetrical_key_to_string(req->keypair,PUBLIC);
       jnx_size encoded_len;
       jnx_char *encoded = encode_from_string(reply_public_key,
-          strlen(reply_public_key) +1,&encoded_len);
+          strlen(reply_public_key),&encoded_len);
       jnx_guid_to_string(&(*req->local).guid,&str1);
       jnx_guid_to_string(&(*req->remote).guid,&str2);
       jnx_guid_to_string(&(*req).id,&connection_id);
