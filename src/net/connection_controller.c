@@ -2,6 +2,7 @@
 #include "encoding.h"
 #include <jnxc_headers/jnx_check.h>
 #include <jnxc_headers/jnx_guid.h>
+
 void internal_connection_control_emitter(Wpmessage *message, void *opt_args){
   connection_controller *controller = (connection_controller*)opt_args;
   jnx_size osize;
@@ -192,7 +193,6 @@ void connection_controller_tick(connection_controller *controller) {
     internal_connnection_message_processor(controller, outmessage);
   }
 }
-
 connection_controller_state connection_controller_initiation_request(
     connection_controller *controller, peer *remote, connection_request **outrequest) {
   connection_request *c = connection_request_create(remote,controller->ds);

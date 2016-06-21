@@ -110,7 +110,6 @@ Wpmessage *connection_request_create_exchange_message(connection_request *req,
           str1,str2,
           encoded,encoded_len,
           SELECTED_ACTION__RESPONDING_CREATED_SESSION);
-
       JNXCHECK(w == E_WGS_OKAY);
       free(encoded);
       break;
@@ -159,7 +158,6 @@ Wpmessage *connection_request_create_exchange_message(connection_request *req,
           str1,str2,
           encoded_secret,encoded_secret_len,
           SELECTED_ACTION__SHARING_SESSION_KEY);
-
       JNXCHECK(w == E_WGS_OKAY);
       free(encoded_secret);
       free(encrypted_string);
@@ -172,16 +170,15 @@ Wpmessage *connection_request_create_exchange_message(connection_request *req,
       jnx_guid_to_string(&(*req->local).guid,&str1);
       jnx_guid_to_string(&(*req->remote).guid,&str2);
       jnx_guid_to_string(&(*req).id,&connection_id);
-
       if(!req->shared_secret) {
         JNXLOG(LERROR,"Should not be sending a completion message with no shared key!");
         exit(1);
       }
       jnx_char *encrypted = symmetrical_encrypt(req->shared_secret,"OKAY",5);
-
       w = wpprotocol_generate_message(&message,
           connection_id,str1,str2,
           encrypted,strlen(encrypted),SELECTED_ACTION__COMPLETED_SESSION);
+      free(encrypted);
       break;
   }
   JNXLOG(LDEBUG,"=====Created new exchange message=====");

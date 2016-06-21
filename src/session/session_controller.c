@@ -2,7 +2,7 @@
  *     File Name           :     /home/jonesax/Work/whisper-core/src/session/session_controller.c
  *     Created By          :     jonesax
  *     Creation Date       :     [2016-06-19 17:30]
- *     Last Modified       :     [2016-06-21 08:12]
+ *     Last Modified       :     [2016-06-21 08:51]
  *     Description         :      
  **********************************************************************************/
 #include "session_controller.h"
@@ -15,7 +15,8 @@ void internal_incoming(const connection_request *c) {
   //Create a session based on the incoming connection
   JNXCHECK(scontroller_handle);
   connection_request *connection = (connection_request*)c;
-  session *s = session_controller_session_create_from_incoming((session_controller*)
+  session *s = session_controller_session_create_from_incoming(
+      (session_controller*)
       scontroller_handle,
       (connection_request*)connection);
 
@@ -35,7 +36,7 @@ session_controller *session_controller_create(
   sc->connection_controller->nc = internal_completed;
   sc->connection_controller->ic = internal_incoming;
   sc->connection_controller->cc = internal_closed;
-  
+
   scontroller_handle = sc;
   return sc;
 }
@@ -43,18 +44,15 @@ E_SC_STATE session_controller_add_session(session_controller *sc, session *s) {
   jnx_list_add(sc->session_list,s);
 }
 int compare_sessions(void *A, void *B) {
-
   session *sa = (session*)A;
   session *sb = (session*)B;
-
   if(jnx_guid_compare(&(*sa).id,&(*sb).id) == JNX_GUID_STATE_SUCCESS) {
     return 0;
   }
-
   return 1;
 }
 E_SC_STATE session_controller_remove_session(session_controller *sc, session *s) {
-  
+
   jnx_list_remove_from(&(*sc).session_list,s,compare_sessions);
 }
 session *session_controller_session_create(session_controller *s,
@@ -69,7 +67,7 @@ session *session_controller_session_create(session_controller *s,
   JNXCHECK(e == E_CCS_OKAY);
   JNXCHECK(request);
   session_add_connection(ses,request);
- 
+
   jnx_char *sguid, *rguid;
   jnx_guid_to_string(&(*ses).id,&sguid);
   jnx_guid_to_string(&(*request).id,&rguid);
@@ -126,7 +124,8 @@ int session_controller_is_session_ready(session_controller *sc,
     jnx_char *guid;
     jnx_guid_to_string(&(*r).id,&guid);
     if(r->state != E_CRS_COMPLETE) {
-      JNXLOG(LDEBUG,"Session found connection request %s that is not ready",guid);
+      JNXLOG(LDEBUG,"Session found connection request %s that is not ready"
+          ,guid);
       free(guid);
       return 0;
     } 
@@ -137,15 +136,12 @@ int session_controller_is_session_ready(session_controller *sc,
   return 1;
 }
 void session_controller_destroy(session_controller **sc) {
-
   jnx_node *h = (*sc)->session_list->head;
-
   while(h) {
     session *s = h->_data;
     session_destroy(&s); 
     h = h->next_node;
   }
-
   jnx_list_destroy(&(*sc)->session_list);
   free(*sc);
   *sc = NULL;
