@@ -2,7 +2,7 @@
 *     File Name           :     src/session/session.h
 *     Created By          :     jonesax
 *     Creation Date       :     [2016-06-19 16:58]
-*     Last Modified       :     [2016-06-20 10:57]
+*     Last Modified       :     [2016-06-21 08:23]
 *     Description         :      
 **********************************************************************************/
 
@@ -19,6 +19,8 @@ typedef struct session {
 session *session_create();
 
 void session_add_connection(session *s, connection_request *c);
+
+void session_remove_connection(session *s, connection_request *c);
 
 void session_destroy(session **s);
 #endif

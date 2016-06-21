@@ -225,10 +225,8 @@ connection_controller_state connection_controller_add_connection_request(
   return E_CCS_OKAY;
 }
 int compare_connection(void *a, void *b) {
-  
   connection_request *ac = (connection_request*)a;
   connection_request *bc = (connection_request*)b;
-
   if(jnx_guid_compare(&(*ac).id,&(*bc).id) == JNX_GUID_STATE_SUCCESS) {
     return 0;
   }
