@@ -223,7 +223,7 @@ Wpmessage *connection_request_send_message(connection_request *req, jnx_char *me
   Wpmessage *omessage;
   wp_generation_state w = wpprotocol_generate_message(&omessage,
           connection_id,str1,str2,
-          encrypted,strlen(encrypted),SELECTED_ACTION__COMPLETED_SESSION);
+          encrypted,strlen(encrypted) +1,SELECTED_ACTION__COMMUNICATING_SESSION);
 
   free(encrypted);
   return omessage;

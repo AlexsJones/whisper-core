@@ -172,6 +172,7 @@ connection_request_state connection_controller_connection_request_send_message(
     return E_CCS_FAILED;
   }
 
+  wpprotocol_mux_push(controller->mux,m);
   return E_CCS_OKAY;
 }
 connection_controller *connection_controller_create(jnx_char *traffic_port, 
