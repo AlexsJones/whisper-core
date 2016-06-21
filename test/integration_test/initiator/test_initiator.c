@@ -75,6 +75,10 @@ void test_initiator() {
     sleep(1);
   }
 
+  session_controller_session_send_message(sc,sess,
+      "Hello!",6);
+  
+  sleep(1);
   session_controller_destroy(&sc);
 
   connection_controller_destroy(&connectionc);

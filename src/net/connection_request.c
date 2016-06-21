@@ -199,3 +199,32 @@ Wpmessage *connection_request_create_exchange_message(connection_request *req,
   }
   return message;
 }
+
+Wpmessage *connection_request_send_message(connection_request *req, jnx_char *message, jnx_size message_len) {
+  if(!req->shared_secret) {
+    JNXLOG(LERROR,"connection_request_send_message: No shared secret!");
+    return NULL;
+  }
+  if(!req->remote) {
+    JNXLOG(LERROR,"connection_request_send_message has no remote peer to send message - has handshaking completed?");
+    return NULL;
+  }
+  jnx_char *connection_id = NULL;
+  jnx_char *str1 = NULL;
+  jnx_char *str2 = NULL;
+
+  jnx_guid_to_string(&(*req->local).guid,&str1);
+  jnx_guid_to_string(&(*req->remote).guid,&str2);
+  jnx_guid_to_string(&(*req).id,&connection_id);
+
+  //Encrypt with shared session key
+  jnx_char *encrypted = symmetrical_encrypt(req->shared_secret,message,message_len);
+
+  Wpmessage *omessage;
+  wp_generation_state w = wpprotocol_generate_message(&omessage,
+          connection_id,str1,str2,
+          encrypted,strlen(encrypted),SELECTED_ACTION__COMPLETED_SESSION);
+
+  free(encrypted);
+  return omessage;
+}

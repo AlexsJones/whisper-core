@@ -41,5 +41,8 @@ int session_controller_is_session_ready(session_controller *sc,
     session *s);
 
 void session_controller_destroy(session_controller **sc);
+
+void session_controller_session_send_message(session_controller *sc, session *s, 
+  jnx_char *message, jnx_size message_len);
 #endif
 

@@ -2,7 +2,7 @@
  *     File Name           :     /home/jonesax/Work/whisper-core/src/session/session_controller.c
  *     Created By          :     jonesax
  *     Creation Date       :     [2016-06-19 17:30]
- *     Last Modified       :     [2016-06-21 08:51]
+ *     Last Modified       :     [2016-06-21 09:59]
  *     Description         :      
  **********************************************************************************/
 #include "session_controller.h"
@@ -146,4 +146,28 @@ void session_controller_destroy(session_controller **sc) {
   free(*sc);
   *sc = NULL;
   scontroller_handle = NULL;
+}
+void session_controller_session_send_message(session_controller *sc, session *s,
+  jnx_char *message,jnx_size message_len) {
+
+  jnx_node *head = s->connection_request_list->head;
+  while(head) {
+    connection_request *req = head->_data;
+    if(req->state != E_CRS_COMPLETE)  {
+      JNXLOG(LERROR,"Cannot send message when one of the connection requests is pending!");
+      return;
+    }
+
+    connection_request_state e = connection_controller_connection_request_send_message(sc->connection_controller,
+      req,message,message_len);
+
+    if(e != E_CCS_OKAY) {
+      jnx_char *cstr;
+      jnx_guid_to_string(&(*req).id,&cstr);
+      JNXLOG(LERROR,"Error sending message from connection %s",cstr);
+      free(cstr);
+    }
+
+    head = head->next_node;
+  }
 }

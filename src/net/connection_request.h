@@ -41,6 +41,8 @@ Wpmessage *connection_request_create_exchange_message(connection_request *req,
     Wpmessage *incoming_message, 
     connection_request_state s);
 
+Wpmessage *connection_request_send_message(connection_request *req, jnx_char *message, jnx_size message_len);
+
 void connection_request_update_state(connection_request *req, 
     connection_request_state s);
 

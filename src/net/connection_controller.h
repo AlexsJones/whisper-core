@@ -50,6 +50,10 @@ connection_controller_state connection_controller_initiation_request(
 connection_request_state connection_controller_fetch_state(connection_request 
     *request);
 
+connection_request_state connection_controller_connection_request_send_message(
+  connection_controller *controller, connection_request *r, jnx_char *message, 
+  jnx_size message_len);
+
 connection_controller_state connection_controller_add_connection_request(
     connection_controller *controller,
     connection_request *c);
@@ -57,4 +61,5 @@ connection_controller_state connection_controller_add_connection_request(
 connection_controller_state connection_controller_remove_connection_request(
     connection_controller *controller,
     connection_request *c);
+
 #endif
