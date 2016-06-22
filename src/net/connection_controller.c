@@ -156,6 +156,10 @@ void internal_connnection_message_processor(connection_controller *controller,
 
           JNXLOG(LDEBUG,"Message %s",incoming_message);
 
+          if(controller->cmr) {
+            controller->cmr(oconnection, incoming_message, 
+                strlen(incoming_message) +1);
+          }
           free(incoming_message);
 
       break;
@@ -180,7 +184,8 @@ connection_controller *connection_controller_create(jnx_char *traffic_port,
     const discovery_service *ds,
     connection_controller_notification_connection_completed nc,
     connection_controller_notification_connection_incoming ic,
-    connection_controller_notification_connection_closed cc) {
+    connection_controller_notification_connection_closed cc,
+    connection_controller_notification_connection_message_received cmr) {
   connection_controller *controller = malloc(sizeof(connection_controller));
   controller->ds = ds;
   controller->port = strdup(traffic_port);
@@ -191,6 +196,7 @@ connection_controller *connection_controller_create(jnx_char *traffic_port,
   controller->nc = nc;
   controller->ic = ic;
   controller->cc = cc;
+  controller->cmr = cmr;
   return controller;
 }
 

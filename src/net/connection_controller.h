@@ -21,6 +21,10 @@ typedef void (*connection_controller_notification_connection_incoming)
   /* Notification of connection has been closed */
   typedef void (*connection_controller_notification_connection_closed)(
       const connection_request *c);
+  /* Notification of a connection receiving an encrypted message - post handshake*/
+  /* Warning: User does not own decrypted_message pointer and should not release it */
+typedef void (*connection_controller_notification_connection_message_received)
+  (const connection_request *c,const jnx_char *decrypted_message, jnx_size message_len);
 
   typedef struct connection_controller {
     wp_mux *mux;
@@ -30,6 +34,7 @@ typedef void (*connection_controller_notification_connection_incoming)
     connection_controller_notification_connection_completed nc;
     connection_controller_notification_connection_incoming ic;
     connection_controller_notification_connection_closed cc;
+    connection_controller_notification_connection_message_received cmr;
   }connection_controller;
 
 connection_controller *connection_controller_create(jnx_char *traffic_port, 
@@ -37,7 +42,8 @@ connection_controller *connection_controller_create(jnx_char *traffic_port,
     const discovery_service *ds,
     connection_controller_notification_connection_completed nc,
     connection_controller_notification_connection_incoming ic,
-    connection_controller_notification_connection_closed cc);
+    connection_controller_notification_connection_closed cc,
+    connection_controller_notification_connection_message_received cmr);
 
 void *connection_controller_destroy(connection_controller **controller);
 
@@ -51,8 +57,8 @@ connection_request_state connection_controller_fetch_state(connection_request
     *request);
 
 connection_request_state connection_controller_connection_request_send_message(
-  connection_controller *controller, connection_request *r, jnx_char *message, 
-  jnx_size message_len);
+    connection_controller *controller, connection_request *r, jnx_char *message, 
+    jnx_size message_len);
 
 connection_controller_state connection_controller_add_connection_request(
     connection_controller *controller,

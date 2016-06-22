@@ -2,7 +2,7 @@
 *     File Name           :     src/session/session.h
 *     Created By          :     jonesax
 *     Creation Date       :     [2016-06-19 16:58]
-*     Last Modified       :     [2016-06-21 08:23]
+*     Last Modified       :     [2016-06-22 11:29]
 *     Description         :      
 **********************************************************************************/
 
@@ -11,6 +11,7 @@
 #include "peer.h"
 #include "connection_request.h"
 #include <jnxc_headers/jnx_guid.h>
+
 typedef struct session {
   jnx_guid id;
   jnx_list *connection_request_list;

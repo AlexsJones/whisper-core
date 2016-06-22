@@ -25,6 +25,17 @@
 
 static char *baddr = NULL;
 static char *interface = NULL;
+static connection_controller *connectionc;
+static session_controller *sc;
+
+void on_message_input(const session *s, const connection_request *r, jnx_char *message, jnx_size len) {
+
+  JNXLOG(LDEBUG,"Successfully receieved message through session!");
+  session_controller_destroy(&sc);
+
+  connection_controller_destroy(&connectionc);
+  exit(0);
+}
 
 void test_receiver() {
   JNXLOG(NULL, "test_linking");
@@ -40,29 +51,21 @@ void test_receiver() {
 
   discovery_service_start(ds, BROADCAST_UPDATE_STRATEGY);
 
-  connection_controller *connectionc = connection_controller_create("8080", AF_INET, ds,
-      NULL,NULL,NULL);
+  connectionc = connection_controller_create("8080", AF_INET, ds,
+      NULL,NULL,NULL,NULL);
 
-  session_controller *sc = session_controller_create(connectionc);
-  
-  
+  sc = session_controller_create(connectionc,on_message_input);
+
+
   while (1) {
 
     connection_controller_tick(connectionc);
- 
-    if(sc->session_list->head) {
-      
-      session *s = sc->session_list->head->_data;
-      if(session_controller_is_session_ready(sc,s)) {
-        connection_controller_tick(connectionc);
-        break;
-      }
-    }
-  
-  }
-  session_controller_destroy(&sc);
 
-  connection_controller_destroy(&connectionc);
+
+    sleep(1);
+  }
+
+  
 }
 
 int main(int argc, char **argv) {

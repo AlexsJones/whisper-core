@@ -2,7 +2,7 @@
  *     File Name           :     /home/jonesax/Work/whisper-core/src/session/session_controller.c
  *     Created By          :     jonesax
  *     Creation Date       :     [2016-06-19 17:30]
- *     Last Modified       :     [2016-06-21 09:59]
+ *     Last Modified       :     [2016-06-22 14:10]
  *     Description         :      
  **********************************************************************************/
 #include "session_controller.h"
@@ -22,6 +22,35 @@ void internal_incoming(const connection_request *c) {
 
   session_controller_add_session(scontroller_handle,s);
 }
+void internal_message_received(const connection_request *c, 
+    const jnx_char *decrypted_message, jnx_size message_len) {
+  JNXLOG(LDEBUG,"Session controller internal message received");
+  if(!scontroller_handle) return;
+  //find the associated session for this connection_request..
+  jnx_node *session_head = scontroller_handle->session_list->head;
+  while(session_head) {
+    session *s = session_head->_data;
+    jnx_node *connection_head = s->connection_request_list->head;
+    int found = 0;
+    while(connection_head) {
+      connection_request *current = connection_head->_data;
+
+      if(jnx_guid_compare(&(*(connection_request*)c).id,
+            &(*current).id) == JNX_GUID_STATE_SUCCESS) {
+      
+        found = 1;
+      }
+      if(found) {
+        if(scontroller_handle->umn) {
+          scontroller_handle->umn(s,current,decrypted_message,message_len);
+        } 
+      }
+      connection_head = connection_head->next_node;
+    }
+    session_head = session_head->next_node;
+  }
+
+}
 void internal_completed(const connection_request *c) {
   JNXLOG(LDEBUG,"Session controller internal completed");
 }
@@ -29,14 +58,16 @@ void internal_closed(const connection_request *c) {
   JNXLOG(LDEBUG,"Session controller internal closed");
 }
 session_controller *session_controller_create(
-    connection_controller *connection_controller) {
+    connection_controller *connection_controller,
+    user_session_message_notification umn) {
   session_controller *sc = malloc(sizeof(session_controller));
   sc->session_list = jnx_list_create();
+  sc->umn = umn;
   sc->connection_controller = connection_controller;
   sc->connection_controller->nc = internal_completed;
   sc->connection_controller->ic = internal_incoming;
   sc->connection_controller->cc = internal_closed;
-
+  sc->connection_controller->cmr = internal_message_received;
   scontroller_handle = sc;
   return sc;
 }

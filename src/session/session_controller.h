@@ -2,7 +2,7 @@
  *     File Name           :     src/session/session_controller.h
  *     Created By          :     jonesax
  *     Creation Date       :     [2016-06-19 17:21]
- *     Last Modified       :     [2016-06-21 08:21]
+ *     Last Modified       :     [2016-06-22 14:10]
  *     Description         :      
  **********************************************************************************/
 #ifndef __SESSION_CONTROLLER_H__
@@ -10,14 +10,19 @@
 #include "connection_controller.h"
 #include "session.h"
 #include <jnxc_headers/jnx_list.h>
+
+void typedef (*user_session_message_notification)(const session *s, 
+    const connection_request *c, const jnx_char *message,
+    jnx_size message_len);
 typedef struct session_controller {
   connection_controller *connection_controller;
   jnx_list *session_list; 
   const discovery_service *discovery;
+  user_session_message_notification umn;
 }session_controller;
 
-session_controller *session_controller_create(
-    connection_controller *connection_controller);
+session_controller *session_controller_create( 
+    connection_controller *connection_controller, user_session_message_notification n);
 
 session *session_controller_session_create(session_controller *s,
     peer *remote_peer);
