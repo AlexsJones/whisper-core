@@ -28,6 +28,9 @@ static char *baddr = NULL;
 static char *interface = NULL;
 connection_controller *connectionc;
 
+void on_message_input(const session *s, const connection_request *r, jnx_char *message, jnx_size len) {
+
+}
 void test_initiator() {
 
   peerstore *store = peerstore_init(local_peer_for_user("initiator_bob",10,interface), 0);
@@ -61,10 +64,10 @@ void test_initiator() {
 
   connectionc = connection_controller_create("8080", 
       AF_INET, ds,
-      NULL,NULL,NULL);
+      NULL,NULL,NULL,NULL);
 
 
-  session_controller *sc = session_controller_create(connectionc);
+  session_controller *sc = session_controller_create(connectionc,on_message_input);
 
   session* sess = session_controller_session_create(sc,remote_peer);
 

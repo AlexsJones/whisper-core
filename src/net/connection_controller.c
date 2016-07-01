@@ -150,17 +150,17 @@ void internal_connnection_message_processor(connection_controller *controller,
     case SELECTED_ACTION__COMMUNICATING_SESSION:
       JNXLOG(LDEBUG,"Message action -> SELECTED_ACTION__COMMUNICATING_SESSION");
 
-          jnx_char *incoming_message = symmetrical_decrypt(oconnection->shared_secret,
+      jnx_char *incoming_message = symmetrical_decrypt(oconnection->shared_secret,
           message->action->contextdata->rawdata.data,
           message->action->contextdata->rawdata.len);
 
-          JNXLOG(LDEBUG,"Message %s",incoming_message);
+      JNXLOG(LDEBUG,"Message %s",incoming_message);
 
-          if(controller->cmr) {
-            controller->cmr(oconnection, incoming_message, 
-                strlen(incoming_message) +1);
-          }
-          free(incoming_message);
+      if(controller->cmr) {
+        controller->cmr(oconnection, incoming_message, 
+            strlen(incoming_message) +1);
+      }
+      free(incoming_message);
 
       break;
   }
@@ -168,8 +168,8 @@ void internal_connnection_message_processor(connection_controller *controller,
   wpmessage__free_unpacked(message,NULL);
 }
 connection_request_state connection_controller_connection_request_send_message(
-  connection_controller *controller, connection_request *r, jnx_char *message, 
-  jnx_size message_len) {
+    connection_controller *controller, connection_request *r, jnx_char *message, 
+    jnx_size message_len) {
 
   Wpmessage *m = connection_request_send_message(r,message,message_len);
   if(!m) {
