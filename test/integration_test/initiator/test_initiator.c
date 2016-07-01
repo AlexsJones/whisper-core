@@ -28,7 +28,8 @@ static char *baddr = NULL;
 static char *interface = NULL;
 connection_controller *connectionc;
 
-void on_message_input(const session *s, const connection_request *r, jnx_char *message, jnx_size len) {
+void on_session_message(const session *s, const connection_request *c,
+    const jnx_char *message, jnx_size message_len) {
 
 }
 void test_initiator() {
@@ -67,7 +68,7 @@ void test_initiator() {
       NULL,NULL,NULL,NULL);
 
 
-  session_controller *sc = session_controller_create(connectionc,on_message_input);
+  session_controller *sc = session_controller_create(connectionc,on_session_message);
 
   session* sess = session_controller_session_create(sc,remote_peer);
 

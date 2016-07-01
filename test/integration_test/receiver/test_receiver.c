@@ -23,6 +23,7 @@
 #include "connection_controller.h"
 #include "session_controller.h"
 
+static int r = 5;
 static char *baddr = NULL;
 static char *interface = NULL;
 static connection_controller *connectionc;
@@ -31,10 +32,14 @@ static session_controller *sc;
 void on_message_input(const session *s, const connection_request *r, jnx_char *message, jnx_size len) {
 
   JNXLOG(LDEBUG,"Successfully receieved message through session!");
+  if(r == 0) {
   session_controller_destroy(&sc);
 
   connection_controller_destroy(&connectionc);
   exit(0);
+
+  }
+  --r;
 }
 
 void test_receiver() {
