@@ -52,7 +52,7 @@ static void safely_update_last_update_time(discovery_service *svc) {
 static void debug_packet(discovery_service *svc, char *packet_type) {
   char *guid_str;
   jnx_guid_to_string(&peerstore_get_local_peer(svc->peers)->guid, &guid_str);
-  printf("[DEBUG] Sent %s packet for peer %s, %s, %s.\n",
+  JNXLOG(LDEBUG,"[DEBUG] Sent %s packet for peer %s, %s, %s.\n",
       packet_type,
       guid_str,
       peerstore_get_local_peer(svc->peers)->host_address, 
@@ -312,7 +312,7 @@ void cancel_thread(jnx_thread **thr) {
    */
 // Public interface functions
 void get_local_ip(char **local_ip, char *interface) {
-  printf("Getting broadcast IP\n");
+  JNXLOG(LDEBUG,"Getting broadcast IP\n");
   *local_ip = calloc(16, sizeof(char));
   get_ip(*local_ip, filter_local_ip_address, interface);
   JNXLOG(0, "Local IP is %s", *local_ip);
@@ -353,11 +353,10 @@ void initiate_discovery(discovery_service *svc) {
   int i;
   for (i = 0; i < INITIAL_DISCOVERY_REQS; i++) {
     send_discovery_request(svc);
-    printf(".");
+    JNXLOG(LDEBUG,".");
     fflush(stdout);
     sleep(1);
   }
-  printf("\n");
 }
 
 int discovery_service_start(discovery_service *svc, discovery_strategy *strategy) {
