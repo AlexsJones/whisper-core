@@ -1,0 +1,12 @@
+git clone https://github.com/AlexsJones/jnxlibc.git
+pushd jnxlibc
+cmake .
+make
+sudo make install >> /dev/null 2>&1
+popd
+git clone https://github.com/AlexsJones/whisper-protocol.git
+pushd whisper-protocol
+cmake .
+make
+sudo make install >> /dev/null 2>&1
+popd
