@@ -1,0 +1,6 @@
+[submodule "jnxlibc"]
+	path = jnxlibc
+	url = https://github.com/AlexsJones/jnxlibc.git
+[submodule "whisper-protocol"]
+	path = whisper-protocol
+	url = https://github.com/AlexsJones/whisper-protocol.git
