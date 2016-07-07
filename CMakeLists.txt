@@ -22,10 +22,11 @@ endif()
 execute_process(COMMAND ./tools/generate_protobuf)
 file(COPY ${HEADERS} DESTINATION whisper-core)
 
+
 add_library(whisper-core-static STATIC ${SOURCE})
 add_library(whisper-core SHARED ${SOURCE})
-target_link_libraries(whisper-core -ljnxc -lcrypto -lssl -g -lprotobuf-c -lwhisper-protocol -fPIC -lpthread ${LINKER_LIBRARIES})
-target_link_libraries(whisper-core-static -ljnxc -lcrypto -lssl -g -lprotobuf-c  -lwhisper-protocol -fPIC -lpthread ${LINKER_LIBRARIES})
+target_link_libraries(whisper-core -ljnxc -lcrypto -lssl -g -lprotobuf-c -lwhisper-protocol -fPIC -lpthread ${LINKER_LIBRARIES} -DJNXLOG_OVERRIDE)
+target_link_libraries(whisper-core-static -ljnxc -lcrypto -lssl -g -lprotobuf-c  -lwhisper-protocol -fPIC -lpthread ${LINKER_LIBRARIES} -DJNXLOG_OVERRIDE)
 install(TARGETS whisper-core-static DESTINATION ${INSTALL_PREFIX}/lib)
 install(TARGETS whisper-core DESTINATION ${INSTALL_PREFIX}/lib)
 install(DIRECTORY whisper-core DESTINATION ${INSTALL_PREFIX}/include)
