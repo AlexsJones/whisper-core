@@ -2,4 +2,4 @@ language: c
 compiler:
     - gcc
     - clang
-script: sudo apt-get install gdb libprotobuf-c0-dev protobuf-c-compiler uuid-dev && git clone https://github.com/AlexsJones/whisper-protocol.git && cd whisper-protocol && cmake . && make && sudo make install && cd ../ && cmake .  && make
+script: sudo apt-get install gdb libprotobuf-c0-dev protobuf-c-compiler uuid-dev && git clone https://github.com/AlexsJones/whisper-protocol.git && cd whisper-protocol && cmake . && make && sudo make install && cd ../ && rm -rf whisper-protocol && cmake .  && make
