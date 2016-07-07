@@ -1,5 +1,3 @@
-jnxlibc
-whisper-protocol
 test/integration_test/initiator/test_initiator
 test/integration_test/connectivity/test_connectivity
 test/integration_test/joiner/test_joiner
