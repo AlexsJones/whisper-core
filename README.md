@@ -8,6 +8,8 @@
   Whisper aims to help provide a platform for inter-domain level chat.
   Using dynamically generated dual encrypted one time sessions; we're giving you the tools to speak your mind without   worrying about who is listening in.
 
+
+`Depends on jnxlibc and whisper-protocol to be installed`
 ---
 ##For Users
 
