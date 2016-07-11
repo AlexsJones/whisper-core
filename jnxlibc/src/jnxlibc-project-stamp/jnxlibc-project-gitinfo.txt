@@ -1,3 +1,0 @@
-repository='https://github.com/AlexsJones/jnxlibc.git'
-module=''
-tag=''
