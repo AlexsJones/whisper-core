@@ -5,7 +5,7 @@ project(whisper-core)
 # ------------------------------------------------------------------------------
 # Add whisper-protocol as external project -------------------------------------
 set(whisper-protocol_PREFIX "${CMAKE_CURRENT_BINARY_DIR}/whisper-protocol")
-set(whisper-protocol_INSTALL_DIR "/usr")
+set(whisper-protocol_INSTALL_DIR ${CMAKE_INSTALL_PREFIX})
 set(whisper-protocol_CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${whisper-protocol_INSTALL_DIR})
 
 ExternalProject_Add(whisper-protocol-project
