@@ -1,5 +1,4 @@
 cmake_minimum_required(VERSION 2.8)
-set(INSTALL_PREFIX /usr)
 include(ExternalProject)
 project(whisper-core)
 
@@ -47,6 +46,6 @@ add_dependencies(whisper-core whisper-protocol-project)
 
 target_link_libraries(whisper-core -ljnxc -lcrypto -lssl -g -lprotobuf-c -lwhisper-protocol -fPIC -lpthread ${LINKER_LIBRARIES})
 target_link_libraries(whisper-core-static -ljnxc -lcrypto -lssl -g -lprotobuf-c  -lwhisper-protocol -fPIC -lpthread ${LINKER_LIBRARIES})
-install(TARGETS whisper-core-static DESTINATION ${INSTALL_PREFIX}/lib)
-install(TARGETS whisper-core DESTINATION ${INSTALL_PREFIX}/lib)
-install(DIRECTORY whisper-core DESTINATION ${INSTALL_PREFIX}/include)
+install(TARGETS whisper-core-static DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
+install(TARGETS whisper-core DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
+install(DIRECTORY whisper-core DESTINATION ${CMAKE_INSTALL_PREFIX}/include)
