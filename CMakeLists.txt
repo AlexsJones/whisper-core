@@ -3,18 +3,6 @@ set(INSTALL_PREFIX /usr)
 include(ExternalProject)
 project(whisper-core)
 
-# Add jnxlibc ------------------------------------------------------------------
-set(jnxlibc_PREFIX "${CMAKE_CURRENT_BINARY_DIR}/jnxlibc")
-set(jnxlibc_INSTALL_DIR "${CMAKE_CURRENT_BINARY_DIR}/jnxlibc_install_files")
-set(jnxlibc_CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${jnxlibc_INSTALL_DIR} -DIGNORE_VERSION=1)
-
-ExternalProject_Add(jnxlibc-project
-  PREFIX ${jnxlibc_PREFIX}
-  GIT_REPOSITORY https://github.com/AlexsJones/jnxlibc.git
-  INSTALL_DIR ${jnxlibc_INSTALL_DIR}
-  CMAKE_ARGS ${jnxlibc_CMAKE_ARGS}
-  BUILD_COMMAND make
-  )
 # ------------------------------------------------------------------------------
 # Add whisper-protocol as external project -------------------------------------
 set(whisper-protocol_PREFIX "${CMAKE_CURRENT_BINARY_DIR}/whisper-protocol")
@@ -30,7 +18,6 @@ ExternalProject_Add(whisper-protocol-project
   INSTALL_COMMAND sudo make install
 )
 # -------------------------------------------------------------------------------
-
 
 add_subdirectory(src/crypto)
 add_subdirectory(src/data)
