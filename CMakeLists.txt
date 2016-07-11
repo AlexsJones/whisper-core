@@ -1,16 +1,36 @@
 cmake_minimum_required(VERSION 2.8)
 set(INSTALL_PREFIX /usr)
+include(ExternalProject)
 project(whisper-core)
 
-execute_process(COMMAND git submodule update --init --recursive)
+# Add jnxlibc ------------------------------------------------------------------
+set(jnxlibc_PREFIX "${CMAKE_CURRENT_BINARY_DIR}/jnxlibc")
+set(jnxlibc_INSTALL_DIR "${CMAKE_CURRENT_BINARY_DIR}/jnxlibc_install_files")
+set(jnxlibc_CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${jnxlibc_INSTALL_DIR} -DIGNORE_VERSION=1)
 
-execute_process(COMMAND cmake . -DIGNORE_VERSION=1 WORKING_DIRECTORY jnxlibc)
-execute_process(COMMAND make WORKING_DIRECTORY jnxlibc)
-execute_process(COMMAND sudo make install WORKING_DIRECTORY jnxlibc)
+ExternalProject_Add(jnxlibc-project
+  PREFIX ${jnxlibc_PREFIX}
+  GIT_REPOSITORY https://github.com/AlexsJones/jnxlibc.git
+  INSTALL_DIR ${jnxlibc_INSTALL_DIR}
+  CMAKE_ARGS ${jnxlibc_CMAKE_ARGS}
+  BUILD_COMMAND make
+  )
+# ------------------------------------------------------------------------------
+# Add whisper-protocol as external project -------------------------------------
+set(whisper-protocol_PREFIX "${CMAKE_CURRENT_BINARY_DIR}/whisper-protocol")
+set(whisper-protocol_INSTALL_DIR "${CMAKE_CURRENT_BINARY_DIR}/whisper-protocol")
+set(whisper-protocol_CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${whisper-protocol_INSTALL_DIR})
 
-execute_process(COMMAND cmake . WORKING_DIRECTORY whisper_protocol)
-execute_process(COMMAND make WORKING_DIRECTORY whisper_protocol)
-execute_process(COMMAND sudo make install WORKING_DIRECTORY whisper_protocol)
+ExternalProject_Add(whisper-protocol-project
+  PREFIX ${whisper-protocol_PREFIX}
+  GIT_REPOSITORY https://github.com/AlexsJones/whisper-protocol.git
+  INSTALL_DIR ${whisper-protocol_INSTALL_DIR}
+  CMAKE_ARGS ${whisper-protocol_CMAKE_ARGS}
+  BUILD_COMMAND make
+  INSTALL_COMMAND sudo make install
+)
+# -------------------------------------------------------------------------------
+
 
 add_subdirectory(src/crypto)
 add_subdirectory(src/data)
@@ -32,11 +52,10 @@ endif()
 execute_process(COMMAND ./tools/generate_protobuf)
 file(COPY ${HEADERS} DESTINATION whisper-core)
 
-
 add_library(whisper-core-static STATIC ${SOURCE})
 add_library(whisper-core SHARED ${SOURCE})
-target_link_libraries(whisper-core -ljnxc -lcrypto -lssl -g -lprotobuf-c -lwhisper-protocol -fPIC -lpthread ${LINKER_LIBRARIES} -DJNXLOG_OVERRIDE)
-target_link_libraries(whisper-core-static -ljnxc -lcrypto -lssl -g -lprotobuf-c  -lwhisper-protocol -fPIC -lpthread ${LINKER_LIBRARIES} -DJNXLOG_OVERRIDE)
+target_link_libraries(whisper-core -ljnxc -lcrypto -lssl -g -lprotobuf-c -lwhisper-protocol -fPIC -lpthread ${LINKER_LIBRARIES})
+target_link_libraries(whisper-core-static -ljnxc -lcrypto -lssl -g -lprotobuf-c  -lwhisper-protocol -fPIC -lpthread ${LINKER_LIBRARIES})
 install(TARGETS whisper-core-static DESTINATION ${INSTALL_PREFIX}/lib)
 install(TARGETS whisper-core DESTINATION ${INSTALL_PREFIX}/lib)
 install(DIRECTORY whisper-core DESTINATION ${INSTALL_PREFIX}/include)

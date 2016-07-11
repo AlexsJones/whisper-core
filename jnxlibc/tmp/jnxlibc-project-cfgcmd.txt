@@ -1,0 +1,1 @@
+cmd='/usr/bin/cmake;-DCMAKE_INSTALL_PREFIX=/home/jonesax/Work/whisper-core/jnxlibc_install_files;-DIGNORE_VERSION=1;-GUnix Makefiles;/home/jonesax/Work/whisper-core/jnxlibc/src/jnxlibc-project'
