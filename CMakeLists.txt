@@ -4,19 +4,6 @@ project(whisper-core)
 
 # ------------------------------------------------------------------------------
 # Add whisper-protocol as external project -------------------------------------
-set(jnxlibc_PREFIX "${CMAKE_CURRENT_BINARY_DIR}/jnxlibc")
-set(jnxlibc_INSTALL_DIR ${CMAKE_INSTALL_PREFIX})
-set(jnxlibc_CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${jnxlibc_INSTALL_DIR} -DIGNORE_VERSION=1)
-
-ExternalProject_Add(jnxlibc-project
-  PREFIX ${jnxlibc_PREFIX}
-  GIT_REPOSITORY https://github.com/AlexsJones/jnxlibc.git
-  INSTALL_DIR ${jnxlibc_INSTALL_DIR}
-  CMAKE_ARGS ${jnxlibc_CMAKE_ARGS}
-  BUILD_COMMAND make
-  INSTALL_COMMAND sudo make install
-  )
-
 set(whisper-protocol_PREFIX "${CMAKE_CURRENT_BINARY_DIR}/whisper-protocol")
 set(whisper-protocol_INSTALL_DIR ${CMAKE_INSTALL_PREFIX})
 set(whisper-protocol_CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${whisper-protocol_INSTALL_DIR})
@@ -24,7 +11,6 @@ set(whisper-protocol_CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${whisper-protocol_INSTAL
 ExternalProject_Add(whisper-protocol-project
   PREFIX ${whisper-protocol_PREFIX}
   GIT_REPOSITORY https://github.com/AlexsJones/whisper-protocol.git
-  INSTALL_DIR ${whisper-protocol_INSTALL_DIR}
   CMAKE_ARGS ${whisper-protocol_CMAKE_ARGS}
   BUILD_COMMAND make
   INSTALL_COMMAND sudo make install
@@ -68,8 +54,8 @@ add_library(whisper-core SHARED ${SOURCE})
 
 add_dependencies(whisper-core whisper-protocol-project)
 
-target_link_libraries(whisper-core jnxlibc -lcrypto -lssl -g -lprotobuf-c whisper-protocol -fPIC -lpthread ${LINKER_LIBRARIES})
-target_link_libraries(whisper-core-static jnxlibcs -lcrypto -lssl -g -lprotobuf-c  whisper-protocols -fPIC -lpthread ${LINKER_LIBRARIES})
+target_link_libraries(whisper-core -ljnxc -lcrypto -lssl -g -lprotobuf-c whisper-protocol -fPIC -lpthread ${LINKER_LIBRARIES})
+target_link_libraries(whisper-core-static -ljnxcs -lcrypto -lssl -g -lprotobuf-c  whisper-protocols -fPIC -lpthread ${LINKER_LIBRARIES})
 install(TARGETS whisper-core-static DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
 install(TARGETS whisper-core DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
 install(DIRECTORY whisper-core DESTINATION ${CMAKE_INSTALL_PREFIX}/include)
