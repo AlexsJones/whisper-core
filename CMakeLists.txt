@@ -38,14 +38,18 @@ endif()
 execute_process(COMMAND ./tools/generate_protobuf)
 file(COPY ${HEADERS} DESTINATION whisper-core)
 
+add_library(whisper-protocol SHARED IMPORTED)
+add_library(whisper-protocols SHARED IMPORTED)
+set_property(TARGET whisper-protocol PROPERTY IMPORTED_LOCATION ${whisper-protocol_INSTALL_DIR}/lib/libwhisper-protocol.so)
+set_property(TARGET whisper-protocols PROPERTY IMPORTED_LOCATION ${whisper-protocol_INSTALL_DIR}/lib/libwhisper-protocols.so)
 
 add_library(whisper-core-static STATIC ${SOURCE})
 add_library(whisper-core SHARED ${SOURCE})
 
 add_dependencies(whisper-core whisper-protocol-project)
 
-target_link_libraries(whisper-core -ljnxc -lcrypto -lssl -g -lprotobuf-c -lwhisper-protocol -fPIC -lpthread ${LINKER_LIBRARIES})
-target_link_libraries(whisper-core-static -ljnxc -lcrypto -lssl -g -lprotobuf-c  -lwhisper-protocol -fPIC -lpthread ${LINKER_LIBRARIES})
+target_link_libraries(whisper-core -ljnxc -lcrypto -lssl -g -lprotobuf-c whisper-protocol -fPIC -lpthread ${LINKER_LIBRARIES})
+target_link_libraries(whisper-core-static -ljnxc -lcrypto -lssl -g -lprotobuf-c  whisper-protocols -fPIC -lpthread ${LINKER_LIBRARIES})
 install(TARGETS whisper-core-static DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
 install(TARGETS whisper-core DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
 install(DIRECTORY whisper-core DESTINATION ${CMAKE_INSTALL_PREFIX}/include)
