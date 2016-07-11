@@ -53,6 +53,7 @@ add_library(whisper-core-static STATIC ${SOURCE})
 add_library(whisper-core SHARED ${SOURCE})
 
 add_dependencies(whisper-core whisper-protocol-project)
+add_dependencies(whisper-core-static whisper-protocol-project)
 
 target_link_libraries(whisper-core -ljnxc -lcrypto -lssl -g -lprotobuf-c whisper-protocol -fPIC -lpthread ${LINKER_LIBRARIES})
 target_link_libraries(whisper-core-static -ljnxcs -lcrypto -lssl -g -lprotobuf-c  whisper-protocols -fPIC -lpthread ${LINKER_LIBRARIES})
