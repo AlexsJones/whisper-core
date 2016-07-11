@@ -9,7 +9,6 @@
   Using dynamically generated dual encrypted one time sessions; we're giving you the tools to speak your mind without   worrying about who is listening in.
 
 
-`Depends on jnxlibc and whisper-protocol to be installed`
 ---
 ##For Users
 
@@ -63,7 +62,9 @@ lib-ssl
 
 ```
 cmake . -DRUN_TESTS=ON #Or ignore the flag for no tests
-make
+
+sudo make
+
 sudo make install 
 ```
 
