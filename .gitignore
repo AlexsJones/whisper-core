@@ -22,8 +22,6 @@ cscope.out
 backtrace
 core
 seg_wrapper.sh
-*.pb-c.c
-*.pb-c.h
 test/include
 .idea
 *.bin
