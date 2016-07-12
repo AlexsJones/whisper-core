@@ -38,7 +38,8 @@ execute_process(COMMAND ./tools/generate_protobuf)
 file(COPY ${HEADERS} DESTINATION whisper-core)
 
 add_library(whisper-protocol SHARED IMPORTED)
-add_library(whisper-protocols SHARED IMPORTED)
+add_library(whisper-protocols STATIC IMPORTED)
+
 set_property(TARGET whisper-protocol PROPERTY IMPORTED_LOCATION ${whisper-protocol_INSTALL_DIR}/lib/libwhisper-protocol.so)
 set_property(TARGET whisper-protocols PROPERTY IMPORTED_LOCATION ${whisper-protocol_INSTALL_DIR}/lib/libwhisper-protocols.so)
 
