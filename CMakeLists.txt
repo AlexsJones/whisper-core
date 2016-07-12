@@ -11,6 +11,7 @@ set(whisper-protocol_CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${whisper-protocol_INSTAL
 ExternalProject_Add(whisper-protocol-project
   PREFIX ${whisper-protocol_PREFIX}
   GIT_REPOSITORY https://github.com/AlexsJones/whisper-protocol.git
+  INSTALL_DIR ${whisper-protocol_INSTALL_DIR}
   CMAKE_ARGS ${whisper-protocol_CMAKE_ARGS}
   BUILD_COMMAND make
   INSTALL_COMMAND sudo make install
@@ -42,13 +43,6 @@ add_library(whisper-protocols STATIC IMPORTED)
 
 set_property(TARGET whisper-protocol PROPERTY IMPORTED_LOCATION ${whisper-protocol_INSTALL_DIR}/lib/libwhisper-protocol.so)
 set_property(TARGET whisper-protocols PROPERTY IMPORTED_LOCATION ${whisper-protocol_INSTALL_DIR}/lib/libwhisper-protocols.so)
-
-add_library(jnxlibc SHARED IMPORTED)
-add_library(jnxlibcs STATIC IMPORTED)
-
-set_property(TARGET jnxlibc PROPERTY IMPORTED_LOCATION ${jnxlibc_INSTALL_DIR}/lib/libjnxc.so)
-set_property(TARGET jnxlibcs PROPERTY IMPORTED_LOCATION ${jnxlibc_INSTALL_DIR}/lib/libjnxcs.a)
-
 
 add_library(whisper-core-static STATIC ${SOURCE})
 add_library(whisper-core SHARED ${SOURCE})
