@@ -33,10 +33,10 @@ void on_message_input(const session *s, const connection_request *r, jnx_char *m
 
   JNXLOG(LDEBUG,"Successfully receieved message through session!");
   if(r == 0) {
-  session_controller_destroy(&sc);
+    session_controller_destroy(&sc);
 
-  connection_controller_destroy(&connectionc);
-  exit(0);
+    connection_controller_destroy(&connectionc);
+    exit(0);
 
   }
   --r;
@@ -66,11 +66,10 @@ void test_receiver() {
 
     connection_controller_tick(connectionc);
 
-
     sleep(1);
   }
 
-  
+
 }
 
 int main(int argc, char **argv) {
