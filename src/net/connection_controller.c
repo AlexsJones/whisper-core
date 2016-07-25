@@ -108,7 +108,7 @@ void internal_connnection_message_processor(connection_controller *controller,
       jnx_size decoded_len;
 
       jnx_char *decoded_key = decode_to_string(message->action->contextdata->rawdata.data,
-          strlen(message->action->contextdata->rawdata.data),&decoded_len);
+         message->action->contextdata->rawdata.len,&decoded_len);
       
       jnx_size decrypted_key_len;
       jnx_char *decrypted_key = asymmetrical_decrypt(oconnection->keypair,decoded_key,
