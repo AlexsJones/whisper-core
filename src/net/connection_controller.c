@@ -105,19 +105,25 @@ void internal_connnection_message_processor(connection_controller *controller,
       //Update connection state-------
       oconnection->state = E_CRS_COMPLETE;
       //------------------------------
-      jnx_size decoded_len;
+      jnx_size decoded_asym_len;
 
-      jnx_char *decoded_key = decode_to_string(message->action->contextdata->rawdata.data,
-         message->action->contextdata->rawdata.len,&decoded_len);
+      jnx_char *decoded_asym_key = decode_to_string(message->action->contextdata->rawdata.data,
+         message->action->contextdata->rawdata.len,&decoded_asym_len);
       
-      jnx_size decrypted_key_len;
-      jnx_char *decrypted_key = asymmetrical_decrypt(oconnection->keypair,decoded_key,
-          decoded_len,&decrypted_key_len);
+      jnx_size decrypted_asym_key_len;
+      jnx_char *decrypted_key = asymmetrical_decrypt(oconnection->keypair,decoded_asym_key,
+          decoded_asym_len,&decrypted_asym_key_len);
 
+
+      //Decode the shared secret
+      jnx_size decoded_secret_len;
+      jnx_char *decoded_shared_sect = decode_to_string(decrypted_key,
+         decrypted_asym_key_len,&decoded_secret_len);
 
       JNXLOG(LDEBUG,"Completed with shared session key of %s",decrypted_key);
-      oconnection->shared_secret = decrypted_key;
-      free(decoded_key);
+      oconnection->shared_secret = decoded_shared_sect;
+      free(decrypted_key);
+      free(decoded_asym_key);
       //Update notification of connection completed
       if(controller->nc) {
         controller->nc(oconnection);

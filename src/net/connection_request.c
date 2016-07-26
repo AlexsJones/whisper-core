@@ -128,24 +128,33 @@ Wpmessage *connection_request_create_exchange_message(connection_request *req,
       RSA *remote_keypair = asymmetrical_key_from_string(decoded,PUBLIC);
       JNXLOG(LDEBUG,"Generated from remote public key");
       jnx_uint8 *buffer;
+      //Generate shared secret
       jnx_char secret_size = generate_shared_secret(&buffer);
-      JNXLOG(LDEBUG,"Generated shared secret %s",buffer);
-      //encrypt shared secret & store in local session
+      JNXLOG(LDEBUG,"Generated shared secret %s with length of %d",buffer,
+          secret_size);
       req->shared_secret = malloc(secret_size + 1);
       bzero(req->shared_secret,secret_size + 1);
       memcpy(req->shared_secret,buffer,secret_size);
+      
+      //Encode the shared secret 
+      jnx_size encoded_shared_secret_size;
+      JNXLOG(LDEBUG,"Encoding shared secret");
+      jnx_char *encoded_shared_secret = encode_from_string(buffer,
+          secret_size,&encoded_shared_secret_size);
+      
       jnx_size asym_encrypted_size;
       JNXLOG(LDEBUG,"About to encrypt shared secret");
       JNXCHECK(remote_keypair);
       jnx_char *encrypted_string = asymmetrical_encrypt(remote_keypair,
-          buffer,&asym_encrypted_size);
-      jnx_size encoded_secret_len;
+          encoded_shared_secret,&asym_encrypted_size);
       JNXCHECK(encrypted_string);
+      JNXLOG(LDEBUG,"Encoding the encrypted shared secret");
       JNXLOG(LDEBUG,"Encrypted shared secret %s",encrypted_string);
       JNXLOG(LDEBUG,"About to encode encrypted shared secret");
+      jnx_size encoded_secret_len;
       jnx_char *encoded_secret = encode_from_string(encrypted_string,
           asym_encrypted_size,&encoded_secret_len);
-      JNXLOG(LDEBUG,"Encoded shared secret successfully");
+      JNXLOG(LDEBUG,"Encoded shared secret successfully: %s", encoded_secret);
       jnx_guid_to_string(&(*req->local).guid,&str1);
       jnx_guid_to_string(&(*req->remote).guid,&str2);
       jnx_guid_to_string(&(*req).id,&connection_id);
@@ -222,8 +231,8 @@ Wpmessage *connection_request_send_message(connection_request *req, jnx_char *me
 
   Wpmessage *omessage;
   wp_generation_state w = wpprotocol_generate_message(&omessage,
-          connection_id,str1,str2,
-          encrypted,strlen(encrypted) +1,SELECTED_ACTION__COMMUNICATING_SESSION);
+      connection_id,str1,str2,
+      encrypted,strlen(encrypted) +1,SELECTED_ACTION__COMMUNICATING_SESSION);
 
   free(encrypted);
   return omessage;
