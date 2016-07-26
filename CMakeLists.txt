@@ -41,7 +41,11 @@ file(COPY ${HEADERS} DESTINATION whisper-core)
 add_library(whisper-protocol SHARED IMPORTED)
 add_library(whisper-protocols STATIC IMPORTED)
 
-set_property(TARGET whisper-protocol PROPERTY IMPORTED_LOCATION ${whisper-protocol_INSTALL_DIR}/lib/libwhisper-protocol.so)
+if(APPLE)
+  set_property(TARGET whisper-protocol PROPERTY IMPORTED_LOCATION ${whisper-protocol_INSTALL_DIR}/lib/libwhisper-protocol.dylib)
+else()
+  set_property(TARGET whisper-protocol PROPERTY IMPORTED_LOCATION ${whisper-protocol_INSTALL_DIR}/lib/libwhisper-protocol.so)
+endif()
 set_property(TARGET whisper-protocols PROPERTY IMPORTED_LOCATION ${whisper-protocol_INSTALL_DIR}/lib/libwhisper-protocols.so)
 
 add_library(whisper-core-static STATIC ${SOURCE})
