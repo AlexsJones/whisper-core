@@ -2,7 +2,7 @@
  *     File Name           :     src/session/session_controller.h
  *     Created By          :     jonesax
  *     Creation Date       :     [2016-06-19 17:21]
- *     Last Modified       :     [2016-06-22 14:10]
+ *     Last Modified       :     [2016-07-28 11:57]
  *     Description         :      
  **********************************************************************************/
 #ifndef __SESSION_CONTROLLER_H__
@@ -14,6 +14,7 @@
 void typedef (*user_session_message_notification)(const session *s, 
     const connection_request *c, const jnx_char *message,
     jnx_size message_len);
+
 typedef struct session_controller {
   connection_controller *connection_controller;
   jnx_list *session_list; 

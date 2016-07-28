@@ -31,6 +31,7 @@ connection_controller *connectionc;
 void on_session_message(const session *s, const connection_request *c,
     const jnx_char *message, jnx_size message_len) {
 
+  printf("on_session_message: %s\n",message);
 }
 void test_initiator() {
 
@@ -80,15 +81,15 @@ void test_initiator() {
   }
 
   while(1)  {
-  session_controller_session_send_message(sc,sess,
-      "Hello!",6);
+    session_controller_session_send_message(sc,sess,
+        "Hello!",6);
     connection_controller_tick(connectionc);
 
     sleep(1);
-  
+
   }
 
-  
+
   session_controller_destroy(&sc);
 
   connection_controller_destroy(&connectionc);

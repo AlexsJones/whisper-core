@@ -31,6 +31,7 @@ static session_controller *sc;
 
 void on_message_input(const session *s, const connection_request *r, jnx_char *message, jnx_size len) {
 
+  printf("on_session_message: %s\n",message);
   JNXLOG(LDEBUG,"Successfully receieved message through session!");
   if(r == 0) {
     session_controller_destroy(&sc);

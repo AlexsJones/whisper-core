@@ -2,7 +2,7 @@
  *     File Name           :     /home/jonesax/Work/whisper-core/src/session/session_controller.c
  *     Created By          :     jonesax
  *     Creation Date       :     [2016-06-19 17:30]
- *     Last Modified       :     [2016-06-22 14:10]
+ *     Last Modified       :     [2016-07-28 11:57]
  *     Description         :      
  **********************************************************************************/
 #include "session_controller.h"
@@ -42,6 +42,7 @@ void internal_message_received(const connection_request *c,
       }
       if(found) {
         if(scontroller_handle->umn) {
+
           scontroller_handle->umn(s,current,decrypted_message,message_len);
         } 
       }
