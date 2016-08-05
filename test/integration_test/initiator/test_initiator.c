@@ -80,15 +80,12 @@ void test_initiator() {
     sleep(1);
   }
 
-  while(1)  {
-    session_controller_session_send_message(sc,sess,
-        "Hello!",6);
-    connection_controller_tick(connectionc);
+  session_controller_session_send_message(sc,sess,
+      "Hello!",6);
+  connection_controller_tick(connectionc);
+  connection_controller_tick(connectionc);
 
-    sleep(1);
-
-  }
-
+  sleep(1);
 
   session_controller_destroy(&sc);
 
@@ -101,6 +98,12 @@ int main(int argc, char **argv) {
     interface = argv[1];
     printf("using interface %s", interface);
   }
-  test_initiator();
+
+  int x =0;
+  do{
+    test_initiator();
+    sleep(1);
+    ++x;
+  }while(x != 10);
   return 0;
 }
