@@ -36,59 +36,65 @@ void on_session_message(const session *s, const connection_request *c,
 void test_initiator() {
 
   peerstore *store = peerstore_init(local_peer_for_user("initiator_bob",10,interface), 0);
-
   get_broadcast_ip(&baddr,interface);
   printf("%s\n", baddr);
   discovery_service *ds = discovery_service_create(1234, AF_INET, baddr, store);
-
   discovery_service_start(ds,BROADCAST_UPDATE_STRATEGY);
 
-  // //CREATING WPPROTOCOL MUX
+  connectionc = connection_controller_create("8080", 
+        AF_INET, ds,
+        NULL,NULL,NULL,NULL);
+  session_controller *sc = session_controller_create(connectionc,on_session_message);
+  
+  int r = 10;
+  //--------------------------------------------------------------------------- 
+  while(r) {
 
-  int remote_peers = 0;
-  jnx_guid **active_guids;
-  peer *local = peerstore_get_local_peer(store);
-  peer *remote_peer = NULL;
-  while(!remote_peers) {
-    int num_guids = peerstore_get_active_guids(store,&active_guids);
-    int i;
-    for(i=0;i<num_guids;i++) {
-      jnx_guid *guid = active_guids[i];
-      peer *p = peerstore_lookup(store,guid);
-      if(peers_compare(p,local) != 0) {
-        printf("Found a remote peer! Breaking!\n");
-        remote_peers = 1;
-        remote_peer = p;
-        break;
+    int remote_peers = 0;
+    jnx_guid **active_guids;
+    peer *local = peerstore_get_local_peer(store);
+    peer *remote_peer = NULL;
+    while(!remote_peers) {
+      int num_guids = peerstore_get_active_guids(store,&active_guids);
+      int i;
+      for(i=0;i<num_guids;i++) {
+        jnx_guid *guid = active_guids[i];
+        peer *p = peerstore_lookup(store,guid);
+        if(peers_compare(p,local) != 0) {
+          printf("Found a remote peer! Breaking!\n");
+          remote_peers = 1;
+          remote_peer = p;
+          break;
+        }
       }
     }
-  }
-
-  connectionc = connection_controller_create("8080", 
-      AF_INET, ds,
-      NULL,NULL,NULL,NULL);
 
 
-  session_controller *sc = session_controller_create(connectionc,on_session_message);
+    session* sess = session_controller_session_create(sc,remote_peer);
 
-  session* sess = session_controller_session_create(sc,remote_peer);
+    while(!session_controller_is_session_ready(sc,sess)) {
 
-  while(!session_controller_is_session_ready(sc,sess)) {
+      connection_controller_tick(connectionc);
 
+      sleep(1);
+    }
+
+    session_controller_session_send_message(sc,sess,
+        "Hello!",6);
+    connection_controller_tick(connectionc);
     connection_controller_tick(connectionc);
 
     sleep(1);
+    --r;
+
+    session_controller_remove_session(sc,sess);
+
+    session_destroy(&sess);
+    JNXLOG(LDEBUG,"Session destroyed...");
+    //------------------------------------------------------------------------ 
   }
 
-  session_controller_session_send_message(sc,sess,
-      "Hello!",6);
-  connection_controller_tick(connectionc);
-  connection_controller_tick(connectionc);
-
-  sleep(1);
-
   session_controller_destroy(&sc);
-
   connection_controller_destroy(&connectionc);
 }
 int main(int argc, char **argv) {
@@ -98,12 +104,6 @@ int main(int argc, char **argv) {
     interface = argv[1];
     printf("using interface %s", interface);
   }
-
-  int x =0;
-  do{
-    test_initiator();
-    sleep(1);
-    ++x;
-  }while(x != 10);
+  test_initiator();
   return 0;
 }

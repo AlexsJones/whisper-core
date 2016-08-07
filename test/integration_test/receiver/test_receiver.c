@@ -33,10 +33,9 @@ void on_message_input(const session *s, const connection_request *r, jnx_char *m
   complete = 1;
   printf("on_session_message: %s\n",message);
   JNXLOG(LDEBUG,"Successfully receieved message through session!");
-    session_controller_destroy(&sc);
-
-    connection_controller_destroy(&connectionc);
-  
+ 
+  session_controller_remove_session(sc,s);
+  session_destroy(s);
 }
 
 void test_receiver() {
@@ -66,6 +65,8 @@ void test_receiver() {
     sleep(1);
   }
 
+    session_controller_destroy(&sc);
+    connection_controller_destroy(&connectionc);
 }
 
 int main(int argc, char **argv) {
