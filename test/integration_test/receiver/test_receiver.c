@@ -28,14 +28,13 @@ static char *interface = NULL;
 static connection_controller *connectionc;
 static session_controller *sc;
 static int complete = 0;
+static session *sess = NULL;
 void on_message_input(const session *s, const connection_request *r, jnx_char *message, jnx_size len) {
 
   complete = 1;
   printf("on_session_message: %s\n",message);
   JNXLOG(LDEBUG,"Successfully receieved message through session!");
- 
-  session_controller_remove_session(sc,s);
-  session_destroy(s);
+  sess = s;
 }
 
 void test_receiver() {
@@ -58,15 +57,23 @@ void test_receiver() {
   sc = session_controller_create(connectionc,on_message_input);
 
 
-  while (!complete) {
+  while (1) {
 
+    if(complete) {
+      if(sess){
+        session_controller_remove_session(sc,sess);
+        session_destroy(&sess);
+        complete = 0;
+        continue;
+      }
+    }
     if(connectionc)
       connection_controller_tick(connectionc);
     sleep(1);
   }
 
-    session_controller_destroy(&sc);
-    connection_controller_destroy(&connectionc);
+  session_controller_destroy(&sc);
+  connection_controller_destroy(&connectionc);
 }
 
 int main(int argc, char **argv) {
