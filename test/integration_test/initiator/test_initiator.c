@@ -33,7 +33,7 @@ void on_session_message(const session *s, const connection_request *c,
 
   printf("on_session_message: %s\n",message);
 }
-void test_initiator() {
+void test_initiator(int r) {
 
   peerstore *store = peerstore_init(local_peer_for_user("initiator_bob",10,interface), 0);
   get_broadcast_ip(&baddr,interface);
@@ -46,7 +46,6 @@ void test_initiator() {
         NULL,NULL,NULL,NULL);
   session_controller *sc = session_controller_create(connectionc,on_session_message);
   
-  int r = 10;
   //--------------------------------------------------------------------------- 
   while(r) {
 
@@ -104,6 +103,8 @@ int main(int argc, char **argv) {
     interface = argv[1];
     printf("using interface %s", interface);
   }
-  test_initiator();
+  int run = 100;
+  test_initiator(run);
+  JNXLOG(LDEBUG,"Completed %s runs", run);
   return 0;
 }
