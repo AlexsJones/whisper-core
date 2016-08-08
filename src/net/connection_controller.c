@@ -63,7 +63,7 @@ void internal_connnection_message_processor(connection_controller *controller,
   JNXLOG(LDEBUG, "Message raw payload [%s] of size %d",message->action->contextdata->rawdata.data,
       message->action->contextdata->rawdata.len);
   JNXLOG(LDEBUG,"======================================")
-  Wpmessage *out_message = NULL;
+    Wpmessage *out_message = NULL;
   switch(message->action->action) {
     case SELECTED_ACTION__CREATE_SESSION:
       if(oconnection) {
@@ -118,7 +118,7 @@ void internal_connnection_message_processor(connection_controller *controller,
       //Decode the shared secret
       jnx_size decoded_secret_len;
       jnx_char *decoded_shared_sect = decode_to_string(decrypted_key,
-         decrypted_asym_key_len,&decoded_secret_len);
+          decrypted_asym_key_len,&decoded_secret_len);
 
       JNXLOG(LDEBUG,"Completed with shared session key of %s",decrypted_key);
       oconnection->shared_secret = decoded_shared_sect;
