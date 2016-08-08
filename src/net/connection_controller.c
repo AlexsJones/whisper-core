@@ -54,6 +54,7 @@ void internal_connnection_message_processor(connection_controller *controller,
   }
   h = r;
 
+  JNXLOG(LDEBUG,"=====Received new exchange message====");
   JNXLOG(LDEBUG,"Received message with connection id %s",message->id);
   JNXLOG(LDEBUG,"Message sender is %s",message->sender);
   JNXLOG(LDEBUG,"Message sender host_address is %s", remote->host_address);
@@ -61,7 +62,7 @@ void internal_connnection_message_processor(connection_controller *controller,
   //sender...
   JNXLOG(LDEBUG, "Message raw payload [%s] of size %d",message->action->contextdata->rawdata.data,
       message->action->contextdata->rawdata.len);
-
+  JNXLOG(LDEBUG,"======================================")
   Wpmessage *out_message = NULL;
   switch(message->action->action) {
     case SELECTED_ACTION__CREATE_SESSION:
@@ -108,14 +109,10 @@ void internal_connnection_message_processor(connection_controller *controller,
       //Update connection state-------
       oconnection->state = E_CRS_COMPLETE;
       //------------------------------
-      jnx_size decoded_asym_len;
-
-      jnx_char *decoded_asym_key = decode_to_string(message->action->contextdata->rawdata.data,
-         message->action->contextdata->rawdata.len,&decoded_asym_len);
-      
       jnx_size decrypted_asym_key_len;
-      jnx_char *decrypted_key = asymmetrical_decrypt(oconnection->keypair,decoded_asym_key,
-          decoded_asym_len,&decrypted_asym_key_len);
+      jnx_char *decrypted_key = asymmetrical_decrypt(oconnection->keypair,
+          message->action->contextdata->rawdata.data,
+          message->action->contextdata->rawdata.len,&decrypted_asym_key_len);
 
 
       //Decode the shared secret
@@ -126,7 +123,6 @@ void internal_connnection_message_processor(connection_controller *controller,
       JNXLOG(LDEBUG,"Completed with shared session key of %s",decrypted_key);
       oconnection->shared_secret = decoded_shared_sect;
       free(decrypted_key);
-      free(decoded_asym_key);
       //Update notification of connection completed
       if(controller->nc) {
         controller->nc(oconnection);

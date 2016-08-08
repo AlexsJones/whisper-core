@@ -150,15 +150,10 @@ Wpmessage *connection_request_create_exchange_message(connection_request *req,
       JNXCHECK(encrypted_string);
       JNXLOG(LDEBUG,"Encoding the encrypted shared secret");
       JNXLOG(LDEBUG,"Encrypted shared secret %s",encrypted_string);
-      JNXLOG(LDEBUG,"About to encode encrypted shared secret");
-      jnx_size encoded_secret_len;
 
       //TODO: There is a bug where encoding this side seems to be decoded with 1 extra char on receiver
       //occassionally...
 
-      jnx_char *encoded_secret = encode_from_string(encrypted_string,
-          asym_encrypted_size,&encoded_secret_len);
-      JNXLOG(LDEBUG,"Encoded shared secret successfully: %s with length: %d", encoded_secret,asym_encrypted_size);
       jnx_guid_to_string(&(*req->local).guid,&str1);
       jnx_guid_to_string(&(*req->remote).guid,&str2);
       jnx_guid_to_string(&(*req).id,&connection_id);
@@ -169,10 +164,9 @@ Wpmessage *connection_request_create_exchange_message(connection_request *req,
       w = wpprotocol_generate_message(&message,
           connection_id,
           str1,str2,
-          encoded_secret,encoded_secret_len,
+          encrypted_string,asym_encrypted_size,
           SELECTED_ACTION__SHARING_SESSION_KEY);
       JNXCHECK(w == E_WGS_OKAY);
-      free(encoded_secret);
       free(encrypted_string);
       free(decoded);
       free(buffer);
