@@ -157,8 +157,8 @@ Wpmessage *connection_request_create_exchange_message(connection_request *req,
       //occassionally...
 
       jnx_char *encoded_secret = encode_from_string(encrypted_string,
-        strlen(encrypted_string),&encoded_secret_len);
-      JNXLOG(LDEBUG,"Encoded shared secret successfully: %s with length: %d", encoded_secret,strlen(encoded_secret));
+        asym_encrypted_size,&encoded_secret_len);
+      JNXLOG(LDEBUG,"Encoded shared secret successfully: %s with length: %d", encoded_secret,asym_encrypted_size);
       jnx_guid_to_string(&(*req->local).guid,&str1);
       jnx_guid_to_string(&(*req->remote).guid,&str2);
       jnx_guid_to_string(&(*req).id,&connection_id);

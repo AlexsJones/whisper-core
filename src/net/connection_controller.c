@@ -59,7 +59,8 @@ void internal_connnection_message_processor(connection_controller *controller,
   JNXLOG(LDEBUG,"Message sender host_address is %s", remote->host_address);
   //I have noticed this to have a stray character after == on occassion that does not match the 
   //sender...
-  JNXLOG(LDEBUG, "Message raw payload [%s]",message->action->contextdata->rawdata.data);
+  JNXLOG(LDEBUG, "Message raw payload [%s] of size %d",message->action->contextdata->rawdata.data,
+      message->action->contextdata->rawdata.len);
 
   Wpmessage *out_message = NULL;
   switch(message->action->action) {
