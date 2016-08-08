@@ -46,7 +46,7 @@ void test_initiator() {
         NULL,NULL,NULL,NULL);
   session_controller *sc = session_controller_create(connectionc,on_session_message);
   
-  int r = 10;
+  int r = 100;
   //--------------------------------------------------------------------------- 
   while(r) {
 
@@ -105,5 +105,6 @@ int main(int argc, char **argv) {
     printf("using interface %s", interface);
   }
   test_initiator();
+  printf("Completed 100 test handshakes...\n");
   return 0;
 }
