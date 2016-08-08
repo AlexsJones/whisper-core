@@ -135,13 +135,13 @@ Wpmessage *connection_request_create_exchange_message(connection_request *req,
       req->shared_secret = malloc(secret_size + 1);
       bzero(req->shared_secret,secret_size + 1);
       memcpy(req->shared_secret,buffer,secret_size);
-      
+
       //Encode the shared secret 
       jnx_size encoded_shared_secret_size;
       JNXLOG(LDEBUG,"Encoding shared secret");
       jnx_char *encoded_shared_secret = encode_from_string(buffer,
           secret_size,&encoded_shared_secret_size);
-      
+
       jnx_size asym_encrypted_size;
       JNXLOG(LDEBUG,"About to encrypt shared secret");
       JNXCHECK(remote_keypair);
@@ -157,7 +157,7 @@ Wpmessage *connection_request_create_exchange_message(connection_request *req,
       //occassionally...
 
       jnx_char *encoded_secret = encode_from_string(encrypted_string,
-        asym_encrypted_size,&encoded_secret_len);
+          asym_encrypted_size,&encoded_secret_len);
       JNXLOG(LDEBUG,"Encoded shared secret successfully: %s with length: %d", encoded_secret,asym_encrypted_size);
       jnx_guid_to_string(&(*req->local).guid,&str1);
       jnx_guid_to_string(&(*req->remote).guid,&str2);
@@ -197,6 +197,8 @@ Wpmessage *connection_request_create_exchange_message(connection_request *req,
   JNXLOG(LDEBUG,"=====Created new exchange message=====");
   JNXLOG(LDEBUG,"Sender: %s",str1);
   JNXLOG(LDEBUG,"Recipient: %s",str2);
+  JNXLOG(LDEBUG, "Message raw payload [%s] of size %d",message->action->contextdata->rawdata.data,
+      message->action->contextdata->rawdata.len);
   JNXLOG(LDEBUG,"======================================");
   if(reply_public_key) {
     free(reply_public_key);
