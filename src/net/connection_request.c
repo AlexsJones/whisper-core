@@ -151,9 +151,6 @@ Wpmessage *connection_request_create_exchange_message(connection_request *req,
       JNXLOG(LDEBUG,"Encoding the encrypted shared secret");
       JNXLOG(LDEBUG,"Encrypted shared secret %s",encrypted_string);
 
-      //TODO: There is a bug where encoding this side seems to be decoded with 1 extra char on receiver
-      //occassionally...
-
       jnx_guid_to_string(&(*req->local).guid,&str1);
       jnx_guid_to_string(&(*req->remote).guid,&str2);
       jnx_guid_to_string(&(*req).id,&connection_id);
