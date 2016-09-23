@@ -42,10 +42,10 @@ void test_initiator(int r) {
   discovery_service_start(ds,BROADCAST_UPDATE_STRATEGY);
 
   connectionc = connection_controller_create("8080", 
-        AF_INET, ds,
-        NULL,NULL,NULL,NULL);
+      AF_INET, ds,
+      NULL,NULL,NULL,NULL);
   session_controller *sc = session_controller_create(connectionc,on_session_message);
-  
+
   //--------------------------------------------------------------------------- 
   while(r) {
 
@@ -67,7 +67,6 @@ void test_initiator(int r) {
         }
       }
     }
-
 
     session* sess = session_controller_session_create(sc,remote_peer);
 

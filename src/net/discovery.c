@@ -182,7 +182,7 @@ jnx_int32 send_discovery_request(discovery_service *svc) {
   char *tmp = "LIST";
   char *port = port_to_string(svc);
   jnx_socket_udp_broadcast_send(svc->sock_send,
-                                svc->broadcast_group_address, port, (jnx_uint8 *) tmp, 5);
+      svc->broadcast_group_address, port, (jnx_uint8 *) tmp, 5);
   return 0;
 }
 
@@ -279,7 +279,7 @@ static void *discovery_loop(void *data) {
   char *port = port_to_string(svc);
   while (svc->isrunning) {
     jnx_socket_udp_listener_tick(svc->udp_listener, svc->receive_callback,
-                                 data);
+        data);
   }
   free(port);
   return 0;
@@ -333,7 +333,7 @@ void get_broadcast_ip_for_interface(char **broadcast_ip, char *interface) {
 }
 
 discovery_service *discovery_service_create(int port, unsigned int family,
-                                            char *broadcast_group_address, peerstore *peers) {
+    char *broadcast_group_address, peerstore *peers) {
   discovery_service *svc = calloc(1, sizeof(discovery_service));
   svc->port = port;
   svc->family = family;
@@ -369,7 +369,7 @@ int discovery_service_start(discovery_service *svc, discovery_strategy *strategy
   // set_up_sockets_for_broadcast(svc);
   svc->sock_send = jnx_socket_udp_create(svc->family);
   svc->udp_listener = jnx_socket_udp_listener_broadcast_create(
-      port_to_string(svc), svc->family);
+      port_to_string(svc), svc->family,NULL);
 
   svc->isrunning = 1;
 
